@@ -26,7 +26,6 @@ jobs:
 
       - name: Test Vue Code
         run: |
-          npm install -g @vue/cli
           npm install -g @vue/cli-service
           npm install
           npm run build
