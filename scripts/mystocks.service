@@ -1,0 +1,10 @@
+[Unit]
+Description=Instance to serve My Stocks
+After=network.target
+
+[Service]
+Environment=GIN_MODE=release
+ExecStart=/var/www/mystocks/mystocks
+
+[Install]
+WantedBy=multi-user.target
