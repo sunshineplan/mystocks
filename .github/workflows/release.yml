@@ -14,10 +14,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Test Code
+      - name: Setup Node
         uses: actions/setup-node@v1
         with:
           node-version: '15'
+
+      - name: Test Code
         run: |
           npm install
           npm run build
