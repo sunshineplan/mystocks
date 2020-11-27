@@ -30,6 +30,7 @@ func run() {
 	server.Handler = router
 	router.Use(sessions.Sessions("session", sessions.NewCookieStore(secret)))
 	router.StaticFS("/js", http.Dir(joinPath(dir(self), "dist/js")))
+	router.StaticFS("/css", http.Dir(joinPath(dir(self), "dist/css")))
 	router.StaticFS("/static", http.Dir(joinPath(dir(self), "dist/static")))
 	router.LoadHTMLFiles(joinPath(dir(self), "dist/index.html"))
 	router.GET("/", func(c *gin.Context) {

@@ -180,17 +180,17 @@ func reorder(c *gin.Context) {
 		return
 	}
 
-	orig := strings.Split(r.New, " ")
-	dest := strings.Split(r.Old, " ")
+	orig := strings.Split(r.Old, " ")
+	dest := strings.Split(r.New, " ")
 
 	ec := make(chan error, 1)
-	var origSeq, destSeq int
+	var old, new int
 	go func() {
 		ec <- db.QueryRow("SELECT seq FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-			orig[0], orig[1], userID).Scan(&origSeq)
+			orig[0], orig[1], userID).Scan(&old)
 	}()
 	if err := db.QueryRow("SELECT seq FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-		dest[0], dest[1], userID).Scan(&destSeq); err != nil {
+		dest[0], dest[1], userID).Scan(&new); err != nil {
 		log.Println("Failed to scan dest seq:", err)
 		c.String(500, "")
 		return
@@ -203,15 +203,15 @@ func reorder(c *gin.Context) {
 
 	go func() {
 		_, err := db.Exec("UPDATE stock SET seq = ? WHERE idx = ? AND code = ? AND user_id = ?",
-			destSeq, orig[0], orig[1], userID)
+			new, orig[0], orig[1], userID)
 		ec <- err
 	}()
-	if origSeq > destSeq {
+	if old > new {
 		_, err = db.Exec("UPDATE stock SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
-			destSeq, origSeq, userID)
+			new, old, userID)
 	} else {
 		_, err = db.Exec("UPDATE stock SET seq = seq - 1 WHERE seq > ? AND seq <= ? AND user_id = ?",
-			origSeq, destSeq, userID)
+			old, new, userID)
 	}
 	if err != nil {
 		log.Println("Failed to update other seq:", err)

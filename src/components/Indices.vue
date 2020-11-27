@@ -51,3 +51,51 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.indices {
+  position: fixed;
+  z-index: 100;
+  bottom: 0;
+  width: 100%;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  background-color: white;
+  box-shadow: 0 -1px 2px 0 #e7e7e7;
+  white-space: normal;
+}
+
+#沪,
+#深,
+#创,
+#中 {
+  color: black;
+  max-width: 25%;
+  flex: 0 0 25%;
+  cursor: default;
+  text-align: center;
+  font-size: 20px;
+}
+
+#沪,
+#深,
+#创,
+#中:hover {
+  text-decoration: none;
+}
+
+.short {
+  display: none;
+}
+
+@media (max-width: 1360px) {
+  .short {
+    display: inline;
+  }
+
+  .full {
+    display: none;
+  }
+}
+</style>

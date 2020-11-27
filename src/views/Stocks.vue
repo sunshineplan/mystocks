@@ -109,3 +109,23 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.table-responsive {
+  height: calc(100% - 54px);
+  padding: 0px 30px;
+  cursor: default;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  background-color: white;
+}
+
+.sortable-ghost {
+  opacity: 0;
+}
+</style>

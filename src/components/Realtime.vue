@@ -135,3 +135,34 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.star {
+  color: #f4b400;
+  width: 50px;
+  height: 50px;
+  font-size: 40px;
+  cursor: default;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.star:hover {
+  background-color: #fcebbaa1;
+  border-radius: 50%;
+}
+
+.open {
+  margin-left: 0.5rem;
+  color: gray;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.sellbuy {
+  min-width: 115px;
+  padding-right: 6px;
+}
+</style>

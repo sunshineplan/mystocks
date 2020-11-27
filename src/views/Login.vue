@@ -89,3 +89,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.login {
+  width: 250px;
+  margin: 0 auto;
+}
+</style>

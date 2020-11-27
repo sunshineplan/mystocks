@@ -84,3 +84,57 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.search {
+  position: relative;
+  width: 250px;
+  display: flex;
+  float: right;
+  margin-bottom: 10px;
+  margin-right: 150px;
+  background-color: #e6ecf0;
+  border-radius: 9999px;
+}
+
+.search:hover {
+  box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+}
+
+#suggest {
+  background-color: transparent;
+  padding: 10px;
+  border: 0;
+}
+
+#suggest:focus {
+  outline: none;
+}
+
+.suggestsList {
+  position: absolute;
+  background-color: white;
+  box-shadow: 0px 5px 4px rgba(101, 119, 134, 0.2),
+    5px 2px 4px rgba(101, 119, 134, 0.2), -5px 2px 4px rgba(101, 119, 134, 0.2);
+  border-radius: 5px;
+  list-style-type: none;
+  padding: 0;
+  width: 250px;
+  cursor: default;
+  text-indent: 20px;
+  top: 100%;
+  z-index: 99;
+}
+
+.autoComplete_selected {
+  color: white;
+  background-color: #008eff;
+  border-radius: 5px;
+}
+
+@media (max-width: 1360px) {
+  .search {
+    margin-right: 0;
+  }
+}
+</style>

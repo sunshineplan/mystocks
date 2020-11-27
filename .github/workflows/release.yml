@@ -33,7 +33,7 @@ jobs:
       - name: Test Go Code
         run: |
           go mod download
-          go build ./...
+          go build -v ./...
 
       - name: Delete Old Release
         uses: actions/github-script@v3
