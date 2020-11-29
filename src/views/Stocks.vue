@@ -34,6 +34,9 @@
 import AutoComplete from "@/components/AutoComplete.vue";
 import Sortable from "sortablejs";
 import { checkTime, post } from "@/misc.js";
+import Cookies from "js-cookie";
+
+const refresh = Cookies.get("Refresh") ? Cookies.get("Refresh") : 3;
 
 export default {
   name: "Stocks",
@@ -54,7 +57,7 @@ export default {
       },
       stocks: [],
       sortable: "",
-      refresh: Number(document.querySelector("#app").dataset.refresh) + 1,
+      refresh: Number(refresh) + 1,
       autoUpdate: "",
       fetching: "",
     };

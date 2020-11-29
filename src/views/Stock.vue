@@ -22,6 +22,7 @@ import { computed } from "vue";
 import { checkTime, post, intraday } from "@/misc.js";
 import Chart from "chart.js";
 import annotation from "chartjs-plugin-annotation";
+import Cookies from "js-cookie";
 
 Chart.defaults.global.maintainAspectRatio = false;
 Chart.defaults.global.legend.display = false;
@@ -33,6 +34,8 @@ Chart.defaults.global.tooltips.displayColors = false;
 Chart.defaults.global.animation.duration = 0;
 Chart.plugins.register({ annotation });
 
+const refresh = Cookies.get("Refresh") ? Cookies.get("Refresh") : 3;
+
 export default {
   name: "Stock",
   components: { AutoComplete, Realtime, StockChart },
@@ -41,7 +44,7 @@ export default {
   },
   data() {
     return {
-      refresh: Number(document.querySelector("#app").dataset.refresh) + 1,
+      refresh: Number(refresh) + 1,
       autoUpdate: [],
       stock: {},
       chart: "",

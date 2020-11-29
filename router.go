@@ -2,12 +2,31 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/stock"
 )
+
+func index(c *gin.Context) {
+	userID := sessions.Default(c).Get("user_id")
+	if userID != nil && userID != 0 {
+		if _, err := c.Cookie("Username"); err != nil {
+			username, err := getUser(c)
+			if err != nil {
+				c.String(500, "")
+				return
+			}
+			c.SetCookie("Username", username, 0, "", "", false, false)
+		}
+		if _, err := c.Cookie("Refresh"); err != nil {
+			c.SetCookie("Refresh", strconv.Itoa(refresh), 0, "", "", false, false)
+		}
+	}
+	c.HTML(200, "index.html", nil)
+}
 
 func myStocks(c *gin.Context) {
 	db, err := getDB()

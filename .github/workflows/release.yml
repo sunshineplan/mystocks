@@ -26,8 +26,8 @@ jobs:
 
       - name: Test Vue Code
         run: |
-          npm install -g @vue/cli-service
-          npm install
+          npm i -g @vue/cli-service --registry=https://registry.npmjs.org
+          npm i --registry=https://registry.npmjs.org
           npm run build
 
       - name: Test Go Code

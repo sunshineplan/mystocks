@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/contrib/sessions"
@@ -23,6 +24,20 @@ func authRequired(c *gin.Context) {
 		c.Abort()
 		c.Redirect(302, "/")
 	}
+}
+
+func getUser(c *gin.Context) (username string, err error) {
+	var db *sql.DB
+	db, err = getDB()
+	if err != nil {
+		log.Println("Failed to connect to database:", err)
+		return
+	}
+	defer db.Close()
+
+	userID := sessions.Default(c).Get("user_id")
+	err = db.QueryRow("SELECT username FROM user WHERE id = ?", userID).Scan(&username)
+	return
 }
 
 func login(c *gin.Context) {
@@ -74,16 +89,18 @@ func login(c *gin.Context) {
 				statusCode = 500
 				message = "Critical Error! Please contact your system administrator."
 			}
-		} else if message == "" {
+		}
+		if message == "" {
 			session := sessions.Default(c)
 			session.Clear()
 			session.Set("user_id", user.ID)
-			session.Set("username", user.Username)
+			c.SetCookie("Username", user.Username, 0, "", "", false, false)
+			c.SetCookie("Refresh", strconv.Itoa(refresh), 0, "", "", false, false)
 
 			if login.Rememberme {
 				session.Options(sessions.Options{Path: "/", HttpOnly: true, MaxAge: 856400 * 365})
 			} else {
-				session.Options(sessions.Options{Path: "/", HttpOnly: true, MaxAge: 0})
+				session.Options(sessions.Options{Path: "/", HttpOnly: true})
 			}
 
 			if err := session.Save(); err != nil {
@@ -158,6 +175,8 @@ func setting(c *gin.Context) {
 			return
 		}
 		session.Clear()
+		c.SetCookie("Username", "", -1, "", "", false, false)
+		c.SetCookie("Refresh", "", -1, "", "", false, false)
 		if err := session.Save(); err != nil {
 			log.Print(err)
 			c.String(500, "")

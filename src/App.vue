@@ -17,12 +17,13 @@
 </template>
 
 <script>
+import Cookies from "js-cookie";
 import Indices from "@/components/Indices.vue";
 
 export default {
   name: "App",
   data() {
-    return { user: document.querySelector("#app").dataset.user };
+    return { user: Cookies.get("Username") };
   },
   components: { Indices },
 };
