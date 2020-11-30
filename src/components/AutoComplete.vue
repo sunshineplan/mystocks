@@ -111,6 +111,14 @@ export default {
   outline: none;
 }
 
+@media (max-width: 1360px) {
+  .search {
+    margin-right: 0;
+  }
+}
+</style>
+
+<style>
 .suggestsList {
   position: absolute;
   background-color: white;
@@ -130,11 +138,5 @@ export default {
   color: white;
   background-color: #008eff;
   border-radius: 5px;
-}
-
-@media (max-width: 1360px) {
-  .search {
-    margin-right: 0;
-  }
 }
 </style>
