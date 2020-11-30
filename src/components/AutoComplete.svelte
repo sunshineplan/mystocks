@@ -2,7 +2,7 @@
   import autoComplete from "@tarekraafat/autocomplete.js";
   import { onMount } from "svelte";
   import { goto } from "@sapper/app";
-  import { post } from "@/misc.js";
+  import { post } from "../misc.js";
 
   let suggest;
 

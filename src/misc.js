@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'
+import { goto } from '@sapper/app'
 
 export const BootstrapButtons = Swal.mixin({
   customClass: { confirmButton: 'swal btn btn-primary' },
@@ -36,6 +37,26 @@ export function color(last, value) {
   if (last < value) return { color: 'red' }
   else if (last > value) return { color: 'green' }
 }
+
+export function addColor(stock, val) {
+  if (stock && stock.name != 'n/a') {
+    switch (val) {
+      case 'change':
+      case 'percent':
+        return color(stock.change)
+      case 'now':
+        return color(stock.last, stock.now)
+      case 'high':
+        return color(stock.last, stock.high)
+      case 'low':
+        return color(stock.last, stock.low)
+      case 'open':
+        return color(stock.last, stock.open)
+    }
+  }
+}
+
+export function gotoStock(stock) { goto(`/stock/${stock.index}/${stock.code}`) }
 
 export function timeLabels(start, end) {
   var times = [];

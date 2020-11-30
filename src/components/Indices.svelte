@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { checkTime, gotoStock, addColor } from "@/misc.js";
+  import { checkTime, gotoStock, addColor } from "../misc.js";
 
   let indices;
   let names = {
@@ -81,7 +81,7 @@
 
 {#if Object.keys(indices).length !== 0}
   <div class="indices">
-    {#each Object.entries(names) as key, val (key)}
+    {#each Object.entries(names) as [key, val] (key)}
       <div id={key} on:click={gotoStock(indices[key])}>
         <span class="short">{key}</span>
         <span class="full">{val}</span>

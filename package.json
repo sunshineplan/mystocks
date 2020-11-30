@@ -9,9 +9,15 @@
     "start": "node dist"
   },
   "dependencies": {
+    "@tarekraafat/autocomplete.js": "^7.2.0",
+    "chart.js": "^2.9.4",
+    "chartjs-plugin-annotation": "^0.5.7",
     "compression": "^1.7.1",
+    "js-cookie": "^2.2.1",
     "polka": "next",
-    "sirv": "^1.0.0"
+    "sirv": "^1.0.0",
+    "sortablejs": "^1.12.0",
+    "sweetalert2": "^10.10.4"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
