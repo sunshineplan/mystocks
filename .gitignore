@@ -20,3 +20,4 @@ instance/
 
 node_modules
 /dist
+__sapper__
