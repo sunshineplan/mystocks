@@ -89,17 +89,14 @@ export default {
       this.fetching.abort();
       clearInterval(this.autoUpdate);
     },
-    load(force) {
+    async load(force) {
       if (checkTime() || force) {
         this.fetching = new AbortController();
-        fetch("/mystocks", { signal: this.fetching.signal })
-          .then((response) => response.json())
-          .then((json) => {
-            this.stocks = json;
-          });
+        const resp = await fetch("/mystocks", { signal: this.fetching.signal });
+        this.stocks = await resp.json();
       }
     },
-    onUpdate: function (evt) {
+    onUpdate(evt) {
       post("/reorder", {
         old: `${this.stocks[evt.oldIndex].index} ${
           this.stocks[evt.oldIndex].code

@@ -4,7 +4,7 @@
       <i
         class="material-icons star"
         :class="stared ? 'stared' : ''"
-        @click="star"
+        @click="star()"
       >
         {{ stared ? "star" : "star_border" }}
       </i>
@@ -14,7 +14,7 @@
       (
       <span>{{ stock.code }}</span>
       )
-      <i class="material-icons open" @click="open"> open_in_new </i>
+      <i class="material-icons open" @click="open">open_in_new</i>
       &nbsp;&nbsp;&nbsp;
       <span :style="addColor(stock, 'now')">
         {{ stock.now }}
@@ -116,18 +116,15 @@ export default {
       return this.Stock.value;
     },
   },
-  created() {
-    fetch("/star")
-      .then((response) => response.text())
-      .then((text) => {
-        if (text == "1") this.stared = true;
-      });
+  async created() {
+    const resp = await fetch("/star");
+    if ((await resp.text()) == "1") this.stared = true;
   },
   methods: {
-    star() {
-      if (this.stared)
-        post("/star", { action: "unstar" }).then(() => (this.stared = false));
-      else post("/star").then(() => (this.stared = true));
+    async star() {
+      if (!this.stared) await post("/star");
+      else await post("/star", { action: "unstar" });
+      this.stared = !this.stared;
     },
     open() {
       window.open("http://stockpage.10jqka.com.cn/" + this.stock.code);

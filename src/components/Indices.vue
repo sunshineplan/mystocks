@@ -39,13 +39,10 @@ export default {
       this.load(true);
       setInterval(this.load, 10000);
     },
-    load(force) {
+    async load(force) {
       if (checkTime() || force) {
-        fetch("/indices")
-          .then((response) => response.json())
-          .then((json) => {
-            this.indices = json;
-          });
+        const resp = await fetch("/indices");
+        this.indices = await resp.json();
       }
     },
   },

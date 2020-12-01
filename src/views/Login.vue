@@ -1,5 +1,5 @@
 <template>
-  <div class="content" @keyup.enter="login">
+  <div class="content" @keyup.enter="login()">
     <header>
       <h3
         class="d-flex justify-content-center align-items-center"
@@ -42,7 +42,9 @@
         <label class="form-check-label" for="rememberme">Remember Me</label>
       </div>
       <hr />
-      <button class="btn btn-primary login" @click="login">Log In</button>
+      <button class="btn btn-primary login" @click="login()">
+        Log In
+      </button>
     </div>
   </div>
 </template>
@@ -65,26 +67,32 @@ export default {
     document.querySelector("#username").focus();
   },
   methods: {
-    login() {
+    async login() {
       if (!document.querySelector("#username").checkValidity())
-        BootstrapButtons.fire("Error", "Username cannot be empty.", "error");
+        await BootstrapButtons.fire(
+          "Error",
+          "Username cannot be empty.",
+          "error"
+        );
       else if (!document.querySelector("#password").checkValidity())
-        BootstrapButtons.fire("Error", "Password cannot be empty.", "error");
-      else
-        post("/login", {
+        await BootstrapButtons.fire(
+          "Error",
+          "Password cannot be empty.",
+          "error"
+        );
+      else {
+        const resp = await post("/login", {
           username: this.username,
           password: this.password,
           rememberme: this.rememberme,
-        }).then((resp) => {
-          if (!resp.ok)
-            resp
-              .text()
-              .then((err) => BootstrapButtons.fire("Error", err, "error"));
-          else {
-            localStorage.setItem("username", this.username);
-            window.location = "/";
-          }
         });
+        if (!resp.ok)
+          await BootstrapButtons.fire("Error", await resp.text(), "error");
+        else {
+          localStorage.setItem("username", this.username);
+          window.location = "/";
+        }
+      }
     },
   },
 };

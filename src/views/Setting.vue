@@ -1,5 +1,5 @@
 <template>
-  <div class="content" @keyup.enter="setting">
+  <div class="content" @keyup.enter="setting()">
     <header style="padding-left: 20px">
       <h3>Setting</h3>
       <hr />
@@ -47,7 +47,9 @@
           Max password length: 20 characters.
         </small>
       </div>
-      <button class="btn btn-primary" @click="setting">Change</button>
+      <button class="btn btn-primary" @click="setting()">
+        Change
+      </button>
       <button class="btn btn-primary" @click="goback">Cancel</button>
     </div>
   </div>
@@ -70,42 +72,38 @@ export default {
     document.title = "Setting";
     window.addEventListener("keyup", this.cancel);
   },
-  beforeUnmount: function () {
+  beforeUnmount() {
     window.removeEventListener("keyup", this.cancel);
   },
   methods: {
-    setting() {
+    async setting() {
       if (valid()) {
         this.validated = false;
-        post("/setting", {
+        const resp = await post("/setting", {
           password: this.password,
           password1: this.password1,
           password2: this.password2,
-        }).then((resp) => {
-          if (!resp.ok)
-            resp
-              .text()
-              .then((err) => BootstrapButtons.fire("Error", err, "error"));
-          else
-            resp.json().then((json) => {
-              if (json.status == 1)
-                BootstrapButtons.fire(
-                  "Success",
-                  "Your password has changed. Please Re-login!",
-                  "success"
-                ).then(() => (window.location = "/"));
-              else
-                BootstrapButtons.fire("Error", json.message, "error").then(
-                  () => {
-                    if (json.error == 1) this.password = "";
-                    else {
-                      this.password1 = "";
-                      this.password2 = "";
-                    }
-                  }
-                );
-            });
         });
+        if (!resp.ok)
+          await BootstrapButtons.fire("Error", await resp.text(), "error");
+        else {
+          const json = await resp.json();
+          if (json.status == 1) {
+            await BootstrapButtons.fire(
+              "Success",
+              "Your password has changed. Please Re-login!",
+              "success"
+            );
+            window.location = "/";
+          } else {
+            await BootstrapButtons.fire("Error", json.message, "error");
+            if (json.error == 1) this.password = "";
+            else {
+              this.password1 = "";
+              this.password2 = "";
+            }
+          }
+        }
       } else this.validated = true;
     },
     goback() {
