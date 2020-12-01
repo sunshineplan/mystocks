@@ -29,8 +29,10 @@ func run() {
 	router := gin.Default()
 	server.Handler = router
 	router.Use(sessions.Sessions("session", sessions.NewCookieStore(secret)))
-	router.StaticFS("/js", http.Dir(joinPath(dir(self), "dist/js")))
-	router.StaticFS("/css", http.Dir(joinPath(dir(self), "dist/css")))
+	router.StaticFS("/client", http.Dir(joinPath(dir(self), "dist/client")))
+	router.StaticFile("service-worker.js", joinPath(dir(self), "dist/service-worker.js"))
+	router.StaticFile("service-worker-index.html", joinPath(dir(self), "dist/service-worker-index.html"))
+	router.StaticFile("style.css", joinPath(dir(self), "dist/style.css"))
 	router.StaticFile("favicon.ico", joinPath(dir(self), "dist/favicon.ico"))
 	router.LoadHTMLFiles(joinPath(dir(self), "dist/index.html"))
 

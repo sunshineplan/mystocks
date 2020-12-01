@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "sapper dev",
-    "build": "sapper build dist",
+    "build": "sapper build",
     "export": "sapper export",
-    "start": "node dist"
+    "start": "node __sapper__/build"
   },
   "dependencies": {
     "@tarekraafat/autocomplete.js": "^7.2.0",

@@ -56,7 +56,7 @@ export function addColor(stock, val) {
   }
 }
 
-export function gotoStock(stock) { goto(`/stock/${stock.index}/${stock.code}`) }
+export async function gotoStock(stock) { await goto(`/stock/${stock.index}/${stock.code}`) }
 
 export function timeLabels(start, end) {
   var times = [];

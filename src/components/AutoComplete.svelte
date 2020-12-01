@@ -1,5 +1,4 @@
 <script>
-  import autoComplete from "@tarekraafat/autocomplete.js";
   import { onMount } from "svelte";
   import { goto } from "@sapper/app";
   import { post } from "../misc.js";
@@ -19,7 +18,8 @@
     document.querySelector("#suggestsList").style.display = "none";
   }
 
-  onMount(() => {
+  onMount(async () => {
+    const autoComplete = await import("@tarekraafat/autocomplete.js");
     new autoComplete({
       selector: "#suggest",
       data: { src: load, cache: false },
@@ -50,7 +50,7 @@
       },
       onSelection: async (feedback) => {
         let stock = feedback.selection.value.split(" ")[0].split(":");
-        await goto(`/stock/${stock[0]}/${stock[1]}`);
+        await goto(`/${stock[0]}/${stock[1]}`);
         suggest = "";
       },
     });

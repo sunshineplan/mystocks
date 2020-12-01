@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { checkTime, gotoStock, addColor } from "../misc.js";
 
-  let indices;
+  let indices = {};
   let names = {
     沪: "上证指数",
     深: "深证成指",
