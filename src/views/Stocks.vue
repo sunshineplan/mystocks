@@ -36,8 +36,6 @@ import Sortable from "sortablejs";
 import { checkTime, post } from "@/misc.js";
 import Cookies from "js-cookie";
 
-const refresh = Cookies.get("Refresh") ? Cookies.get("Refresh") : 3;
-
 export default {
   name: "Stocks",
   components: { AutoComplete },
@@ -55,12 +53,16 @@ export default {
         开盘: "open",
         昨收: "last",
       },
-      stocks: [],
       sortable: "",
-      refresh: Number(refresh) + 1,
+      refresh: Cookies.get("Refresh") ? Cookies.get("Refresh") : 3,
       autoUpdate: "",
       fetching: "",
     };
+  },
+  computed: {
+    stocks() {
+      return this.$store.state.stocks;
+    },
   },
   created() {
     this.start();
@@ -93,7 +95,7 @@ export default {
       if (checkTime() || force) {
         this.fetching = new AbortController();
         const resp = await fetch("/mystocks", { signal: this.fetching.signal });
-        this.stocks = await resp.json();
+        this.$store.commit("stocks", await resp.json());
       }
     },
     onUpdate(evt) {

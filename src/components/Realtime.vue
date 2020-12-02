@@ -103,17 +103,15 @@ import { post } from "@/misc.js";
 
 export default {
   name: "Realtime",
-  inject: ["Stock"],
   data() {
     return { stared: false };
   },
   computed: {
-    width() {
-      if (!this.stock.sell5 && !this.stock.buy5) return "480px";
-      else return "360px";
-    },
     stock() {
-      return this.Stock.value;
+      return this.$store.state.stock;
+    },
+    width() {
+      return !this.stock.sell5 && !this.stock.buy5 ? "480px" : "360px";
     },
   },
   async created() {
@@ -122,7 +120,7 @@ export default {
   },
   methods: {
     async star() {
-      if (!this.stared) await post("/star");
+      if (!this.stared) await post("/star", {});
       else await post("/star", { action: "unstar" });
       this.stared = !this.stared;
     },

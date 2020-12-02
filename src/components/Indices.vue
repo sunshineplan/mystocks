@@ -26,10 +26,14 @@ export default {
   name: "Indices",
   data() {
     return {
-      indices: {},
       names: { 沪: "上证指数", 深: "深证成指", 创: "创业板指", 中: "中小板指" },
       fields: ["now", "change", "percent"],
     };
+  },
+  computed: {
+    indices() {
+      return this.$store.state.indices;
+    },
   },
   created() {
     this.start();
@@ -41,8 +45,7 @@ export default {
     },
     async load(force) {
       if (checkTime() || force) {
-        const resp = await fetch("/indices");
-        this.indices = await resp.json();
+        this.$store.dispatch("indices");
       }
     },
   },

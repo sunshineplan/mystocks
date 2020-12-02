@@ -18,8 +18,7 @@
 import AutoComplete from "@/components/AutoComplete.vue";
 import Realtime from "@/components/Realtime.vue";
 import StockChart from "@/components/Chart.vue";
-import { computed } from "vue";
-import { checkTime, post, intraday } from "@/misc.js";
+import { checkTime, intraday } from "@/misc.js";
 import Chart from "chart.js";
 import annotation from "chartjs-plugin-annotation";
 import Cookies from "js-cookie";
@@ -34,21 +33,14 @@ Chart.defaults.global.tooltips.displayColors = false;
 Chart.defaults.global.animation.duration = 0;
 Chart.plugins.register({ annotation });
 
-const refresh = Cookies.get("Refresh") ? Cookies.get("Refresh") : 3;
-
 export default {
   name: "Stock",
   components: { AutoComplete, Realtime, StockChart },
-  provide() {
-    return { Stock: computed(() => this.stock) };
-  },
   data() {
     return {
-      refresh: Number(refresh) + 1,
+      refresh: Cookies.get("Refresh") ? Cookies.get("Refresh") : 3,
       autoUpdate: [],
-      stock: {},
       chart: "",
-      data: [],
       update: "",
     };
   },
@@ -58,6 +50,12 @@ export default {
     },
     code() {
       return this.$route.params.code;
+    },
+    stock() {
+      return this.$store.state.stock;
+    },
+    data() {
+      return this.$store.state.chart;
     },
   },
   watch: {
@@ -100,29 +98,22 @@ export default {
     },
     async loadRealtime(force) {
       if (checkTime() || (force && this.code)) {
-        let response = await post("/get", {
+        await this.$store.dispatch("stock", {
           index: this.index,
           code: this.code,
-          q: "realtime",
         });
-        let stock = await response.json();
-        if (stock.name) {
-          this.stock = stock;
-          this.update = stock.update;
-          document.title = `${stock.name} ${stock.now} ${stock.percent}`;
+        if (this.stock.name) {
+          this.update = this.stock.update;
+          document.title = `${this.stock.name} ${this.stock.now} ${this.stock.percent}`;
         }
       }
     },
     async loadChart(force) {
-      if (checkTime() || (force && this.code)) {
-        let response = await post("/get", {
+      if (checkTime() || (force && this.code))
+        await this.$store.dispatch("chart", {
           index: this.index,
           code: this.code,
-          q: "chart",
         });
-        let json = await response.json();
-        if (json.chart) this.data = json.chart;
-      }
     },
     updateChart() {
       if (this.data.length && this.stock.now) {

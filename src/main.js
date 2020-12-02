@@ -2,5 +2,6 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import mixin from './mixin'
+import store from './store'
 
-createApp(App).mixin(mixin).use(router).mount('#app')
+createApp(App).use(store).mixin(mixin).use(router).mount('#app')
