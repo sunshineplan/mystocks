@@ -14,4 +14,5 @@ require (
 	github.com/sunshineplan/utils v0.0.0-20201112132214-a65f6c365251
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392
+	golang.org/x/sys v0.0.0-20201201145000-ef89a241ccb3 // indirect
 )
