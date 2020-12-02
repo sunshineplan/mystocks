@@ -24,6 +24,9 @@ func index(c *gin.Context) {
 		if _, err := c.Cookie("Refresh"); err != nil {
 			c.SetCookie("Refresh", strconv.Itoa(refresh), 0, "", "", false, false)
 		}
+	} else {
+		c.SetCookie("Username", "", -1, "", "", false, false)
+		c.SetCookie("Refresh", "", -1, "", "", false, false)
 	}
 	c.HTML(200, "index.html", nil)
 }
