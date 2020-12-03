@@ -1,4 +1,4 @@
 @echo off
+
 go build -ldflags "-s -w"
-npm i
-npm run build
+npm i && npm run build
