@@ -16,21 +16,21 @@ export default createStore({
   },
   actions: {
     async stock({ commit }, payload) {
-      let response = await post('/get', {
+      const resp = await post('/get', {
         index: payload.index,
         code: payload.code,
         q: 'realtime',
       });
-      let stock = await response.json();
+      const stock = await resp.json();
       if (stock.name) commit('stock', stock)
     },
     async chart({ commit }, payload) {
-      let response = await post('/get', {
+      const resp = await post('/get', {
         index: payload.index,
         code: payload.code,
         q: 'chart',
       });
-      let json = await response.json();
+      const json = await resp.json();
       if (json.chart) commit('chart', json.chart)
     },
     async indices({ commit }) {

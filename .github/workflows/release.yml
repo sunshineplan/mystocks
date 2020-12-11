@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Create Release
-    runs-on: windows-latest
+    runs-on: [ windows-latest, macos-latest, ubuntu-latest ]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2

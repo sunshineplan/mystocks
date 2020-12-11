@@ -54,7 +54,7 @@ export default {
         昨收: "last",
       },
       sortable: "",
-      refresh: Cookies.get("Refresh") ? Cookies.get("Refresh") : 3,
+      refresh: Cookies.get("Refresh") || 3,
       autoUpdate: "",
       fetching: "",
     };

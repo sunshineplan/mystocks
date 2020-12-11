@@ -44,12 +44,12 @@ export default {
         },
       },
       noResults: () => {
-        let result = document.createElement("li");
+        const result = document.createElement("li");
         result.innerHTML = "No Results";
         document.querySelector("#suggestsList").appendChild(result);
       },
       onSelection: (feedback) => {
-        let stock = feedback.selection.value.split(" ")[0].split(":");
+        const stock = feedback.selection.value.split(" ")[0].split(":");
         this.$router.push(`/stock/${stock[0]}/${stock[1]}`);
         this.suggest = "";
       },
@@ -72,8 +72,8 @@ export default {
   methods: {
     async load() {
       if (this.suggest.length >= 2) {
-        let source = await post("/suggest", { keyword: this.suggest });
-        let data = await source.json();
+        const resp = await post("/suggest", { keyword: this.suggest });
+        const data = await resp.json();
         return data.map((i) => `${i.Index}:${i.Code} ${i.Name} ${i.Type}`);
       }
       return [];

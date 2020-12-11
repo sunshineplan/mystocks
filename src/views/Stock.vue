@@ -38,7 +38,7 @@ export default {
   components: { AutoComplete, Realtime, StockChart },
   data() {
     return {
-      refresh: Cookies.get("Refresh") ? Cookies.get("Refresh") : 3,
+      refresh: Cookies.get("Refresh") || 3,
       autoUpdate: [],
       chart: "",
       update: "",
@@ -117,7 +117,7 @@ export default {
     },
     updateChart() {
       if (this.data.length && this.stock.now) {
-        let data = this.data;
+        const data = this.data;
         data[data.length - 1].y = this.stock.now;
         this.chart.data.datasets[0].data = data;
         this.chart.update();
