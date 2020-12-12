@@ -8,7 +8,9 @@ installSoftware() {
 installMyStocks() {
     curl -Lo- https://github.com/sunshineplan/mystocks/archive/v1.0.tar.gz | tar zxC /var/www
     mv /var/www/mystocks* /var/www/mystocks
+    cd /var/www/mystocks
     bash build.sh
+    ./mystocks install
 }
 
 configMyStocks() {
@@ -31,11 +33,6 @@ configMyStocks() {
     sed -i "s,\$log,$log," /var/www/mystocks/config.ini
     sed -i "s/\$host/$host/" /var/www/mystocks/config.ini
     sed -i "s/\$port/$port/" /var/www/mystocks/config.ini
-}
-
-setupsystemd() {
-    cp -s /var/www/mystocks/scripts/mystocks.service /etc/systemd/system
-    systemctl enable mystocks
     service mystocks start
 }
 
@@ -71,7 +68,6 @@ main() {
     installSoftware
     installMyStocks
     configMyStocks
-    setupsystemd
     writeLogrotateScrip
     createCronTask
     setupNGINX

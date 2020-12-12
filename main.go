@@ -14,16 +14,25 @@ import (
 	"github.com/sunshineplan/utils"
 	"github.com/sunshineplan/utils/httpsvr"
 	"github.com/sunshineplan/utils/metadata"
-	"github.com/sunshineplan/utils/winsvc"
+	"github.com/sunshineplan/utils/service"
 	"github.com/vharitonsky/iniflags"
 )
 
 var self string
 var logPath *string
 var refresh int
-var svc winsvc.Service
 var meta metadata.Server
 var server httpsvr.Server
+
+var svc = service.Service{
+	Name: "MyStocks",
+	Desc: "Instance to serve My Stocks",
+	Exec: run,
+	Options: service.Options{
+		Dependencies: []string{"After=network.target"},
+		Others:       []string{"Environment=GIN_MODE=release"},
+	},
+}
 
 var (
 	joinPath = filepath.Join
@@ -39,9 +48,6 @@ func init() {
 	os.MkdirAll(joinPath(dir(self), "instance"), 0755)
 	sqlite = joinPath(dir(self), "instance/mystocks.db")
 	sqlitePy = joinPath(dir(self), "scripts/sqlite.py")
-	svc.Name = "MyStocks"
-	svc.Desc = "MyStocks Service"
-	svc.Exec = run
 }
 
 func usage(errmsg string) {
@@ -69,7 +75,7 @@ func main() {
 	iniflags.Parse()
 	stock.SetTimeout(refresh)
 
-	if winsvc.IsWindowsService() {
+	if service.IsWindowsService() {
 		svc.Run(false)
 		return
 	}

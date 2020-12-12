@@ -46,8 +46,8 @@ github.com/sunshineplan/gohttp v0.0.0-20201112060045-f748ec4ea5df h1:ALv9yPgvY+T
 github.com/sunshineplan/gohttp v0.0.0-20201112060045-f748ec4ea5df/go.mod h1:KaIWij1g41q0MnVSAe2pyReheMYhrHsMcwlBQGppv9A=
 github.com/sunshineplan/stock v0.0.0-20201126110129-c807d019903b h1:t1fppk+V2TmkqRnIco2sIY4tfIXVXoizrdCKp/v/wyg=
 github.com/sunshineplan/stock v0.0.0-20201126110129-c807d019903b/go.mod h1:gBDMUouQKj1A0my1/AEDX4z954Vg5oeu5bf+JPLIJqs=
-github.com/sunshineplan/utils v0.0.0-20201211125557-e3b43ec7298f h1:pysklHPhIlS2zhHoEL1xRfeqkcgiCim5zOmOs0zIQWE=
-github.com/sunshineplan/utils v0.0.0-20201211125557-e3b43ec7298f/go.mod h1:fJ8/Fjbd50RwQ8/wxBmBgkuDHfcXrCJu6c/iRsgkYok=
+github.com/sunshineplan/utils v0.0.0-20201212122036-7a2495910f72 h1:BjbN7dIlgxfBaWyQkzs/2NshQNTbKVnnLUyzaUlAItc=
+github.com/sunshineplan/utils v0.0.0-20201212122036-7a2495910f72/go.mod h1:fJ8/Fjbd50RwQ8/wxBmBgkuDHfcXrCJu6c/iRsgkYok=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs=

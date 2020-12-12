@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/sunshineplan/gohttp v0.0.0-20201112060045-f748ec4ea5df // indirect
 	github.com/sunshineplan/stock v0.0.0-20201126110129-c807d019903b
-	github.com/sunshineplan/utils v0.0.0-20201211125557-e3b43ec7298f
+	github.com/sunshineplan/utils v0.0.0-20201212122036-7a2495910f72
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
 	golang.org/x/sys v0.0.0-20201211090839-8ad439b19e0f // indirect
