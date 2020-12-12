@@ -31,14 +31,20 @@
 </template>
 
 <script>
-import AutoComplete from "@/components/AutoComplete.vue";
 import Sortable from "sortablejs";
+import { defineAsyncComponent } from "vue";
 import { checkTime, post } from "@/misc.js";
 import Cookies from "js-cookie";
 
 export default {
   name: "Stocks",
-  components: { AutoComplete },
+  components: {
+    AutoComplete: defineAsyncComponent(() =>
+      import(
+        /* webpackChunkName: "stock" */ "@/components/AutoComplete.vue"
+      )
+    ),
+  },
   data() {
     return {
       columns: {

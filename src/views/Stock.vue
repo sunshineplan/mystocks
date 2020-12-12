@@ -15,13 +15,23 @@
 </template>
 
 <script>
-import AutoComplete from "@/components/AutoComplete.vue";
-import Realtime from "@/components/Realtime.vue";
-import StockChart from "@/components/Chart.vue";
+import { defineAsyncComponent } from "vue";
 
 export default {
   name: "Stock",
-  components: { AutoComplete, Realtime, StockChart },
+  components: {
+    AutoComplete: defineAsyncComponent(() =>
+      import(
+        /* webpackChunkName: "stock" */ "@/components/AutoComplete.vue"
+      )
+    ),
+    Realtime: defineAsyncComponent(() =>
+      import(/* webpackChunkName: "stock" */ "@/components/Realtime.vue")
+    ),
+    StockChart: defineAsyncComponent(() =>
+      import(/* webpackChunkName: "chart" */ "@/components/Chart.vue")
+    ),
+  },
   mounted() {
     document.title = "My Stocks";
   },
