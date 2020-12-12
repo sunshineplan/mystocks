@@ -5,14 +5,14 @@ export const BootstrapButtons = Swal.mixin({
   buttonsStyling: false
 })
 
-export function valid() {
+export const valid = () => {
   var result = true
   Array.from(document.querySelectorAll('input'))
     .forEach(i => { if (!i.checkValidity()) result = false })
   return result
 }
 
-export function post(url, data) {
+export const post = (url, data) => {
   return fetch(url, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
@@ -20,7 +20,7 @@ export function post(url, data) {
   })
 }
 
-export function checkTime() {
+export const checkTime = () => {
   var date = new Date();
   var hour = date.getUTCHours();
   var day = date.getDay();
@@ -29,7 +29,7 @@ export function checkTime() {
   return false
 }
 
-export function color(last, value) {
+export const color = (last, value) => {
   if (value == undefined)
     if (last < 0) return { color: 'green' }
     else if (last > 0) return { color: 'red' }
@@ -37,58 +37,11 @@ export function color(last, value) {
   else if (last > value) return { color: 'green' }
 }
 
-export function timeLabels(start, end) {
+export const timeLabels = (start, end) => {
   var times = [];
   for (var i = 0; start <= end; i++) {
     times[i] = `${Math.floor(start / 60).toString().padStart(2, '0')}:${(start % 60).toString().padStart(2, '0')}`
     start++
   }
   return times
-}
-
-export const intraday = {
-  type: 'line',
-  data: {
-    labels: timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60)),
-    datasets: [
-      {
-        label: 'Price',
-        fill: false,
-        lineTension: 0,
-        borderWidth: 2,
-        borderColor: 'red',
-        backgroundColor: 'red',
-        pointRadius: 0,
-        pointHoverRadius: 3
-      }
-    ]
-  },
-  options: {
-    scales: {
-      xAxes: [{
-        gridLines: { drawTicks: false },
-        ticks: {
-          padding: 10,
-          autoSkipPadding: 100,
-          maxRotation: 0
-        }
-      }],
-      yAxes: [{
-        gridLines: { drawTicks: false },
-        ticks: { padding: 12 }
-      }]
-    },
-    annotation: {
-      annotations: [
-        {
-          id: 'PreviousClose',
-          type: 'line',
-          mode: 'horizontal',
-          scaleID: 'y-axis-0',
-          borderColor: 'black',
-          borderWidth: .75
-        }
-      ]
-    }
-  }
 }
