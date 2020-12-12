@@ -143,9 +143,10 @@ export default {
   },
   methods: {
     async star() {
-      if (!this.stared) await post("/star", {});
-      else await post("/star", { action: "unstar" });
-      this.stared = !this.stared;
+      let resp;
+      if (!this.stared) resp = await post("/star", {});
+      else resp = await post("/star", { action: "unstar" });
+      if ((await resp.text()) == "1") this.stared = !this.stared;
     },
     async start() {
       if (this.code != "n/a") {

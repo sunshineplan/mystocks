@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 
 func index(c *gin.Context) {
 	userID := sessions.Default(c).Get("user_id")
-	if userID != nil && userID != 0 {
+	if userID != nil {
 		if _, err := c.Cookie("Username"); err != nil {
 			username, err := getUser(c)
 			if err != nil {
@@ -25,8 +26,12 @@ func index(c *gin.Context) {
 			c.SetCookie("Refresh", strconv.Itoa(refresh), 0, "", "", false, false)
 		}
 	} else {
-		c.SetCookie("Username", "", -1, "", "", false, false)
-		c.SetCookie("Refresh", "", -1, "", "", false, false)
+		if _, err := c.Cookie("Username"); err != http.ErrNoCookie {
+			c.SetCookie("Username", "", -1, "", "", false, false)
+		}
+		if _, err := c.Cookie("Refresh"); err != http.ErrNoCookie {
+			c.SetCookie("Refresh", "", -1, "", "", false, false)
+		}
 	}
 	c.HTML(200, "index.html", nil)
 }
@@ -43,9 +48,6 @@ func myStocks(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
-		session.Clear()
-		session.Set("user_id", 0)
-		session.Save()
 		userID = 0
 	}
 
@@ -126,6 +128,10 @@ func star(c *gin.Context) {
 
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
+	if userID == nil {
+		c.String(200, "0")
+		return
+	}
 	refer := strings.Split(c.Request.Referer(), "/")
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
@@ -152,6 +158,10 @@ func doStar(c *gin.Context) {
 
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
+	if userID == nil {
+		c.String(200, "0")
+		return
+	}
 	refer := strings.Split(c.Request.Referer(), "/")
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
@@ -195,6 +205,10 @@ func reorder(c *gin.Context) {
 
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
+	if userID == nil {
+		c.String(200, "0")
+		return
+	}
 
 	var r struct{ New, Old string }
 	if err := c.BindJSON(&r); err != nil {
