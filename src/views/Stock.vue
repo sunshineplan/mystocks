@@ -21,9 +21,7 @@ export default {
   name: "Stock",
   components: {
     AutoComplete: defineAsyncComponent(() =>
-      import(
-        /* webpackChunkName: "stock" */ "@/components/AutoComplete.vue"
-      )
+      import(/* webpackChunkName: "stock" */ "@/components/AutoComplete.vue")
     ),
     Realtime: defineAsyncComponent(() =>
       import(/* webpackChunkName: "stock" */ "@/components/Realtime.vue")

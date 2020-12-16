@@ -40,9 +40,7 @@ export default {
   name: "Stocks",
   components: {
     AutoComplete: defineAsyncComponent(() =>
-      import(
-        /* webpackChunkName: "stock" */ "@/components/AutoComplete.vue"
-      )
+      import(/* webpackChunkName: "stock" */ "@/components/AutoComplete.vue")
     ),
   },
   data() {

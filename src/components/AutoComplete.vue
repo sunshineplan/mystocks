@@ -16,37 +16,31 @@ export default {
   data() {
     return {
       suggest: "",
-      autoComplete: "",
     };
   },
   mounted() {
-    this.autoComplete = new autoComplete({
+    const autoCompletejs = new autoComplete({
       selector: "#suggest",
-      data: { src: this.load, cache: false },
+      data: {
+        src: async () => {
+          const resp = await post("/suggest", { keyword: this.suggest });
+          const data = await resp.json();
+          return data.map((i) => `${i.Index}:${i.Code} ${i.Name} ${i.Type}`);
+        },
+      },
       trigger: { event: ["input", "focus"] },
       searchEngine: (query, record) => {
         return record;
       },
       placeHolder: "Search Stock",
-      threshold: 1,
-      debounce: 200,
+      threshold: 2,
+      debounce: 300,
       maxResults: 10,
-      resultsList: {
-        render: true,
-        container: (source) => {
-          source.setAttribute("id", "suggestsList");
-          source.setAttribute("class", "suggestsList");
-        },
-      },
-      resultItem: {
-        content: (data, src) => {
-          src.innerHTML = data.match;
-        },
-      },
-      noResults: () => {
+      noResults: (dataFeedback, generateList) => {
+        generateList(autoCompletejs, dataFeedback, dataFeedback.results);
         const result = document.createElement("li");
         result.innerHTML = "No Results";
-        document.querySelector("#suggestsList").appendChild(result);
+        document.querySelector("#autoComplete_list").appendChild(result);
       },
       onSelection: (feedback) => {
         const stock = feedback.selection.value.split(" ")[0].split(":");
@@ -54,33 +48,6 @@ export default {
         this.suggest = "";
       },
     });
-    document.querySelector("#suggest").addEventListener("blur", this.hide);
-    document
-      .querySelector("#suggest")
-      .addEventListener(
-        "focus",
-        () => (document.querySelector("#suggestsList").style.display = "block")
-      );
-    document.querySelector("#suggest").addEventListener("keyup", (evt) => {
-      if (evt.key == "Escape") {
-        this.suggest = "";
-        this.hide();
-      }
-    });
-    this.hide();
-  },
-  methods: {
-    async load() {
-      if (this.suggest.length >= 2) {
-        const resp = await post("/suggest", { keyword: this.suggest });
-        const data = await resp.json();
-        return data.map((i) => `${i.Index}:${i.Code} ${i.Name} ${i.Type}`);
-      }
-      return [];
-    },
-    hide() {
-      document.querySelector("#suggestsList").style.display = "none";
-    },
   },
 };
 </script>
@@ -119,7 +86,7 @@ export default {
 </style>
 
 <style>
-.suggestsList {
+.autoComplete_list {
   position: absolute;
   background-color: white;
   box-shadow: 0px 5px 4px rgba(101, 119, 134, 0.2),
@@ -132,6 +99,12 @@ export default {
   text-indent: 20px;
   top: 100%;
   z-index: 99;
+}
+
+.autoComplete_result:hover {
+  color: white;
+  background-color: #008eff;
+  border-radius: 5px;
 }
 
 .autoComplete_selected {
