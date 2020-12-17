@@ -10,9 +10,9 @@ require (
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/sunshineplan/gohttp v0.0.0-20201112060045-f748ec4ea5df // indirect
-	github.com/sunshineplan/stock v0.0.0-20201126110129-c807d019903b
-	github.com/sunshineplan/utils v0.0.0-20201212122036-7a2495910f72
+	github.com/sunshineplan/stock v0.0.0-20201217075248-4281859ef7a3
+	github.com/sunshineplan/utils v0.0.0-20201217074852-2e02253ad9d2
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
-	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
-	golang.org/x/sys v0.0.0-20201211090839-8ad439b19e0f // indirect
+	golang.org/x/crypto v0.0.0-20201217014255-9d1352758620
+	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
 )
