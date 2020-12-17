@@ -160,9 +160,6 @@ export default {
           index: this.index,
           code: this.code,
         });
-        if (this.stock.name) {
-          document.title = `${this.stock.name} ${this.stock.now} ${this.stock.percent}`;
-        }
       }
     },
     open() {

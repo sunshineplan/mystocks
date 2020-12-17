@@ -25,7 +25,8 @@ export default createStore({
       });
       const stock = await resp.json();
       if (stock.name) {
-        commit('stock', stock);
+        commit('stock', stock)
+        document.title = `${stock.name} ${stock.now} ${stock.percent}`
         dispatch('updateChart')
       }
     },
@@ -47,30 +48,34 @@ export default createStore({
     },
     updateChart({ commit, state }) {
       const chart = state.chart
-      if (chart && state.stock.last) {
-        chart.options.scales.yAxes[0].ticks.suggestedMin =
-          state.stock.last / 1.01
-        chart.options.scales.yAxes[0].ticks.suggestedMax =
-          state.stock.last * 1.01
-        chart.annotation.elements.PreviousClose.options.value = state.stock.last
+      if (chart) {
+        if (state.stock.last) {
+          chart.options.scales.yAxes[0].ticks.suggestedMin =
+            state.stock.last / 1.01
+          chart.options.scales.yAxes[0].ticks.suggestedMax =
+            state.stock.last * 1.01
+          chart.annotation.elements.PreviousClose.options.value = state.stock.last
+        }
+        if (state.line.length && state.stock.now) {
+          const data = state.line
+          data[data.length - 1].y = state.stock.now
+          chart.config.data.datasets[0].data = data
+        }
+        chart.update()
       }
-      if (chart && state.line.length && state.stock.now) {
-        const data = state.line
-        data[data.length - 1].y = state.stock.now
-        chart.data.datasets[0].data = data
-      }
-      if (chart) chart.update()
       commit('chart', chart)
     },
     resetChart({ commit, state }) {
       commit('line', [])
       const chart = state.chart
-      if (chart) chart.data.datasets[0].data = []
-      if (chart) chart.update()
+      if (chart) {
+        chart.config.data.datasets[0].data = []
+        chart.update()
+      }
       commit('chart', chart)
     },
     destroyChart({ commit, state }) {
-      if (state.chart) state.chart.update()
+      if (state.chart) state.chart.destroy()
       commit('chart', null)
     }
   }
