@@ -8,14 +8,16 @@
         </div>
         <a>Home</a>
       </div>
-      <Realtime />
+      <Realtime :stock="stock" />
     </header>
-    <StockChart />
+    <StockChart @mouseenter="enter" @mouseleave="leave" />
   </div>
 </template>
 
 <script>
 import { defineAsyncComponent } from "vue";
+import Cookies from "js-cookie";
+import { checkTime } from "@/misc.js";
 
 export default {
   name: "Stock",
@@ -30,8 +32,77 @@ export default {
       import(/* webpackChunkName: "chart" */ "@/components/Chart.vue")
     ),
   },
-  mounted() {
+  data() {
+    return {
+      refresh: Cookies.get("Refresh") || 3,
+      autoUpdate: [],
+      update: "",
+      hover: false,
+    };
+  },
+  computed: {
+    index() {
+      return this.$route.params.index;
+    },
+    code() {
+      return this.$route.params.code;
+    },
+    stock() {
+      return this.$store.state.stock;
+    },
+  },
+  watch: {
+    update(now, last) {
+      if (now && last && !this.hover) this.$store.dispatch("updateChart");
+    },
+    async $route(to) {
+      if (to.name == "stock" && this.code != "n/a") await this.reload();
+    },
+  },
+  async mounted() {
     document.title = "My Stocks";
+    if (this.code != "n/a") {
+      await this.reload();
+      this.autoUpdate.push(setInterval(this.loadRealtime, this.refresh * 1000));
+      this.autoUpdate.push(setInterval(this.loadChart, 60000));
+    }
+  },
+  beforeUnmount() {
+    for (; this.autoUpdate.length > 0; ) clearInterval(this.autoUpdate.pop());
+    this.$store.dispatch("destroyChart");
+  },
+  methods: {
+    enter() {
+      this.hover = true;
+    },
+    leave() {
+      setTimeout(() => (this.hover = false), 200);
+    },
+    async reload() {
+      this.$store.dispatch("resetChart");
+      await this.loadRealtime(true);
+      await this.loadChart(true);
+      this.$store.dispatch("updateChart");
+    },
+    async loadRealtime(force) {
+      if (checkTime() || (force && this.code)) {
+        await this.$store.dispatch("stock", {
+          index: this.index,
+          code: this.code,
+        });
+        if (this.stock.name) {
+          this.update = this.stock.update;
+          document.title = `${this.stock.name} ${this.stock.now} ${this.stock.percent}`;
+        }
+      }
+    },
+    async loadChart(force) {
+      if (checkTime() || (force && this.code))
+        await this.$store.dispatch("line", {
+          index: this.index,
+          code: this.code,
+        });
+    },
   },
 };
 </script>

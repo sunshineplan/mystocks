@@ -99,47 +99,26 @@
 </template>
 
 <script>
-import { checkTime, post } from "@/misc.js";
-import Cookies from "js-cookie";
+import { post } from "@/misc.js";
 
 export default {
   name: "Realtime",
+  props: {
+    stock: Object,
+  },
   data() {
     return {
-      refresh: Cookies.get("Refresh") || 3,
       stared: false,
-      autoUpdate: "",
     };
   },
   computed: {
-    index() {
-      return this.$route.params.index;
-    },
-    code() {
-      return this.$route.params.code;
-    },
-    stock() {
-      return this.$store.state.stock;
-    },
     width() {
       return !this.stock.sell5 && !this.stock.buy5 ? "480px" : "360px";
-    },
-  },
-  watch: {
-    async $route(to) {
-      this.$store.commit("stock", {});
-      if (to.name == "stock" && this.code != "n/a") await this.load(true);
     },
   },
   async created() {
     const resp = await fetch("/star");
     if ((await resp.text()) == "1") this.stared = true;
-  },
-  async mounted() {
-    await this.start();
-  },
-  beforeUnmount() {
-    clearInterval(this.autoUpdate);
   },
   methods: {
     async star() {
@@ -147,20 +126,6 @@ export default {
       if (!this.stared) resp = await post("/star", {});
       else resp = await post("/star", { action: "unstar" });
       if ((await resp.text()) == "1") this.stared = !this.stared;
-    },
-    async start() {
-      if (this.code != "n/a") {
-        await this.load(true);
-        this.autoUpdate = setInterval(this.load, this.refresh * 1000);
-      }
-    },
-    async load(force) {
-      if (checkTime() || (force && this.code)) {
-        await this.$store.dispatch("stock", {
-          index: this.index,
-          code: this.code,
-        });
-      }
     },
     open() {
       window.open("http://stockpage.10jqka.com.cn/" + this.stock.code);

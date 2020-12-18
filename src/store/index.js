@@ -1,5 +1,18 @@
 import { createStore } from 'vuex'
+import Chart from 'chart.js'
+import annotation from 'chartjs-plugin-annotation'
+import { intraday } from '@/components/Chart.vue'
 import { post } from '@/misc.js'
+
+Chart.defaults.global.maintainAspectRatio = false
+Chart.defaults.global.legend.display = false
+Chart.defaults.global.hover.mode = 'index'
+Chart.defaults.global.hover.intersect = false
+Chart.defaults.global.tooltips.mode = 'index'
+Chart.defaults.global.tooltips.intersect = false
+Chart.defaults.global.tooltips.displayColors = false
+Chart.defaults.global.animation.duration = 0
+Chart.plugins.register({ annotation })
 
 export default createStore({
   state: {
@@ -17,62 +30,51 @@ export default createStore({
     indices(state, indices) { state.indices = indices }
   },
   actions: {
-    async stock({ dispatch, commit }, payload) {
+    async stock({ commit }, payload) {
       const resp = await post('/get', {
         index: payload.index,
         code: payload.code,
         q: 'realtime',
-      });
-      const stock = await resp.json();
-      if (stock.name) {
-        commit('stock', stock)
-        document.title = `${stock.name} ${stock.now} ${stock.percent}`
-        dispatch('updateChart')
-      }
+      })
+      const stock = await resp.json()
+      if (stock.name) commit('stock', stock)
     },
-    async line({ dispatch, commit }, payload) {
+    async line({ commit }, payload) {
       const resp = await post('/get', {
         index: payload.index,
         code: payload.code,
         q: 'chart',
-      });
-      const json = await resp.json();
-      if (json.chart) {
-        commit('line', json.chart)
-        dispatch('updateChart')
-      }
+      })
+      const json = await resp.json()
+      if (json.chart) commit('line', json.chart)
     },
     async indices({ commit }) {
       const resp = await fetch('/indices')
       commit('indices', await resp.json())
     },
-    updateChart({ commit, state }) {
-      const chart = state.chart
-      if (chart) {
-        if (state.stock.last) {
-          chart.options.scales.yAxes[0].ticks.suggestedMin =
-            state.stock.last / 1.01
-          chart.options.scales.yAxes[0].ticks.suggestedMax =
-            state.stock.last * 1.01
-          chart.annotation.elements.PreviousClose.options.value = state.stock.last
-        }
-        if (state.line.length && state.stock.now) {
-          const data = state.line
-          data[data.length - 1].y = state.stock.now
-          chart.config.data.datasets[0].data = data
-        }
-        chart.update()
+    updateChart({ dispatch, commit, state }) {
+      dispatch('destroyChart')
+      const chart = new Chart(document.querySelector('#chart'), intraday)
+      const stock = { ...state.stock }
+      const line = [...state.line]
+      if (stock.last) {
+        chart.options.scales.yAxes[0].ticks.suggestedMin = stock.last / 1.01
+        chart.options.scales.yAxes[0].ticks.suggestedMax = stock.last * 1.01
+        chart.annotation.elements.PreviousClose.options.value = stock.last
       }
+      if (line.length && stock.now) {
+        line[line.length - 1].y = stock.now
+        chart.config.data.datasets[0].data = line
+      }
+      chart.update()
       commit('chart', chart)
     },
     resetChart({ commit, state }) {
       commit('line', [])
-      const chart = state.chart
-      if (chart) {
-        chart.config.data.datasets[0].data = []
-        chart.update()
+      if (state.chart) {
+        state.chart.destroy()
+        commit('chart', new Chart(document.querySelector('#chart'), intraday))
       }
-      commit('chart', chart)
     },
     destroyChart({ commit, state }) {
       if (state.chart) state.chart.destroy()
