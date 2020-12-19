@@ -37,7 +37,7 @@ export default {
       refresh: Cookies.get("Refresh") || 3,
       autoUpdate: [],
       update: "",
-      hover: false,
+      hover: 0,
     };
   },
   computed: {
@@ -73,10 +73,10 @@ export default {
   },
   methods: {
     enter() {
-      this.hover = true;
+      this.hover++;
     },
     leave() {
-      setTimeout(() => (this.hover = false), 200);
+      setTimeout(() => this.hover--, 200);
     },
     async reload() {
       this.$store.dispatch("resetChart");
