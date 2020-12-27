@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -35,7 +36,7 @@ func deleteUser(username string) {
 	}
 	defer db.Close()
 
-	res, err := db.Exec("DELETE FROM user WHERE username=?", strings.ToLower(username))
+	res, err := db.Exec("DELETE FROM user WHERE username = ?", strings.ToLower(username))
 	if err != nil {
 		log.Fatalln("Failed to delete user:", err)
 	}
@@ -64,13 +65,28 @@ func backup() {
 		Account:  config.Account,
 		Password: config.Password,
 	}
-	file := dump()
-	defer os.Remove(file)
+	tmpfile, err := ioutil.TempFile("", "tmp")
+	if err != nil {
+		log.Fatalln("Failed to create temporary file:", err)
+	}
+	tmpfile.Close()
+
+	if err := dbConfig.Backup(tmpfile.Name()); err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	var subject string
+	if local {
+		subject = "My Stocks Backup(Local) - " + time.Now().Format("20060102")
+	} else {
+		subject = "My Stocks Backup - " + time.Now().Format("20060102")
+	}
 	if err := dialer.Send(
 		&mail.Message{
 			To:          config.To,
-			Subject:     "My Stocks Backup-" + time.Now().Format("20060102"),
-			Attachments: []*mail.Attachment{{Path: file, Filename: "database"}},
+			Subject:     subject,
+			Attachments: []*mail.Attachment{{Path: tmpfile.Name(), Filename: "database"}},
 		},
 	); err != nil {
 		log.Fatalln("Failed to send mail:", err)
@@ -81,14 +97,22 @@ func backup() {
 func restore(file string) {
 	log.Print("Start!")
 	if file == "" {
-		file = joinPath(dir(self), "scripts/schema.sql")
+		if local {
+			file = joinPath(dir(self), "scripts/sqlite.sql")
+		} else {
+			file = joinPath(dir(self), "scripts/mysql.sql")
+		}
 	} else {
 		if _, err := os.Stat(file); err != nil {
 			log.Fatalln("File not found:", err)
 		}
 	}
 	dropAll := joinPath(dir(self), "scripts/drop_all.sql")
-	execScript(dropAll)
-	execScript(file)
+	if err := dbConfig.Restore(dropAll); err != nil {
+		log.Fatal(err)
+	}
+	if err := dbConfig.Restore(file); err != nil {
+		log.Fatal(err)
+	}
 	log.Print("Done!")
 }
