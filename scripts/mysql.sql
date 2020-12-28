@@ -13,6 +13,12 @@ CREATE TABLE stock (
   seq INT DEFAULT 0,
 );
 
+CREATE TABLE seq (
+  user_id INT NOT NULL,
+  stock_id INT NOT NULL,
+  seq INT NOT NULL
+);
+
 DELIMITER ;;
 CREATE TRIGGER add_user AFTER INSERT ON user
 FOR EACH ROW BEGIN
@@ -27,14 +33,20 @@ END;;
 
 CREATE TRIGGER add_seq AFTER INSERT ON stock
 FOR EACH ROW BEGIN
-    UPDATE stock SET seq = (SELECT MAX(seq) + 1 FROM stock WHERE user_id = new.user_id)
-    WHERE user_id = new.user_id AND idx = new.idx AND code = new.code;
+    SET @seq := (SELECT IFNULL(MAX(seq)+1, 1) FROM seq WHERE user_id = new.user_id);
+    INSERT INTO seq
+      (user_id, stock_id, seq)
+    VALUES
+      (new.user_id, new.id, @seq);
 END;;
 
 CREATE TRIGGER reorder AFTER DELETE ON stock
 FOR EACH ROW BEGIN
-    UPDATE stock SET seq = seq - 1
-    WHERE user_id = old.user_id AND seq > old.seq;
+    SET @seq := (SELECT seq FROM seq WHERE user_id = old.user_id AND stock_id = old.id);
+    DELETE FROM seq
+    WHERE user_id = old.user_id AND seq = @seq;
+    UPDATE seq SET seq = seq-1
+    WHERE user_id = old.user_id AND seq > @seq;
 END;;
 DELIMITER ;
 

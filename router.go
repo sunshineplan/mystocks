@@ -51,7 +51,8 @@ func myStocks(c *gin.Context) {
 		userID = 0
 	}
 
-	rows, err := db.Query(`SELECT idx, code FROM stock WHERE user_id = ? ORDER BY seq`, userID)
+	rows, err := db.Query(`SELECT idx, code FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
+WHERE user_id = ? ORDER BY seq`, userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "no such table") {
 			restore("")
@@ -220,10 +221,10 @@ func reorder(c *gin.Context) {
 	dest := strings.Split(r.New, " ")
 
 	ec := make(chan error, 1)
-	var old, new int
+	var oldID, old, new int
 	go func() {
-		ec <- db.QueryRow("SELECT seq FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-			orig[0], orig[1], userID).Scan(&old)
+		ec <- db.QueryRow(`SELECT id, seq FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
+WHERE idx = ? AND code = ? AND stock.user_id = ?`, orig[0], orig[1], userID).Scan(&oldID, &old)
 	}()
 	if err := db.QueryRow("SELECT seq FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
 		dest[0], dest[1], userID).Scan(&new); err != nil {
@@ -238,15 +239,15 @@ func reorder(c *gin.Context) {
 	}
 
 	go func() {
-		_, err := db.Exec("UPDATE stock SET seq = ? WHERE idx = ? AND code = ? AND user_id = ?",
-			new, orig[0], orig[1], userID)
+		_, err := db.Exec("UPDATE seq SET seq = ? WHERE stock_id = ? AND user_id = ?",
+			new, oldID, userID)
 		ec <- err
 	}()
 	if old > new {
-		_, err = db.Exec("UPDATE stock SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
+		_, err = db.Exec("UPDATE seq SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
 			new, old, userID)
 	} else {
-		_, err = db.Exec("UPDATE stock SET seq = seq - 1 WHERE seq > ? AND seq <= ? AND user_id = ?",
+		_, err = db.Exec("UPDATE seq SET seq = seq - 1 WHERE seq > ? AND seq <= ? AND user_id = ?",
 			old, new, userID)
 	}
 	if err != nil {

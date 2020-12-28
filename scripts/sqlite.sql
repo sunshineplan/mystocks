@@ -7,11 +7,16 @@ CREATE TABLE user (
 );
 
 CREATE TABLE stock (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
   idx TEXT NOT NULL,
-  code TEXT NOT NULL,
-  seq INTEGER DEFAULT 0,
-  FOREIGN KEY (user_id) REFERENCES user (id)
+  code TEXT NOT NULL
+);
+
+CREATE TABLE seq (
+  user_id INTEGER NOT NULL,
+  stock_id INTEGER NOT NULL,
+  seq INTEGER NOT NULL
 );
 
 CREATE TRIGGER add_user AFTER INSERT ON user
@@ -27,14 +32,18 @@ END;
 
 CREATE TRIGGER add_seq AFTER INSERT ON stock
 BEGIN
-    UPDATE stock SET seq = (SELECT MAX(seq) + 1 FROM stock WHERE user_id = new.user_id)
-    WHERE user_id = new.user_id AND idx = new.idx AND code = new.code;
+    INSERT INTO seq
+      (user_id, stock_id, seq)
+    VALUES
+      (new.user_id, new.id, (SELECT MAX(seq) + 1 FROM seq WHERE user_id = new.user_id));
 END;
 
 CREATE TRIGGER reorder AFTER DELETE ON stock
 BEGIN
-    UPDATE stock SET seq = seq - 1
-    WHERE user_id = old.user_id AND seq > old.seq;
+    DELETE FROM seq
+    WHERE user_id = old.user_id AND seq = (SELECT seq FROM seq WHERE user_id = old.user_id AND stock_id = old.id);
+    UPDATE seq SET seq = seq-1
+    WHERE user_id = old.user_id AND seq > (SELECT seq FROM seq WHERE user_id = old.user_id AND stock_id = old.id);
 END;
 
 INSERT INTO user (id, username, password)
