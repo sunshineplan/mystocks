@@ -12,12 +12,6 @@ import (
 
 func addUser(username string) {
 	log.Print("Start!")
-	db, err := getDB()
-	if err != nil {
-		log.Fatalln("Failed to connect to database:", err)
-	}
-	defer db.Close()
-
 	if _, err := db.Exec("INSERT INTO user(username) VALUES (?)", strings.ToLower(username)); err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			log.Fatalf("Username %s already exists.", strings.ToLower(username))
@@ -30,12 +24,6 @@ func addUser(username string) {
 
 func deleteUser(username string) {
 	log.Print("Start!")
-	db, err := getDB()
-	if err != nil {
-		log.Fatalln("Failed to connect to database:", err)
-	}
-	defer db.Close()
-
 	res, err := db.Exec("DELETE FROM user WHERE username = ?", strings.ToLower(username))
 	if err != nil {
 		log.Fatalln("Failed to delete user:", err)

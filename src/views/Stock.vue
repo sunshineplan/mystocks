@@ -16,7 +16,6 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
-import Cookies from "js-cookie";
 import { checkTime } from "@/misc.js";
 
 export default {
@@ -34,7 +33,6 @@ export default {
   },
   data() {
     return {
-      refresh: Cookies.get("Refresh") || 3,
       autoUpdate: [],
       update: "",
       hover: 0,
@@ -63,8 +61,12 @@ export default {
     document.title = "My Stocks";
     if (this.code != "n/a") {
       await this.reload();
-      this.autoUpdate.push(setInterval(this.loadRealtime, this.refresh * 1000));
-      this.autoUpdate.push(setInterval(this.loadChart, 60000));
+      if (this.user && this.refresh > 0) {
+        this.autoUpdate.push(
+          setInterval(this.loadRealtime, this.refresh * 1000)
+        );
+        this.autoUpdate.push(setInterval(this.loadChart, 60000));
+      }
     }
   },
   beforeUnmount() {

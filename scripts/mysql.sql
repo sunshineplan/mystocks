@@ -1,16 +1,16 @@
 -- Initialize the database.
 
 CREATE TABLE user (
-  id INT PRIMARY KEY AUTOINCREMENT,
+  id INT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(20) UNIQUE NOT NULL,
   password VARCHAR(120) NOT NULL DEFAULT '123456'
 );
 
 CREATE TABLE stock (
+  id INT PRIMARY KEY AUTO_INCREMENT,
   user_id INT NOT NULL,
   idx VARCHAR(10) NOT NULL,
-  code VARCHAR(20) NOT NULL,
-  seq INT DEFAULT 0,
+  code VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE seq (
@@ -50,5 +50,5 @@ FOR EACH ROW BEGIN
 END;;
 DELIMITER ;
 
-INSERT INTO user (id, username, password)
-VALUES (0, 'guest', '');
+SET SESSION sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
+INSERT INTO user (id, username, password) VALUES (0, 'guest', '');

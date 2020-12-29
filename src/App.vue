@@ -17,14 +17,10 @@
 </template>
 
 <script>
-import Cookies from "js-cookie";
 import { defineAsyncComponent } from "vue";
 
 export default {
   name: "App",
-  data() {
-    return { user: Cookies.get("Username") };
-  },
   components: {
     Indices: defineAsyncComponent(() =>
       import(/* webpackChunkName: "stock" */ "@/components/Indices.vue")

@@ -41,7 +41,7 @@ export default {
   methods: {
     start() {
       this.load(true);
-      setInterval(this.load, 10000);
+      if (this.user && this.refresh > 0) setInterval(this.load, 10000);
     },
     async load(force) {
       if (checkTime() || force) {

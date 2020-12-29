@@ -34,7 +34,6 @@
 import Sortable from "sortablejs";
 import { defineAsyncComponent } from "vue";
 import { checkTime, post } from "@/misc.js";
-import Cookies from "js-cookie";
 
 export default {
   name: "Stocks",
@@ -58,7 +57,6 @@ export default {
         昨收: "last",
       },
       sortable: "",
-      refresh: Cookies.get("Refresh") || 3,
       autoUpdate: "",
       fetching: "",
     };
@@ -77,8 +75,8 @@ export default {
       animation: 150,
       delay: 500,
       swapThreshold: 0.5,
-      onStart: () => this.stop(),
-      onEnd: () => this.start(),
+      onStart: this.stop,
+      onEnd: this.start,
       onUpdate: this.onUpdate,
     });
   },
@@ -87,13 +85,14 @@ export default {
     this.sortable.destroy();
   },
   methods: {
-    start() {
-      this.load(true);
-      this.autoUpdate = setInterval(this.load, this.refresh * 1000);
+    async start() {
+      await this.load(true);
+      if (this.user && this.refresh > 0)
+        this.autoUpdate = setInterval(this.load, this.refresh * 1000);
     },
     stop() {
       this.fetching.abort();
-      clearInterval(this.autoUpdate);
+      if (this.user && this.refresh > 0) clearInterval(this.autoUpdate);
     },
     async load(force) {
       if (checkTime() || force) {
@@ -102,8 +101,8 @@ export default {
         this.$store.commit("stocks", await resp.json());
       }
     },
-    onUpdate(evt) {
-      post("/reorder", {
+    async onUpdate(evt) {
+      await post("/reorder", {
         old: `${this.stocks[evt.oldIndex].index} ${
           this.stocks[evt.oldIndex].code
         }`,

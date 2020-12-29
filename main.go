@@ -84,6 +84,7 @@ func main() {
 			log.Fatalln("Failed to init remote database config:", err)
 		}
 	}
+	getDB()
 
 	if service.IsWindowsService() {
 		svc.Run(false)

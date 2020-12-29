@@ -37,14 +37,6 @@ func index(c *gin.Context) {
 }
 
 func myStocks(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
@@ -52,7 +44,7 @@ func myStocks(c *gin.Context) {
 	}
 
 	rows, err := db.Query(`SELECT idx, code FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
-WHERE user_id = ? ORDER BY seq`, userID)
+WHERE stock.user_id = ? ORDER BY seq`, userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "no such table") {
 			restore("")
@@ -119,14 +111,6 @@ func getSuggest(c *gin.Context) {
 }
 
 func star(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
@@ -149,14 +133,6 @@ func star(c *gin.Context) {
 }
 
 func doStar(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
@@ -196,14 +172,6 @@ func doStar(c *gin.Context) {
 }
 
 func reorder(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
@@ -226,7 +194,8 @@ func reorder(c *gin.Context) {
 		ec <- db.QueryRow(`SELECT id, seq FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
 WHERE idx = ? AND code = ? AND stock.user_id = ?`, orig[0], orig[1], userID).Scan(&oldID, &old)
 	}()
-	if err := db.QueryRow("SELECT seq FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
+	if err := db.QueryRow(`SELECT seq FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
+WHERE idx = ? AND code = ? AND stock.user_id = ?`,
 		dest[0], dest[1], userID).Scan(&new); err != nil {
 		log.Println("Failed to scan dest seq:", err)
 		c.String(500, "")
@@ -238,11 +207,7 @@ WHERE idx = ? AND code = ? AND stock.user_id = ?`, orig[0], orig[1], userID).Sca
 		return
 	}
 
-	go func() {
-		_, err := db.Exec("UPDATE seq SET seq = ? WHERE stock_id = ? AND user_id = ?",
-			new, oldID, userID)
-		ec <- err
-	}()
+	var err error
 	if old > new {
 		_, err = db.Exec("UPDATE seq SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
 			new, old, userID)
@@ -255,7 +220,8 @@ WHERE idx = ? AND code = ? AND stock.user_id = ?`, orig[0], orig[1], userID).Sca
 		c.String(500, "")
 		return
 	}
-	if err := <-ec; err != nil {
+	if _, err := db.Exec("UPDATE seq SET seq = ? WHERE stock_id = ? AND user_id = ?",
+		new, oldID, userID); err != nil {
 		log.Println("Failed to update orig seq:", err)
 		c.String(500, "")
 		return

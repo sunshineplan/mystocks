@@ -35,7 +35,7 @@ BEGIN
     INSERT INTO seq
       (user_id, stock_id, seq)
     VALUES
-      (new.user_id, new.id, (SELECT MAX(seq) + 1 FROM seq WHERE user_id = new.user_id));
+      (new.user_id, new.id, (SELECT IFNULL(MAX(seq)+1, 1) FROM seq WHERE user_id = new.user_id));
 END;
 
 CREATE TRIGGER reorder AFTER DELETE ON stock

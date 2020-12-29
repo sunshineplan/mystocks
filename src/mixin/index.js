@@ -1,6 +1,13 @@
+import Cookies from 'js-cookie'
 import { color } from '@/misc.js'
 
 export default {
+  data() {
+    return {
+      user: Cookies.get('Username'),
+      refresh: Cookies.get('Refresh') || 3
+    }
+  },
   methods: {
     addColor(stock, val) {
       if (stock && stock.name != 'n/a') {
