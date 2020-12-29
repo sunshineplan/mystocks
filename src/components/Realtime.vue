@@ -116,11 +116,20 @@ export default {
       return !this.stock.sell5 && !this.stock.buy5 ? "480px" : "360px";
     },
   },
+  watch: {
+    async $route(to) {
+      if (to.name == "stock" && this.code != "n/a") await this.getStar();
+    },
+  },
   async created() {
-    const resp = await fetch("/star");
-    if ((await resp.text()) == "1") this.stared = true;
+    await this.getStar();
   },
   methods: {
+    async getStar() {
+      const resp = await fetch("/star");
+      if ((await resp.text()) == "1") this.stared = true;
+      else this.stared = false;
+    },
     async star() {
       let resp;
       if (!this.stared) resp = await post("/star", {});
