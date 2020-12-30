@@ -137,7 +137,10 @@ export default {
       if ((await resp.text()) == "1") this.stared = !this.stared;
     },
     open() {
-      window.open("http://stockpage.10jqka.com.cn/" + this.stock.code);
+      if (this.stock.index == "SSE")
+        window.open(`https://quote.eastmoney.com/sh${this.stock.code}.html`);
+      else if (this.stock.index == "SZSE")
+        window.open(`https://quote.eastmoney.com/sz${this.stock.code}.html`);
     },
   },
 };
