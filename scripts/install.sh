@@ -2,15 +2,13 @@
 
 installSoftware() {
     apt -qq -y install nginx
-    apt -qq -y -t $(lsb_release -sc)-backports install golang-go npm
 }
 
 installMyStocks() {
-    curl -Lo- https://github.com/sunshineplan/mystocks/archive/v1.0.tar.gz | tar zxC /var/www
-    mv /var/www/mystocks* /var/www/mystocks
+    mkdir -p /var/www/mystocks
+    curl -Lo- https://github.com/sunshineplan/mystocks/releases/download/v1.0/release.tar.gz | tar zxC /var/www/mystocks
     cd /var/www/mystocks
-    bash build.sh
-    ./mystocks install
+    chmod +x mystocks
 }
 
 configMyStocks() {
@@ -33,6 +31,7 @@ configMyStocks() {
     sed -i "s,\$log,$log," /var/www/mystocks/config.ini
     sed -i "s/\$host/$host/" /var/www/mystocks/config.ini
     sed -i "s/\$port/$port/" /var/www/mystocks/config.ini
+    ./mystocks install
     service mystocks start
 }
 
