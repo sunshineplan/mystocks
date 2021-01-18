@@ -8,22 +8,32 @@ import (
 	"path/filepath"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/sunshineplan/stock"
 	_ "github.com/sunshineplan/stock/txzq"
 	"github.com/sunshineplan/utils"
+	"github.com/sunshineplan/utils/database/sqlite"
 	"github.com/sunshineplan/utils/httpsvr"
 	"github.com/sunshineplan/utils/metadata"
-	"github.com/sunshineplan/utils/winsvc"
+	"github.com/sunshineplan/utils/service"
 	"github.com/vharitonsky/iniflags"
 )
 
 var self string
+var local bool
 var logPath *string
 var refresh int
-var svc winsvc.Service
 var meta metadata.Server
 var server httpsvr.Server
+
+var svc = service.Service{
+	Name: "MyStocks",
+	Desc: "Instance to serve My Stocks",
+	Exec: run,
+	Options: service.Options{
+		Dependencies: []string{"After=network.target"},
+		Others:       []string{"Environment=GIN_MODE=release"},
+	},
+}
 
 var (
 	joinPath = filepath.Join
@@ -37,11 +47,7 @@ func init() {
 		log.Fatalln("Failed to get self path:", err)
 	}
 	os.MkdirAll(joinPath(dir(self), "instance"), 0755)
-	sqlite = joinPath(dir(self), "instance/mystocks.db")
-	sqlitePy = joinPath(dir(self), "scripts/sqlite.py")
-	svc.Name = "MyStocks"
-	svc.Desc = "MyStocks Service"
-	svc.Exec = run
+
 }
 
 func usage(errmsg string) {
@@ -55,6 +61,7 @@ usage: %s <command>
 }
 
 func main() {
+	flag.BoolVar(&local, "local", true, "Use local database or not")
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
 	flag.StringVar(&meta.Value, "value", "", "Verify Header Value")
@@ -68,8 +75,18 @@ func main() {
 	iniflags.SetAllowMissingConfigFile(true)
 	iniflags.Parse()
 	stock.SetTimeout(refresh)
+	if local {
+		dbConfig = &sqlite.Config{
+			Path: joinPath(dir(self), "instance/mystocks.db"),
+		}
+	} else {
+		if err := initMySQL(); err != nil {
+			log.Fatalln("Failed to init remote database config:", err)
+		}
+	}
+	getDB()
 
-	if winsvc.IsWindowsService() {
+	if service.IsWindowsService() {
 		svc.Run(false)
 		return
 	}

@@ -1,75 +1,49 @@
 <script>
+  import autoComplete from "@tarekraafat/autocomplete.js";
   import { onMount } from "svelte";
-  import { goto } from "@sapper/app";
-  import { post } from "../misc.js";
+  import { current, component } from "../stores";
+  import { post } from "../misc";
 
-  let suggest;
-
-  async function load() {
-    if (suggest.length >= 2) {
-      let source = await post("/suggest", { keyword: suggest });
-      let data = await source.json();
-      return data.map((i) => `${i.Index}:${i.Code} ${i.Name} ${i.Type}`);
-    }
-    return [];
-  }
-
-  function hide() {
-    document.querySelector("#suggestsList").style.display = "none";
-  }
+  let suggest = "";
 
   onMount(async () => {
-    const autoComplete = await import("@tarekraafat/autocomplete.js");
-    new autoComplete({
+    const autoCompletejs = new autoComplete({
       selector: "#suggest",
-      data: { src: load, cache: false },
+      data: {
+        src: async () => {
+          const resp = await post("/suggest", { keyword: suggest });
+          const data = await resp.json();
+          return data.map((i) => `${i.Index}:${i.Code} ${i.Name} ${i.Type}`);
+        },
+      },
       trigger: { event: ["input", "focus"] },
       searchEngine: (query, record) => {
         return record;
       },
       placeHolder: "Search Stock",
-      threshold: 1,
-      debounce: 200,
+      threshold: 2,
+      debounce: 300,
       maxResults: 10,
-      resultsList: {
-        render: true,
-        container: (source) => {
-          source.setAttribute("id", "suggestsList");
-          source.setAttribute("class", "suggestsList");
-        },
-      },
-      resultItem: {
-        content: (data, src) => {
-          src.innerHTML = data.match;
-        },
-      },
-      noResults: () => {
-        let result = document.createElement("li");
+      noResults: (dataFeedback, generateList) => {
+        generateList(autoCompletejs, dataFeedback, dataFeedback.results);
+        const result = document.createElement("li");
         result.innerHTML = "No Results";
-        document.querySelector("#suggestsList").appendChild(result);
+        document.querySelector("#autoComplete_list").appendChild(result);
       },
-      onSelection: async (feedback) => {
-        let stock = feedback.selection.value.split(" ")[0].split(":");
-        await goto(`/${stock[0]}/${stock[1]}`);
+      onSelection: (feedback) => {
+        const stock = feedback.selection.value.split(" ")[0].split(":");
+        $current = { index: stock[0], code: stock[1] };
+        $component = "stock";
         suggest = "";
       },
     });
-    document.querySelector("#suggest").addEventListener("blur", hide);
-    document
-      .querySelector("#suggest")
-      .addEventListener(
-        "focus",
-        () => (document.querySelector("#suggestsList").style.display = "block")
-      );
-    document.querySelector("#suggest").addEventListener("keyup", (evt) => {
-      if (evt.key == "Escape") {
-        suggest = "";
-        hide();
-      }
-    });
-    hide();
   });
 </script>
+
+<div class="search">
+  <div class="icon"><i class="material-icons">search</i></div>
+  <input bind:value={suggest} id="suggest" />
+</div>
 
 <style>
   .search {
@@ -103,8 +77,3 @@
     }
   }
 </style>
-
-<div class="search">
-  <div class="icon"><i class="material-icons">search</i></div>
-  <input bind:value={suggest} id="suggest" />
-</div>

@@ -1,9 +1,29 @@
-<script>
-  import Cookies from "js-cookie";
-  import { goto } from "@sapper/app";
+<script lang="ts">
+  import { component } from "./stores";
 
-  $: user = Cookies.get("Username");
+  export let user: string;
 </script>
+
+<nav class="navbar navbar-light topbar">
+  <a class="brand" href="/">My Stocks</a>
+  <div class="navbar-nav flex-row">
+    {#if user}
+      <div class="navbar-nav flex-row">
+        <span class="nav-link">{user}</span>
+        <span class="nav-link link" on:click={() => ($component = "setting")}>
+          Setting
+        </span>
+        <a class="nav-link link" href="/logout">Log out</a>
+      </div>
+    {:else}
+      <div class="navbar-nav flex-row">
+        <span class="nav-link link" on:click={() => ($component = "login")}>
+          Log in
+        </span>
+      </div>
+    {/if}
+  </div>
+</nav>
 
 <style>
   .topbar {
@@ -38,20 +58,3 @@
     border-radius: 5px;
   }
 </style>
-
-<nav class="navbar navbar-light topbar">
-  <a class="brand" on:click={goto('/')}>My Stocks</a>
-  <div class="navbar-nav flex-row">
-    {#if user}
-      <div class="navbar-nav flex-row">
-        <a class="nav-link">{user}</a>
-        <a class="nav-link link" on:click={goto('/setting')}>Setting</a>
-        <a class="nav-link link" href="/logout">Log out</a>
-      </div>
-    {:else}
-      <div class="navbar-nav flex-row">
-        <a class="nav-link link" on:click={goto('/login')}>Log in</a>
-      </div>
-    {/if}
-  </div>
-</nav>

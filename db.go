@@ -1,73 +1,33 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
-	"io/ioutil"
 	"log"
-	"os/exec"
-	"runtime"
+	"time"
+
+	"github.com/sunshineplan/utils/database"
+	"github.com/sunshineplan/utils/database/mysql"
 )
 
-var sqlite, sqlitePy string
+var dbConfig database.Database
+var db *sql.DB
 
-func getDB() (*sql.DB, error) {
-	return sql.Open("sqlite3", sqlite)
+func initMySQL() error {
+	var config mysql.Config
+	if err := meta.Get("mystocks_mysql", &config); err != nil {
+		return err
+	}
+	dbConfig = &config
+	return nil
 }
 
-func execScript(file string) {
-	var cmd string
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "python"
-	case "linux":
-		cmd = "python3"
-	default:
-		log.Fatal("Unsupported operating system.")
-	}
-
-	var args []string
-	args = append(args, sqlitePy)
-	args = append(args, "restore")
-	args = append(args, sqlite)
-	args = append(args, file)
-
-	c := exec.Command(cmd, args...)
-	var stderr bytes.Buffer
-	c.Stderr = &stderr
-	if err := c.Run(); err != nil {
-		log.Fatalf("Failed to execute sqlite3 script: %s\n%v", stderr.String(), err)
-	}
-}
-
-func dump() string {
-	tmpfile, err := ioutil.TempFile("", "tmp")
+func getDB() {
+	var err error
+	db, err = dbConfig.Open()
 	if err != nil {
-		log.Fatalln("Failed to create temporary file:", err)
+		log.Fatalln("Failed to connect to database:", err)
 	}
-	tmpfile.Close()
-
-	var cmd string
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "python"
-	case "linux":
-		cmd = "python3"
-	default:
-		log.Fatal("Unsupported operating system.")
-	}
-
-	var args []string
-	args = append(args, sqlitePy)
-	args = append(args, "backup")
-	args = append(args, sqlite)
-	args = append(args, tmpfile.Name())
-
-	c := exec.Command(cmd, args...)
-	var stderr bytes.Buffer
-	c.Stderr = &stderr
-	if err := c.Run(); err != nil {
-		log.Fatalf("Failed to run backup command: %s\n%v", stderr.String(), err)
-	}
-	return tmpfile.Name()
+	db.SetConnMaxLifetime(time.Minute * 1)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
 }

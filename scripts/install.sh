@@ -1,14 +1,14 @@
 #! /bin/bash
 
 installSoftware() {
-    apt -qq -y install nginx npm
-    apt -qq -y -t $(lsb_release -sc)-backports install golang-go
+    apt -qq -y install nginx
 }
 
 installMyStocks() {
-    curl -Lo- https://github.com/sunshineplan/mystocks/archive/v1.0.tar.gz | tar zxC /var/www
-    mv /var/www/mystocks* /var/www/mystocks
-    bash build.sh
+    mkdir -p /var/www/mystocks
+    curl -Lo- https://github.com/sunshineplan/mystocks/releases/download/v1.0/release.tar.gz | tar zxC /var/www/mystocks
+    cd /var/www/mystocks
+    chmod +x mystocks
 }
 
 configMyStocks() {
@@ -31,11 +31,7 @@ configMyStocks() {
     sed -i "s,\$log,$log," /var/www/mystocks/config.ini
     sed -i "s/\$host/$host/" /var/www/mystocks/config.ini
     sed -i "s/\$port/$port/" /var/www/mystocks/config.ini
-}
-
-setupsystemd() {
-    cp -s /var/www/mystocks/scripts/mystocks.service /etc/systemd/system
-    systemctl enable mystocks
+    ./mystocks install
     service mystocks start
 }
 
@@ -71,7 +67,6 @@ main() {
     installSoftware
     installMyStocks
     configMyStocks
-    setupsystemd
     writeLogrotateScrip
     createCronTask
     setupNGINX

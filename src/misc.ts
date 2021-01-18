@@ -1,19 +1,26 @@
 import Swal from 'sweetalert2'
-import { goto } from '@sapper/app'
+import type { Stock } from './stores'
 
-export const BootstrapButtons = Swal.mixin({
-  customClass: { confirmButton: 'swal btn btn-primary' },
-  buttonsStyling: false
-})
+export const fire = (
+  title?: string | undefined,
+  html?: string | undefined,
+  icon?: 'success' | 'error' | 'warning' | 'info' | 'question' | undefined
+) => {
+  const swal = Swal.mixin({
+    customClass: { confirmButton: 'swal btn btn-primary' },
+    buttonsStyling: false
+  })
+  return swal.fire(title, html, icon)
+}
 
-export function valid() {
-  var result = true
+export const valid = () => {
+  let result = true
   Array.from(document.querySelectorAll('input'))
     .forEach(i => { if (!i.checkValidity()) result = false })
   return result
 }
 
-export function post(url, data) {
+export const post = (url: string, data?: object) => {
   return fetch(url, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
@@ -21,7 +28,7 @@ export function post(url, data) {
   })
 }
 
-export function checkTime() {
+export const checkTime = () => {
   var date = new Date();
   var hour = date.getUTCHours();
   var day = date.getDay();
@@ -30,16 +37,19 @@ export function checkTime() {
   return false
 }
 
-export function color(last, value) {
-  if (value == undefined)
-    if (last < 0) return { color: 'green' }
-    else if (last > 0) return { color: 'red' }
-  if (last < value) return { color: 'red' }
-  else if (last > value) return { color: 'green' }
+export const color = (last: number, value?: number) => {
+  if (value === undefined) {
+    if (last < 0) return 'color:green'
+    else if (last > 0) return 'color:red'
+  } else {
+    if (last < value) return 'color:red'
+    else if (last > value) return 'color:green'
+  }
+  return 'color:initial'
 }
 
-export function addColor(stock, val) {
-  if (stock && stock.name != 'n/a') {
+export const addColor = (stock: Stock, val: string) => {
+  if (stock.name != 'n/a') {
     switch (val) {
       case 'change':
       case 'percent':
@@ -54,11 +64,10 @@ export function addColor(stock, val) {
         return color(stock.last, stock.open)
     }
   }
+  return 'color:initial'
 }
 
-export async function gotoStock(stock) { await goto(`/stock/${stock.index}/${stock.code}`) }
-
-export function timeLabels(start, end) {
+export const timeLabels = (start: number, end: number) => {
   var times = [];
   for (var i = 0; start <= end; i++) {
     times[i] = `${Math.floor(start / 60).toString().padStart(2, '0')}:${(start % 60).toString().padStart(2, '0')}`

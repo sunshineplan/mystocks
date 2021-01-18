@@ -1,29 +1,106 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
-  import { stock } from "../stores.js";
-  import { post, addColor } from "../misc.js";
+  import { post, addColor } from "../misc";
+  import type { Stock } from "../stores";
+
+  export let stock: Stock;
 
   let stared = false;
-  $: width = !$stock.sell5 && !$stock.buy5 ? "480px" : "360px";
+  $: width = !stock.sell5.length && !stock.buy5.length ? "480px" : "360px";
 
-  function star() {
-    if (stared)
-      post("/star", { action: "unstar" }).then(() => (stared = false));
-    else post("/star").then(() => (stared = true));
-  }
+  const star = async () => {
+    await post("/star", { action: stared ? "unstar" : "star" });
+    stared = !stared;
+  };
 
   function open() {
-    window.open("http://stockpage.10jqka.com.cn/" + $stock.code);
+    if (stock.index == "SSE")
+      window.open(`https://quote.eastmoney.com/sh${stock.code}.html`);
+    else if (stock.index == "SZSE")
+      window.open(`https://quote.eastmoney.com/sz${stock.code}.html`);
   }
 
-  onMount(() => {
-    fetch("/star")
-      .then((response) => response.text())
-      .then((text) => {
-        if (text == "1") stared = true;
-      });
+  onMount(async () => {
+    const resp = await fetch("/star");
+    if ((await resp.text()) == "1") stared = true;
   });
 </script>
+
+<div>
+  <div style="display: flex; font-size: 2rem">
+    <i class="material-icons star {stared ? 'stared' : ''}" on:click={star}>
+      {stared ? "star" : "star_border"}
+    </i>
+    <span>{stock.name}</span>(<span>{stock.code}</span>)
+    <i class="material-icons open" on:click={open}>open_in_new</i>
+    &nbsp;&nbsp;&nbsp;
+    <span style={addColor(stock, "now")}>{stock.now}</span>
+    &nbsp;&nbsp;&nbsp;
+    <span style={addColor(stock, "percent")}>{stock.percent}</span>
+  </div>
+  <div style="min-height: 52px">
+    <table style="float: left; table-layout: fixed; width: {width}">
+      <tbody>
+        <tr>
+          <td>昨收: <span>{stock.last}</span></td>
+          <td>
+            涨跌:
+            <span style={addColor(stock, "change")}>{stock.change}</span>
+          </td>
+          <td>
+            涨幅:
+            <span style={addColor(stock, "percent")}>{stock.percent}</span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            最高:
+            <span style={addColor(stock, "high")}>{stock.high}</span>
+          </td>
+          <td>
+            最低:
+            <span style={addColor(stock, "low")}>{stock.low}</span>
+          </td>
+          <td>
+            开盘:
+            <span style={addColor(stock, "open")}>{stock.open}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    {#if stock.sell5.length || stock.buy5.length}
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <span style="display: inline-flex">
+                卖盘:&nbsp;
+                {#each stock.sell5 as sell, index (index)}
+                  <div class="sellbuy" style="color: red">
+                    {sell.Price}-{sell.Volume}
+                  </div>
+                {/each}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span style="display: inline-flex">
+                买盘:&nbsp;
+                {#each stock.buy5 as buy, index (index)}
+                  <div class="sellbuy" style="color: green">
+                    {buy.Price}-{buy.Volume}
+                  </div>
+                {/each}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    {/if}
+  </div>
+  <small>更新时间: <span class="update">{stock.update}</span></small>
+</div>
 
 <style>
   .star {
@@ -55,79 +132,3 @@
     padding-right: 6px;
   }
 </style>
-
-<div>
-  <div style="display: flex; font-size: 2rem">
-    <i class="material-icons star {stared ? 'stared' : ''}" on:click={star}>
-      {stared ? 'star' : 'star_border'}
-    </i>
-    <span>{$stock.name}</span>(<span>{$stock.code}</span>)
-    <i class="material-icons open" on:click={open}> open_in_new </i>
-    &nbsp;&nbsp;&nbsp;
-    <span style={addColor($stock, 'now')}>{$stock.now}</span>
-    &nbsp;&nbsp;&nbsp;
-    <span style={addColor($stock, 'percent')}>{$stock.percent}</span>
-  </div>
-  <div style="min-height: 52px">
-    <table style="float: left; table-layout: fixed; width: {width}">
-      <tbody>
-        <tr>
-          <td>昨收: <span>{$stock.last}</span></td>
-          <td>
-            涨跌:
-            <span style={addColor($stock, 'change')}>{$stock.change}</span>
-          </td>
-          <td>
-            涨幅:
-            <span style={addColor($stock, 'percent')}>{$stock.percent}</span>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            最高:
-            <span style={addColor($stock, 'high')}>{$stock.high}</span>
-          </td>
-          <td>
-            最低:
-            <span style={addColor($stock, 'low')}>{$stock.low}</span>
-          </td>
-          <td>
-            开盘:
-            <span style={addColor($stock, 'open')}>{$stock.open}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    {#if $stock.sell5 || $stock.buy5}
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <span style="display: inline-flex">
-                卖盘:&nbsp;
-                {#each $stock.sell5 as sell, index (index)}
-                  <div class="sellbuy" style="color: red">
-                    {sell.Price}-{sell.Volume}
-                  </div>
-                {/each}
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <span style="display: inline-flex">
-                买盘:&nbsp;
-                {#each $stock.buy5 as buy, index (index)}
-                  <div class="sellbuy" style="color: green">
-                    {buy.Price}-{buy.Volume}
-                  </div>
-                {/each}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    {/if}
-  </div>
-  <small>更新时间: <span class="update">{$stock.update}</span></small>
-</div>

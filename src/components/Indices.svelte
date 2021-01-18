@@ -1,35 +1,56 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
-  import { checkTime, gotoStock, addColor } from "../misc.js";
+  import { checkTime, addColor } from "../misc";
+  import { current, component } from "../stores";
+  import type { Stock } from "../stores";
 
-  let indices = {};
-  let names = {
+  const names = {
     沪: "上证指数",
     深: "深证成指",
     创: "创业板指",
     中: "中小板指",
   };
-  let fields = ["now", "change", "percent"];
+  const fields = ["now", "change", "percent"] as Array<keyof Stock>;
 
-  function start() {
-    load(true);
+  let indices: { [key: string]: Stock } = {};
+
+  const start = async () => {
+    await load(true);
     setInterval(load, 10000);
-  }
+  };
 
-  function load(force) {
+  const load = async (force?: boolean) => {
     if (checkTime() || force) {
-      fetch("/indices")
-        .then((response) => response.json())
-        .then((json) => {
-          indices = json;
-        });
+      const resp = await fetch("/indices");
+      indices = await resp.json();
     }
-  }
+  };
 
-  onMount(() => {
-    start();
+  const goto = (stock: Stock) => {
+    $current = stock;
+    $component = "stock";
+  };
+
+  onMount(async () => {
+    await start();
   });
 </script>
+
+{#if Object.keys(indices).length !== 0}
+  <div class="indices">
+    {#each Object.entries(names) as [key, val] (key)}
+      <div id={key} on:click={() => goto(indices[key])}>
+        <span class="short">{key}</span>
+        <span class="full">{val}</span>
+        {#each fields as field (field)}
+          <span style={addColor(indices[key], field)}>
+            &nbsp;&nbsp;{indices[key][field]}
+          </span>
+        {/each}
+      </div>
+    {/each}
+  </div>
+{/if}
 
 <style>
   .indices {
@@ -78,19 +99,3 @@
     }
   }
 </style>
-
-{#if Object.keys(indices).length !== 0}
-  <div class="indices">
-    {#each Object.entries(names) as [key, val] (key)}
-      <div id={key} on:click={gotoStock(indices[key])}>
-        <span class="short">{key}</span>
-        <span class="full">{val}</span>
-        {#each fields as field (field)}
-          <span style={addColor(indices[key], field)}>
-            &nbsp;&nbsp;{indices[key][field]}
-          </span>
-        {/each}
-      </div>
-    {/each}
-  </div>
-{/if}

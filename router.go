@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 
 func index(c *gin.Context) {
 	userID := sessions.Default(c).Get("user_id")
-	if userID != nil && userID != 0 {
+	if userID != nil {
 		if _, err := c.Cookie("Username"); err != nil {
 			username, err := getUser(c)
 			if err != nil {
@@ -24,29 +25,26 @@ func index(c *gin.Context) {
 		if _, err := c.Cookie("Refresh"); err != nil {
 			c.SetCookie("Refresh", strconv.Itoa(refresh), 0, "", "", false, false)
 		}
+	} else {
+		if _, err := c.Cookie("Username"); err != http.ErrNoCookie {
+			c.SetCookie("Username", "", -1, "", "", false, false)
+		}
+		if _, err := c.Cookie("Refresh"); err != http.ErrNoCookie {
+			c.SetCookie("Refresh", "", -1, "", "", false, false)
+		}
 	}
 	c.HTML(200, "index.html", nil)
 }
 
 func myStocks(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
-		session.Clear()
-		session.Set("user_id", 0)
-		session.Save()
 		userID = 0
 	}
 
-	rows, err := db.Query(`SELECT idx, code FROM stock WHERE user_id = ? ORDER BY seq`, userID)
+	rows, err := db.Query(`SELECT idx, code FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
+WHERE stock.user_id = ? ORDER BY seq`, userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "no such table") {
 			restore("")
@@ -113,16 +111,12 @@ func getSuggest(c *gin.Context) {
 }
 
 func star(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
+	if userID == nil {
+		c.String(200, "0")
+		return
+	}
 	refer := strings.Split(c.Request.Referer(), "/")
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
@@ -139,16 +133,12 @@ func star(c *gin.Context) {
 }
 
 func doStar(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
+	if userID == nil {
+		c.String(200, "0")
+		return
+	}
 	refer := strings.Split(c.Request.Referer(), "/")
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
@@ -182,16 +172,12 @@ func doStar(c *gin.Context) {
 }
 
 func reorder(c *gin.Context) {
-	db, err := getDB()
-	if err != nil {
-		log.Println("Failed to connect to database:", err)
-		c.String(503, "")
-		return
-	}
-	defer db.Close()
-
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
+	if userID == nil {
+		c.String(200, "0")
+		return
+	}
 
 	var r struct{ New, Old string }
 	if err := c.BindJSON(&r); err != nil {
@@ -203,12 +189,13 @@ func reorder(c *gin.Context) {
 	dest := strings.Split(r.New, " ")
 
 	ec := make(chan error, 1)
-	var old, new int
+	var oldID, old, new int
 	go func() {
-		ec <- db.QueryRow("SELECT seq FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-			orig[0], orig[1], userID).Scan(&old)
+		ec <- db.QueryRow(`SELECT id, seq FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
+WHERE idx = ? AND code = ? AND stock.user_id = ?`, orig[0], orig[1], userID).Scan(&oldID, &old)
 	}()
-	if err := db.QueryRow("SELECT seq FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
+	if err := db.QueryRow(`SELECT seq FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
+WHERE idx = ? AND code = ? AND stock.user_id = ?`,
 		dest[0], dest[1], userID).Scan(&new); err != nil {
 		log.Println("Failed to scan dest seq:", err)
 		c.String(500, "")
@@ -220,16 +207,12 @@ func reorder(c *gin.Context) {
 		return
 	}
 
-	go func() {
-		_, err := db.Exec("UPDATE stock SET seq = ? WHERE idx = ? AND code = ? AND user_id = ?",
-			new, orig[0], orig[1], userID)
-		ec <- err
-	}()
+	var err error
 	if old > new {
-		_, err = db.Exec("UPDATE stock SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
+		_, err = db.Exec("UPDATE seq SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
 			new, old, userID)
 	} else {
-		_, err = db.Exec("UPDATE stock SET seq = seq - 1 WHERE seq > ? AND seq <= ? AND user_id = ?",
+		_, err = db.Exec("UPDATE seq SET seq = seq - 1 WHERE seq > ? AND seq <= ? AND user_id = ?",
 			old, new, userID)
 	}
 	if err != nil {
@@ -237,7 +220,8 @@ func reorder(c *gin.Context) {
 		c.String(500, "")
 		return
 	}
-	if err := <-ec; err != nil {
+	if _, err := db.Exec("UPDATE seq SET seq = ? WHERE stock_id = ? AND user_id = ?",
+		new, oldID, userID); err != nil {
 		log.Println("Failed to update orig seq:", err)
 		c.String(500, "")
 		return

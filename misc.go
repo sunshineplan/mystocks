@@ -1,22 +1,19 @@
 package main
 
 import (
+	"bytes"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/sunshineplan/utils/mail"
+	"github.com/sunshineplan/utils/zip"
 )
 
 func addUser(username string) {
 	log.Print("Start!")
-	db, err := getDB()
-	if err != nil {
-		log.Fatalln("Failed to connect to database:", err)
-	}
-	defer db.Close()
-
 	if _, err := db.Exec("INSERT INTO user(username) VALUES (?)", strings.ToLower(username)); err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			log.Fatalf("Username %s already exists.", strings.ToLower(username))
@@ -29,13 +26,7 @@ func addUser(username string) {
 
 func deleteUser(username string) {
 	log.Print("Start!")
-	db, err := getDB()
-	if err != nil {
-		log.Fatalln("Failed to connect to database:", err)
-	}
-	defer db.Close()
-
-	res, err := db.Exec("DELETE FROM user WHERE username=?", strings.ToLower(username))
+	res, err := db.Exec("DELETE FROM user WHERE username = ?", strings.ToLower(username))
 	if err != nil {
 		log.Fatalln("Failed to delete user:", err)
 	}
@@ -64,13 +55,36 @@ func backup() {
 		Account:  config.Account,
 		Password: config.Password,
 	}
-	file := dump()
-	defer os.Remove(file)
+	tmpfile, err := ioutil.TempFile("", "tmp")
+	if err != nil {
+		log.Fatalln("Failed to create temporary file:", err)
+	}
+	tmpfile.Close()
+
+	if err := dbConfig.Backup(tmpfile.Name()); err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	b, err := ioutil.ReadFile(tmpfile.Name())
+	if err != nil {
+		log.Fatal(err)
+	}
+	var buf bytes.Buffer
+	if err := zip.FromBytes(&buf, zip.File{Name: "database", Body: b}); err != nil {
+		log.Fatal(err)
+	}
+	var subject string
+	if local {
+		subject = "My Stocks Backup(Local) - " + time.Now().Format("20060102")
+	} else {
+		subject = "My Stocks Backup - " + time.Now().Format("20060102")
+	}
 	if err := dialer.Send(
 		&mail.Message{
 			To:          config.To,
-			Subject:     "My Stocks Backup-" + time.Now().Format("20060102"),
-			Attachments: []*mail.Attachment{{Path: file, Filename: "database"}},
+			Subject:     subject,
+			Attachments: []*mail.Attachment{{Bytes: buf.Bytes(), Filename: "backup.zip"}},
 		},
 	); err != nil {
 		log.Fatalln("Failed to send mail:", err)
@@ -81,14 +95,22 @@ func backup() {
 func restore(file string) {
 	log.Print("Start!")
 	if file == "" {
-		file = joinPath(dir(self), "scripts/schema.sql")
+		if local {
+			file = joinPath(dir(self), "scripts/sqlite.sql")
+		} else {
+			file = joinPath(dir(self), "scripts/mysql.sql")
+		}
 	} else {
 		if _, err := os.Stat(file); err != nil {
 			log.Fatalln("File not found:", err)
 		}
 	}
 	dropAll := joinPath(dir(self), "scripts/drop_all.sql")
-	execScript(dropAll)
-	execScript(file)
+	if err := dbConfig.Restore(dropAll); err != nil {
+		log.Fatal(err)
+	}
+	if err := dbConfig.Restore(file); err != nil {
+		log.Fatal(err)
+	}
 	log.Print("Done!")
 }
