@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io/ioutil"
 	"log"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/sunshineplan/utils/mail"
+	"github.com/sunshineplan/utils/zip"
 )
 
 func addUser(username string) {
@@ -64,6 +66,14 @@ func backup() {
 	}
 	defer os.Remove(tmpfile.Name())
 
+	b, err := ioutil.ReadFile(tmpfile.Name())
+	if err != nil {
+		log.Fatal(err)
+	}
+	var buf bytes.Buffer
+	if err := zip.FromBytes(&buf, zip.File{Name: "database", Body: b}); err != nil {
+		log.Fatal(err)
+	}
 	var subject string
 	if local {
 		subject = "My Stocks Backup(Local) - " + time.Now().Format("20060102")
@@ -74,7 +84,7 @@ func backup() {
 		&mail.Message{
 			To:          config.To,
 			Subject:     subject,
-			Attachments: []*mail.Attachment{{Path: tmpfile.Name(), Filename: "database"}},
+			Attachments: []*mail.Attachment{{Bytes: buf.Bytes(), Filename: "backup.zip"}},
 		},
 	); err != nil {
 		log.Fatalln("Failed to send mail:", err)
