@@ -61,7 +61,7 @@ jobs:
           go mod download
           go build -ldflags "-s -w"
           GOOS=windows go build -ldflags "-s -w"
-          tar cvzf release.tar.gz dist scripts mystocks mystocks.exe config.ini.default
+          tar cvzf release.tar.gz public scripts mystocks mystocks.exe config.ini.default
           echo "::set-output name=date::$(TZ=CST date +'%Y-%m-%d')"
 
       - name: Create Release
