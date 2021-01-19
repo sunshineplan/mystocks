@@ -1,6 +1,28 @@
 import Swal from 'sweetalert2'
 import type { Stock } from './stores'
 
+const color = (last: number, value?: number) => {
+  if (value === undefined) {
+    if (last < 0) return 'color:green'
+    else if (last > 0) return 'color:red'
+  } else {
+    if (last < value) return 'color:red'
+    else if (last > value) return 'color:green'
+  }
+  return 'color:initial'
+}
+
+const timeLabels = (start: number, end: number) => {
+  let times: string[] = []
+  for (let i = 0; start <= end; i++) {
+    times[i] = `${Math.floor(start / 60)
+      .toString()
+      .padStart(2, '0')}:${(start % 60).toString().padStart(2, '0')}`
+    start++
+  }
+  return times
+}
+
 export const fire = (
   title?: string | undefined,
   html?: string | undefined,
@@ -29,23 +51,12 @@ export const post = (url: string, data?: object) => {
 }
 
 export const checkTime = () => {
-  var date = new Date();
-  var hour = date.getUTCHours();
-  var day = date.getDay();
+  const date = new Date()
+  const hour = date.getUTCHours()
+  const day = date.getDay()
   if (hour >= 1 && hour <= 8 && day >= 1 && day <= 5)
     return true
   return false
-}
-
-export const color = (last: number, value?: number) => {
-  if (value === undefined) {
-    if (last < 0) return 'color:green'
-    else if (last > 0) return 'color:red'
-  } else {
-    if (last < value) return 'color:red'
-    else if (last > value) return 'color:green'
-  }
-  return 'color:initial'
 }
 
 export const addColor = (stock: Stock, val: string) => {
@@ -67,19 +78,12 @@ export const addColor = (stock: Stock, val: string) => {
   return 'color:initial'
 }
 
-export const timeLabels = (start: number, end: number) => {
-  var times = [];
-  for (var i = 0; start <= end; i++) {
-    times[i] = `${Math.floor(start / 60).toString().padStart(2, '0')}:${(start % 60).toString().padStart(2, '0')}`
-    start++
-  }
-  return times
-}
-
 export const intraday = {
   type: 'line',
   data: {
-    labels: timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60)),
+    labels: timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(
+      timeLabels(13 * 60 + 1, 15 * 60)
+    ),
     datasets: [
       {
         label: 'Price',
@@ -95,18 +99,22 @@ export const intraday = {
   },
   options: {
     scales: {
-      xAxes: [{
-        gridLines: { drawTicks: false },
-        ticks: {
-          padding: 10,
-          autoSkipPadding: 100,
-          maxRotation: 0
+      xAxes: [
+        {
+          gridLines: { drawTicks: false },
+          ticks: {
+            padding: 10,
+            autoSkipPadding: 100,
+            maxRotation: 0,
+          }
         }
-      }],
-      yAxes: [{
-        gridLines: { drawTicks: false },
-        ticks: { padding: 12 }
-      }]
+      ],
+      yAxes: [
+        {
+          gridLines: { drawTicks: false },
+          ticks: { padding: 12 }
+        }
+      ]
     },
     annotation: {
       annotations: [
@@ -116,7 +124,7 @@ export const intraday = {
           mode: 'horizontal',
           scaleID: 'y-axis-0',
           borderColor: 'black',
-          borderWidth: .75
+          borderWidth: 0.75
         }
       ]
     }

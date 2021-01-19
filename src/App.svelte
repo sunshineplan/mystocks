@@ -5,7 +5,7 @@
   import Stocks from "./components/Stocks.svelte";
   import Stock from "./components/Stock.svelte";
   import Indices from "./components/Indices.svelte";
-  import { username as user, component, refresh } from "./stores";
+  import { username as user, current, component, refresh } from "./stores";
 
   const getInfo = async () => {
     const resp = await fetch("/info");
@@ -13,6 +13,12 @@
     if (Object.keys(info).length) {
       $user = info.username;
       $refresh = info.refresh;
+    }
+    if (/^\/stock\/[A-Z]{3,4}\/\d{6}$/.test(window.location.pathname)) {
+      const stock = window.location.pathname.split("/");
+      $current = { index: stock[2], code: stock[3] };
+      window.history.pushState({}, "", `/stock/${$current.index}/${$current.code}`);
+      $component = "stock";
     }
   };
   const promise = getInfo();
@@ -22,7 +28,13 @@
     setting: Setting,
     stocks: Stocks,
     stock: Stock,
-  } as { [component: string]: any };
+  } as {
+    [component: string]:
+      | typeof Login
+      | typeof Setting
+      | typeof Stocks
+      | typeof Stock;
+  };
 </script>
 
 <Nav bind:user={$user} />

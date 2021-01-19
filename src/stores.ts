@@ -18,5 +18,5 @@ export interface Stock {
 
 export const username = writable('')
 export const component = writable('stocks')
-export const current = writable({} as { index: string, code: string })
+export const current = writable({ index: 'n/a', code: 'n/a' })
 export const refresh = writable(3)

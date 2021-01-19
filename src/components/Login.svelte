@@ -28,6 +28,7 @@
       else {
         localStorage.setItem("username", username as string);
         dispatch("info");
+        window.history.pushState({}, "", "/");
         $component = "stocks";
       }
     }

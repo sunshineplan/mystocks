@@ -25,6 +25,7 @@
             "success"
           );
           $username = "";
+          window.history.pushState({}, "", "/");
           $component = "stocks";
         } else {
           await fire("Error", json.message, "error");
@@ -39,6 +40,7 @@
   };
 
   const cancel = () => {
+    window.history.pushState({}, "", "/");
     $component = "stocks";
   };
 </script>

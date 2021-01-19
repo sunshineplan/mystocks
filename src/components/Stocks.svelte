@@ -43,6 +43,7 @@
 
   const goto = (stock: Stock) => {
     $current = stock;
+    window.history.pushState({}, "", `/stock/${stock.index}/${stock.code}`);
     $component = "stock";
   };
 
@@ -63,7 +64,7 @@
       document.querySelector("#sortable") as HTMLElement,
       {
         animation: 150,
-        delay: 500,
+        delay: 400,
         swapThreshold: 0.5,
         onStart: stop,
         onEnd: start,

@@ -2,39 +2,12 @@ package main
 
 import (
 	"log"
-	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/stock"
 )
-
-func index(c *gin.Context) {
-	userID := sessions.Default(c).Get("user_id")
-	if userID != nil {
-		if _, err := c.Cookie("Username"); err != nil {
-			username, err := getUser(c)
-			if err != nil {
-				c.String(500, "")
-				return
-			}
-			c.SetCookie("Username", username, 0, "", "", false, false)
-		}
-		if _, err := c.Cookie("Refresh"); err != nil {
-			c.SetCookie("Refresh", strconv.Itoa(refresh), 0, "", "", false, false)
-		}
-	} else {
-		if _, err := c.Cookie("Username"); err != http.ErrNoCookie {
-			c.SetCookie("Username", "", -1, "", "", false, false)
-		}
-		if _, err := c.Cookie("Refresh"); err != http.ErrNoCookie {
-			c.SetCookie("Refresh", "", -1, "", "", false, false)
-		}
-	}
-	c.HTML(200, "index.html", nil)
-}
 
 func myStocks(c *gin.Context) {
 	session := sessions.Default(c)

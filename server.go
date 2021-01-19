@@ -29,27 +29,33 @@ func run() {
 	router := gin.Default()
 	server.Handler = router
 	router.Use(sessions.Sessions("session", sessions.NewCookieStore(secret)))
-	router.StaticFS("/js", http.Dir(joinPath(dir(self), "dist/js")))
-	router.StaticFS("/css", http.Dir(joinPath(dir(self), "dist/css")))
-	router.StaticFile("favicon.ico", joinPath(dir(self), "dist/favicon.ico"))
-	router.LoadHTMLFiles(joinPath(dir(self), "dist/index.html"))
+	router.StaticFS("/build", http.Dir(joinPath(dir(self), "public/build")))
+	router.StaticFile("favicon.ico", joinPath(dir(self), "public/favicon.ico"))
+	router.StaticFile("style.css", joinPath(dir(self), "public/style.css"))
+	router.LoadHTMLFiles(joinPath(dir(self), "public/index.html"))
 
-	router.GET("/", index)
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(200, "index.html", nil)
+	})
+	router.GET("/info", func(c *gin.Context) {
+		username, _ := getUser(c)
+		c.JSON(200, gin.H{"username": username, "refresh": refresh})
+	})
 
 	auth := router.Group("/")
 	auth.POST("/login", login)
 	auth.GET("/logout", authRequired, func(c *gin.Context) {
 		session := sessions.Default(c)
 		session.Clear()
-		c.SetCookie("Username", "", -1, "", "", false, false)
-		c.SetCookie("Refresh", "", -1, "", "", false, false)
 		session.Save()
 		c.Redirect(302, "/")
 	})
 	auth.POST("/setting", authRequired, setting)
 
 	base := router.Group("/")
-	base.GET("/stock/:index/:code", index)
+	base.GET("/stock/:index/:code", func(c *gin.Context) {
+		c.HTML(200, "index.html", nil)
+	})
 	base.GET("/mystocks", myStocks)
 	base.GET("/indices", indices)
 	base.POST("/get", getStock)

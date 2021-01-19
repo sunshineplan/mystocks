@@ -1,25 +1,36 @@
 <script lang="ts">
-  import { component } from "./stores";
+  import { component } from "../stores";
 
   export let user: string;
 </script>
 
 <nav class="navbar navbar-light topbar">
-  <a class="brand" href="/">My Stocks</a>
+  <span
+    class="brand"
+    on:click={() => {
+      window.history.pushState({}, "", "/");
+      $component = "stocks";
+    }}> My Stocks </span>
   <div class="navbar-nav flex-row">
     {#if user}
       <div class="navbar-nav flex-row">
         <span class="nav-link">{user}</span>
-        <span class="nav-link link" on:click={() => ($component = "setting")}>
-          Setting
-        </span>
+        <span
+          class="nav-link link"
+          on:click={() => {
+            window.history.pushState({}, "", "/setting");
+            $component = "setting";
+          }}> Setting </span>
         <a class="nav-link link" href="/logout">Log out</a>
       </div>
     {:else}
       <div class="navbar-nav flex-row">
-        <span class="nav-link link" on:click={() => ($component = "login")}>
-          Log in
-        </span>
+        <span
+          class="nav-link link"
+          on:click={() => {
+            window.history.pushState({}, "", "/login");
+            $component = "login";
+          }}> Log in </span>
       </div>
     {/if}
   </div>
@@ -56,5 +67,9 @@
   .topbar .link:hover {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 5px;
+  }
+
+  span {
+    cursor: pointer;
   }
 </style>

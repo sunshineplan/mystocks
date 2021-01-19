@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/contrib/sessions"
@@ -78,8 +77,6 @@ func login(c *gin.Context) {
 			session := sessions.Default(c)
 			session.Clear()
 			session.Set("user_id", user.ID)
-			c.SetCookie("Username", user.Username, 0, "", "", false, false)
-			c.SetCookie("Refresh", strconv.Itoa(refresh), 0, "", "", false, false)
 
 			if login.Rememberme {
 				session.Options(sessions.Options{Path: "/", HttpOnly: true, MaxAge: 856400 * 365})
@@ -151,8 +148,6 @@ func setting(c *gin.Context) {
 			return
 		}
 		session.Clear()
-		c.SetCookie("Username", "", -1, "", "", false, false)
-		c.SetCookie("Refresh", "", -1, "", "", false, false)
 		if err := session.Save(); err != nil {
 			log.Print(err)
 			c.String(500, "")

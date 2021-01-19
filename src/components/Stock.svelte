@@ -22,18 +22,33 @@
   } as Chart.PluginServiceGlobalRegistration & Chart.PluginServiceRegistrationOptions);
 
   let autoUpdate: number[] = [];
-  let stock: Stock = {} as Stock;
+  let stock: Stock = {
+    index: "n/a",
+    code: "n/a",
+    name: "n/a",
+    now: 0,
+    change: 0,
+    percent: "-",
+    high: 0,
+    low: 0,
+    open: 0,
+    last: 0,
+    sell5: [],
+    buy5: [],
+    update: "",
+  };
   let data: Chart.ChartPoint[] = [];
   let chart: Chart;
   let update = "";
 
-  const start = async () => {
+  $: $current, load();
+
+  const start = () => {
     chart = new Chart(
       document.querySelector("#stockChart") as HTMLCanvasElement,
       intraday as Chart.ChartConfiguration
     );
     if ($current.code != "n/a") {
-      await load();
       autoUpdate.push(setInterval(loadRealtime, $refresh * 1000));
       autoUpdate.push(setInterval(loadChart, 60000));
     }
@@ -62,7 +77,7 @@
       if (json.name) {
         stock = json;
         update = json.update;
-        if (update) updateChart();
+        if (update && !force) updateChart();
         document.title = `${json.name} ${json.now} ${json.percent}`;
       }
     }
@@ -88,8 +103,8 @@
     }
   };
 
-  onMount(async () => {
-    await start();
+  onMount(() => {
+    start();
     return () => {
       for (; autoUpdate.length > 0; ) clearInterval(autoUpdate.pop());
       chart.destroy();
@@ -104,7 +119,13 @@
 <div class="content">
   <header>
     <AutoComplete />
-    <div class="home" on:click={() => ($component = "stocks")}>
+    <div
+      class="home"
+      on:click={() => {
+        window.history.pushState({}, "", "/");
+        $component = "stocks";
+      }}
+    >
       <div class="icon"><i class="material-icons">home</i></div>
       <span>Home</span>
     </div>

@@ -19,5 +19,4 @@ instance/
 *.log
 
 node_modules
-/dist
-__sapper__
+/public/build/

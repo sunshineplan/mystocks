@@ -33,6 +33,7 @@
       onSelection: (feedback) => {
         const stock = feedback.selection.value.split(" ")[0].split(":");
         $current = { index: stock[0], code: stock[1] };
+        window.history.pushState({}, "", `/stock/${stock[0]}/${stock[1]}`);
         $component = "stock";
         suggest = "";
       },
@@ -75,5 +76,33 @@
     .search {
       margin-right: 0;
     }
+  }
+
+  :global(.autoComplete_list) {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 5px 4px rgba(101, 119, 134, 0.2),
+      5px 2px 4px rgba(101, 119, 134, 0.2),
+      -5px 2px 4px rgba(101, 119, 134, 0.2);
+    border-radius: 5px;
+    list-style-type: none;
+    padding: 0;
+    width: 250px;
+    cursor: default;
+    text-indent: 20px;
+    top: 100%;
+    z-index: 99;
+  }
+
+  :global(.autoComplete_result:hover) {
+    color: white;
+    background-color: #008eff;
+    border-radius: 5px;
+  }
+
+  :global(.autoComplete_selected) {
+    color: white;
+    background-color: #008eff;
+    border-radius: 5px;
   }
 </style>

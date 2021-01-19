@@ -46,8 +46,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/sunshineplan/gohttp v0.0.0-20201112060045-f748ec4ea5df h1:ALv9yPgvY+TafAvJEoQNf2RzfpLhzkGekDhWmI60OBw=
 github.com/sunshineplan/gohttp v0.0.0-20201112060045-f748ec4ea5df/go.mod h1:KaIWij1g41q0MnVSAe2pyReheMYhrHsMcwlBQGppv9A=
-github.com/sunshineplan/stock v0.0.0-20210104010238-bb986eb11628 h1:CPLlj34n1DYkmHIokm0flcTmWlBnnE2bnTG80ebZp4Y=
-github.com/sunshineplan/stock v0.0.0-20210104010238-bb986eb11628/go.mod h1:gBDMUouQKj1A0my1/AEDX4z954Vg5oeu5bf+JPLIJqs=
+github.com/sunshineplan/stock v0.0.0-20210119040752-e07218c962a1 h1:yb+8vj071U/wlQSQsV+vLCxyDMmqTIFYBjyC1c7k7lU=
+github.com/sunshineplan/stock v0.0.0-20210119040752-e07218c962a1/go.mod h1:gBDMUouQKj1A0my1/AEDX4z954Vg5oeu5bf+JPLIJqs=
 github.com/sunshineplan/utils v0.0.0-20210115125102-a550a4954143 h1:NP2ZkgY+7n2Q4PFnILlCAnvSdtWxUmq4Kamvj4oon8Q=
 github.com/sunshineplan/utils v0.0.0-20210115125102-a550a4954143/go.mod h1:fJ8/Fjbd50RwQ8/wxBmBgkuDHfcXrCJu6c/iRsgkYok=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=

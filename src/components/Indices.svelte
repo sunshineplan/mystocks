@@ -28,6 +28,7 @@
 
   const goto = (stock: Stock) => {
     $current = stock;
+    window.history.pushState({}, "", `/stock/${stock.index}/${stock.code}`);
     $component = "stock";
   };
 
