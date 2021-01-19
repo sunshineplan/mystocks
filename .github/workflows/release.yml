@@ -60,8 +60,11 @@ jobs:
           npm run build
           go mod download
           go build -ldflags "-s -w"
-          GOOS=windows go build -ldflags "-s -w"
-          tar cvzf release.tar.gz public scripts mystocks mystocks.exe config.ini.default
+          sudo apt-get install gcc-multilib
+          sudo apt-get install gcc-mingw-w64
+          GOOS=windows CGO_ENABLED=1 CXX=i686-w64-mingw32-g++ CC=i686-w64-mingw32-gcc go build -ldflags "-s -w"
+          tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
+          tar cvzf release-windows.tar.gz public scripts mystocks.exe config.ini.default
           echo "::set-output name=date::$(TZ=CST date +'%Y-%m-%d')"
 
       - name: Create Release
@@ -76,12 +79,22 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
+      - name: Upload Linux Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release.tar.gz
-          asset_name: release.tar.gz
+          asset_path: ./release-linux.tar.gz
+          asset_name: release-linux.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release-windows.tar.gz
+          asset_name: release-windows.tar.gz
           asset_content_type: application/gzip
