@@ -6,7 +6,7 @@ installSoftware() {
 
 installMyStocks() {
     mkdir -p /var/www/mystocks
-    curl -Lo- https://github.com/sunshineplan/mystocks/releases/download/v1.0/release.tar.gz | tar zxC /var/www/mystocks
+    curl -Lo- https://github.com/sunshineplan/mystocks/releases/download/v1.0/release-linux.tar.gz | tar zxC /var/www/mystocks
     cd /var/www/mystocks
     chmod +x mystocks
 }
