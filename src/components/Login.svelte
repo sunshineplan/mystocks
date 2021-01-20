@@ -9,7 +9,7 @@
   let password = "";
   let rememberme = false;
 
-  async function login() {
+  const login = async () => {
     if (
       !(document.querySelector(
         "#username"
@@ -26,13 +26,13 @@
       const resp = await post("/login", { username, password, rememberme });
       if (!resp.ok) await fire("Error", await resp.text(), "error");
       else {
-        localStorage.setItem("username", username as string);
+        localStorage.setItem("username", username);
         dispatch("info");
         window.history.pushState({}, "", "/");
         $component = "stocks";
       }
     }
-  }
+  };
 </script>
 
 <svelte:head>
@@ -93,5 +93,9 @@
   .login {
     width: 250px;
     margin: 0 auto;
+  }
+
+  .form-control {
+    width: 250px;
   }
 </style>

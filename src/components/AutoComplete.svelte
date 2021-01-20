@@ -62,6 +62,13 @@
     box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
   }
 
+  .icon {
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    padding-left: 20px;
+  }
+
   #suggest {
     background-color: transparent;
     padding: 10px;

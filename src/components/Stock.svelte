@@ -157,4 +157,11 @@
     font-size: 36px;
     color: #1da1f2;
   }
+
+  .icon {
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    padding-left: 20px;
+  }
 </style>
