@@ -56,15 +56,13 @@ jobs:
       - name: Build
         id: build
         run: |
-          npm i --no-package-lock --legacy-peer-deps
+          npm i --no-package-lock
           npm run build
           go mod download
           go build -ldflags "-s -w"
           sudo apt install gcc-mingw-w64-x86-64
           sudo apt install g++-mingw-w64-x86-64
           GOOS=windows CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ go build -ldflags "-s -w"
-          tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
-          tar cvzf release-windows.tar.gz public scripts mystocks.exe config.ini.default
           echo "::set-output name=date::$(TZ=CST date +'%Y-%m-%d')"
 
       - name: Create Release
@@ -78,6 +76,11 @@ jobs:
           body: ${{ steps.build.outputs.date }}
           draft: false
           prerelease: false
+
+      - name: Zip release files
+        run: |
+          tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
+          tar cvzf release-windows.tar.gz public scripts mystocks.exe config.ini.default
 
       - name: Upload Linux Release Asset
         uses: actions/upload-release-asset@v1
