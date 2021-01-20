@@ -1,29 +1,31 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { post, addColor } from "../misc";
+  import { current } from "../stores";
   import type { Stock } from "../stores";
 
   export let stock: Stock;
 
   let stared = false;
   $: width = !stock.sell5.length && !stock.buy5.length ? "480px" : "360px";
+  $: $current && info();
+
+  const info = async () => {
+    const resp = await fetch("/star");
+    if ((await resp.text()) == "1") stared = true;
+    else stared = false;
+  };
 
   const star = async () => {
     await post("/star", { action: stared ? "unstar" : "star" });
     stared = !stared;
   };
 
-  function open() {
+  const open = () => {
     if (stock.index == "SSE")
       window.open(`https://quote.eastmoney.com/sh${stock.code}.html`);
     else if (stock.index == "SZSE")
       window.open(`https://quote.eastmoney.com/sz${stock.code}.html`);
-  }
-
-  onMount(async () => {
-    const resp = await fetch("/star");
-    if ((await resp.text()) == "1") stared = true;
-  });
+  };
 </script>
 
 <div>
