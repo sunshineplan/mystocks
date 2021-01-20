@@ -80,7 +80,7 @@ jobs:
       - name: Zip release files
         run: |
           tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
-          tar cvzf release-windows.tar.gz public scripts mystocks.exe config.ini.default
+          zip -9vr release-windows.zip public scripts mystocks.exe config.ini.default
 
       - name: Upload Linux Release Asset
         uses: actions/upload-release-asset@v1
@@ -98,6 +98,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-windows.tar.gz
-          asset_name: release-windows.tar.gz
-          asset_content_type: application/gzip
+          asset_path: ./release-windows.zip
+          asset_name: release-windows.zip
+          asset_content_type: application/zip
