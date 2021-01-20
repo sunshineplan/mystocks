@@ -74,8 +74,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v1.0
-          release_name: ${{ steps.date.outputs.date }}
-          body: ${{ steps.date.outputs.date }}
+          release_name: ${{ steps.build.outputs.date }}
+          body: ${{ steps.build.outputs.date }}
           draft: false
           prerelease: false
 
