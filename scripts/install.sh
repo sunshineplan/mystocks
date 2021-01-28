@@ -23,6 +23,8 @@ configMyStocks() {
     [ -z $port ] && port=12345
     read -p 'Please enter log path(default: /var/log/app/mystocks.log): ' log
     [ -z $log ] && log=/var/log/app/mystocks.log
+    read -p 'Please enter update URL: ' update
+    read -p 'Please enter exclude files: ' exclude
     mkdir -p $(dirname $log)
     sed "s,\$server,$server," /var/www/mystocks/config.ini.default > /var/www/mystocks/config.ini
     sed -i "s/\$header/$header/" /var/www/mystocks/config.ini
@@ -31,6 +33,8 @@ configMyStocks() {
     sed -i "s,\$log,$log," /var/www/mystocks/config.ini
     sed -i "s/\$host/$host/" /var/www/mystocks/config.ini
     sed -i "s/\$port/$port/" /var/www/mystocks/config.ini
+    sed -i "s,\$update,$update," /var/www/mystocks/config.ini
+    sed -i "s|\$exclude|$exclude|" /var/www/mystocks/config.ini
     ./mystocks install
     service mystocks start
 }

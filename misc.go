@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sunshineplan/utils/archive"
 	"github.com/sunshineplan/utils/mail"
-	"github.com/sunshineplan/utils/zip"
 )
 
 func addUser(username string) {
@@ -71,7 +71,7 @@ func backup() {
 		log.Fatal(err)
 	}
 	var buf bytes.Buffer
-	if err := zip.FromBytes(&buf, zip.File{Name: "database", Body: b}); err != nil {
+	if err := archive.Pack(&buf, archive.ZIP, archive.File{Name: "database", Body: b}); err != nil {
 		log.Fatal(err)
 	}
 	var subject string

@@ -8,13 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/stock"
 	_ "github.com/sunshineplan/stock/txzq"
 	"github.com/sunshineplan/utils"
-	"github.com/sunshineplan/utils/database/sqlite"
 	"github.com/sunshineplan/utils/httpsvr"
 	"github.com/sunshineplan/utils/metadata"
-	"github.com/sunshineplan/utils/service"
 	"github.com/vharitonsky/iniflags"
 )
 
@@ -69,22 +68,20 @@ func main() {
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
 	flag.IntVar(&refresh, "refresh", 3, "Refresh Interval")
+	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
+	exclude := flag.String("exclude", "", "Exclude Files")
 	//logPath = flag.String("log", joinPath(dir(self), "access.log"), "Log Path")
 	logPath = flag.String("log", "", "Log Path")
 	iniflags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	iniflags.SetAllowMissingConfigFile(true)
 	iniflags.Parse()
+
+	svc.Options.ExcludeFiles = strings.Split(*exclude, ",")
 	stock.SetTimeout(refresh)
-	if local {
-		dbConfig = &sqlite.Config{
-			Path: joinPath(dir(self), "instance/mystocks.db"),
-		}
-	} else {
-		if err := initMySQL(); err != nil {
-			log.Fatalln("Failed to init remote database config:", err)
-		}
+
+	if err := initDB(); err != nil {
+		log.Fatalln("Failed to initialize database:", err)
 	}
-	getDB()
 
 	if service.IsWindowsService() {
 		svc.Run(false)
@@ -107,6 +104,8 @@ func main() {
 			err = svc.Start()
 		case "stop":
 			err = svc.Stop()
+		case "update":
+			err = svc.Update()
 		case "backup":
 			backup()
 		case "init":
@@ -135,6 +134,6 @@ func main() {
 		usage(fmt.Sprintf("Unknown arguments: %s", strings.Join(flag.Args(), " ")))
 	}
 	if err != nil {
-		log.Fatalf("failed to %s MyStocks: %v", flag.Arg(0), err)
+		log.Fatalf("Failed to %s: %v", flag.Arg(0), err)
 	}
 }

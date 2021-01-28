@@ -17,17 +17,14 @@ type user struct {
 }
 
 func authRequired(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
-	if userID == nil {
+	if sessions.Default(c).Get("userID") == nil {
 		c.Abort()
 		c.Redirect(302, "/")
 	}
 }
 
 func getUser(c *gin.Context) (username string, err error) {
-	userID := sessions.Default(c).Get("user_id")
-	err = db.QueryRow("SELECT username FROM user WHERE id = ?", userID).Scan(&username)
+	err = db.QueryRow("SELECT username FROM user WHERE id = ?", sessions.Default(c).Get("userID")).Scan(&username)
 	return
 }
 
@@ -76,7 +73,7 @@ func login(c *gin.Context) {
 		if message == "" {
 			session := sessions.Default(c)
 			session.Clear()
-			session.Set("user_id", user.ID)
+			session.Set("userID", user.ID)
 
 			if login.Rememberme {
 				session.Options(sessions.Options{Path: "/", HttpOnly: true, MaxAge: 856400 * 365})
@@ -102,7 +99,7 @@ func setting(c *gin.Context) {
 	}
 
 	session := sessions.Default(c)
-	userID := session.Get("user_id")
+	userID := session.Get("userID")
 
 	var oldPassword string
 	if err := db.QueryRow("SELECT password FROM user WHERE id = ?", userID).Scan(&oldPassword); err != nil {

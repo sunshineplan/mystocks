@@ -10,8 +10,7 @@ import (
 )
 
 func myStocks(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
+	userID := sessions.Default(c).Get("userID")
 	if userID == nil {
 		userID = 0
 	}
@@ -84,8 +83,7 @@ func getSuggest(c *gin.Context) {
 }
 
 func star(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
+	userID := sessions.Default(c).Get("userID")
 	if userID == nil {
 		c.String(200, "0")
 		return
@@ -106,8 +104,7 @@ func star(c *gin.Context) {
 }
 
 func doStar(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
+	userID := sessions.Default(c).Get("userID")
 	if userID == nil {
 		c.String(200, "0")
 		return
@@ -145,8 +142,7 @@ func doStar(c *gin.Context) {
 }
 
 func reorder(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
+	userID := sessions.Default(c).Get("userID")
 	if userID == nil {
 		c.String(200, "0")
 		return
