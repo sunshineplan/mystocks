@@ -33,6 +33,7 @@ func getUser(c *gin.Context) (id int, username string, err error) {
 		username = sessions.Default(c).Get("username").(string)
 		return
 	}
+	id = sid.(int)
 	err = db.QueryRow("SELECT username FROM user WHERE id = ?", id).Scan(&username)
 	return
 }
