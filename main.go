@@ -75,6 +75,7 @@ func main() {
 	logPath = flag.String("log", "", "Log Path")
 	iniflags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	iniflags.SetAllowMissingConfigFile(true)
+	iniflags.SetAllowUnknownFlags(true)
 	iniflags.Parse()
 
 	svc.Options.ExcludeFiles = strings.Split(*exclude, ",")
@@ -101,6 +102,8 @@ func main() {
 			err = svc.Start()
 		case "stop":
 			err = svc.Stop()
+		case "restart":
+			err = svc.Restart()
 		case "update":
 			err = svc.Update()
 		case "backup":

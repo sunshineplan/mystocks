@@ -24,17 +24,14 @@ func authRequired(c *gin.Context) {
 }
 
 func getUser(c *gin.Context) (id int, username string, err error) {
-	sid := sessions.Default(c).Get("id")
+	session := sessions.Default(c)
+	sid := session.Get("id")
+	username, _ = session.Get("username").(string)
 	if universal {
 		err = db.QueryRow("SELECT id FROM user WHERE uid = ?", sid).Scan(&id)
-		if err != nil {
-			return
-		}
-		username = sessions.Default(c).Get("username").(string)
 		return
 	}
-	id = sid.(int)
-	err = db.QueryRow("SELECT username FROM user WHERE id = ?", id).Scan(&username)
+	id, _ = sid.(int)
 	return
 }
 
@@ -84,6 +81,7 @@ func login(c *gin.Context) {
 			session := sessions.Default(c)
 			session.Clear()
 			session.Set("id", user.ID)
+			session.Set("username", user.Username)
 
 			if login.Rememberme {
 				session.Options(sessions.Options{Path: "/", HttpOnly: true, MaxAge: 856400 * 365})
