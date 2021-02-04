@@ -4,15 +4,16 @@ import (
 	"log"
 	"strings"
 
-	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/stock"
 )
 
 func myStocks(c *gin.Context) {
-	userID := sessions.Default(c).Get("userID")
-	if userID == nil {
-		userID = 0
+	userID, _, err := getUser(c)
+	if err != nil {
+		log.Println("Failed to get user:", err)
+		c.String(500, "")
+		return
 	}
 
 	rows, err := db.Query(`SELECT idx, code FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
@@ -83,32 +84,40 @@ func getSuggest(c *gin.Context) {
 }
 
 func star(c *gin.Context) {
-	userID := sessions.Default(c).Get("userID")
-	if userID == nil {
+	userID, _, err := getUser(c)
+	if err != nil {
+		log.Println("Failed to get user:", err)
+		c.String(500, "")
+		return
+	} else if userID == 0 {
 		c.String(200, "0")
 		return
 	}
+
 	refer := strings.Split(c.Request.Referer(), "/")
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
 
-	if userID != nil {
-		var exist string
-		if err := db.QueryRow("SELECT idx FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-			index, code, userID).Scan(&exist); err == nil {
-			c.String(200, "1")
-			return
-		}
+	var exist string
+	if err := db.QueryRow("SELECT idx FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
+		index, code, userID).Scan(&exist); err == nil {
+		c.String(200, "1")
+		return
 	}
 	c.String(200, "0")
 }
 
 func doStar(c *gin.Context) {
-	userID := sessions.Default(c).Get("userID")
-	if userID == nil {
+	userID, _, err := getUser(c)
+	if err != nil {
+		log.Println("Failed to get user:", err)
+		c.String(500, "")
+		return
+	} else if userID == 0 {
 		c.String(200, "0")
 		return
 	}
+
 	refer := strings.Split(c.Request.Referer(), "/")
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
@@ -119,31 +128,31 @@ func doStar(c *gin.Context) {
 		return
 	}
 
-	if userID != nil {
-		if r.Action == "unstar" {
-			if _, err := db.Exec("DELETE FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-				index, code, userID); err != nil {
-				log.Println("Failed to unstar stock:", err)
-				c.String(500, "")
-				return
-			}
-		} else {
-			if _, err := db.Exec("INSERT INTO stock (idx, code, user_id) VALUES (?, ?, ?)",
-				index, code, userID); err != nil {
-				log.Println("Failed to star stock:", err)
-				c.String(500, "")
-				return
-			}
+	if r.Action == "unstar" {
+		if _, err := db.Exec("DELETE FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
+			index, code, userID); err != nil {
+			log.Println("Failed to unstar stock:", err)
+			c.String(500, "")
+			return
 		}
-		c.String(200, "1")
-		return
+	} else {
+		if _, err := db.Exec("INSERT INTO stock (idx, code, user_id) VALUES (?, ?, ?)",
+			index, code, userID); err != nil {
+			log.Println("Failed to star stock:", err)
+			c.String(500, "")
+			return
+		}
 	}
-	c.String(200, "0")
+	c.String(200, "1")
 }
 
 func reorder(c *gin.Context) {
-	userID := sessions.Default(c).Get("userID")
-	if userID == nil {
+	userID, _, err := getUser(c)
+	if err != nil {
+		log.Println("Failed to get user:", err)
+		c.String(500, "")
+		return
+	} else if userID == 0 {
 		c.String(200, "0")
 		return
 	}
@@ -176,7 +185,6 @@ WHERE idx = ? AND code = ? AND stock.user_id = ?`,
 		return
 	}
 
-	var err error
 	if old > new {
 		_, err = db.Exec("UPDATE seq SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
 			new, old, userID)

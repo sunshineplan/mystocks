@@ -1,7 +1,17 @@
 <script lang="ts">
-  import { component } from "../stores";
+  import { fire, post } from "../misc";
+  import { username, component } from "../stores";
 
   export let user: string;
+
+  const logout = async () => {
+    const resp = await post("@universal@/logout");
+    if (resp.ok) {
+      $username = "";
+      window.history.pushState({}, "", "/");
+      $component = "stocks";
+    } else await fire("Error", "Unknow error", "error");
+  };
 </script>
 
 <nav class="navbar navbar-light topbar">
@@ -10,7 +20,10 @@
     on:click={() => {
       window.history.pushState({}, "", "/");
       $component = "stocks";
-    }}> My Stocks </span>
+    }}
+  >
+    My Stocks
+  </span>
   <div class="navbar-nav flex-row">
     {#if user}
       <div class="navbar-nav flex-row">
@@ -20,8 +33,11 @@
           on:click={() => {
             window.history.pushState({}, "", "/setting");
             $component = "setting";
-          }}> Setting </span>
-        <a class="nav-link link" href="/logout">Log out</a>
+          }}
+        >
+          Setting
+        </span>
+        <span class="nav-link link" on:click={logout}>Log out</span>
       </div>
     {:else}
       <div class="navbar-nav flex-row">
@@ -30,7 +46,10 @@
           on:click={() => {
             window.history.pushState({}, "", "/login");
             $component = "login";
-          }}> Log in </span>
+          }}
+        >
+          Log in
+        </span>
       </div>
     {/if}
   </div>
