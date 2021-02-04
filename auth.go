@@ -24,13 +24,9 @@ func authRequired(c *gin.Context) {
 }
 
 func getUser(c *gin.Context) (id int, username string, err error) {
-	var ok bool
-	id, ok = sessions.Default(c).Get("id").(int)
-	if !ok {
-		return
-	}
+	sid := sessions.Default(c).Get("id")
 	if universal {
-		err = db.QueryRow("SELECT id FROM user WHERE uid = ?", id).Scan(&id)
+		err = db.QueryRow("SELECT id FROM user WHERE uid = ?", sid).Scan(&id)
 		if err != nil {
 			return
 		}
