@@ -14,6 +14,10 @@ import (
 
 func addUser(username string) {
 	log.Print("Start!")
+	if err := initDB(); err != nil {
+		log.Fatalln("Failed to initialize database:", err)
+	}
+
 	if _, err := db.Exec("INSERT INTO user(username) VALUES (?)", strings.ToLower(username)); err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			log.Fatalf("Username %s already exists.", strings.ToLower(username))
@@ -26,6 +30,10 @@ func addUser(username string) {
 
 func deleteUser(username string) {
 	log.Print("Start!")
+	if err := initDB(); err != nil {
+		log.Fatalln("Failed to initialize database:", err)
+	}
+
 	res, err := db.Exec("DELETE FROM user WHERE username = ?", strings.ToLower(username))
 	if err != nil {
 		log.Fatalln("Failed to delete user:", err)

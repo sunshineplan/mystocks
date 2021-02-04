@@ -21,6 +21,10 @@ func run() {
 		log.SetOutput(f)
 	}
 
+	if err := initDB(); err != nil {
+		log.Fatalln("Failed to initialize database:", err)
+	}
+
 	secret := make([]byte, 16)
 	if _, err := rand.Read(secret); err != nil {
 		log.Fatalln("Failed to get secret:", err)

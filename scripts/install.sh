@@ -35,7 +35,7 @@ configMyStocks() {
     sed -i "s/\$port/$port/" /var/www/mystocks/config.ini
     sed -i "s,\$update,$update," /var/www/mystocks/config.ini
     sed -i "s|\$exclude|$exclude|" /var/www/mystocks/config.ini
-    ./mystocks install
+    ./mystocks install || exit 1
     service mystocks start
 }
 

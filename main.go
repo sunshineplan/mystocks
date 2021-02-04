@@ -79,10 +79,6 @@ func main() {
 	svc.Options.ExcludeFiles = strings.Split(*exclude, ",")
 	stock.SetTimeout(refresh)
 
-	if err := initDB(); err != nil {
-		log.Fatalln("Failed to initialize database:", err)
-	}
-
 	if service.IsWindowsService() {
 		svc.Run(false)
 		return
