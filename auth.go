@@ -117,12 +117,11 @@ func chgpwd(c *gin.Context) {
 	var errorCode int
 	err := bcrypt.CompareHashAndPassword([]byte(oldPassword), []byte(data.Password))
 	switch {
-	case err != nil:
-		if (err == bcrypt.ErrHashTooShort && data.Password != oldPassword) ||
-			err == bcrypt.ErrMismatchedHashAndPassword {
+	case err != nil && data.Password != oldPassword:
+		if err == bcrypt.ErrHashTooShort || err == bcrypt.ErrMismatchedHashAndPassword {
 			message = "Incorrect password."
 			errorCode = 1
-		} else if data.Password != oldPassword {
+		} else {
 			log.Print(err)
 			c.String(500, "")
 			return

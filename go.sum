@@ -59,8 +59,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3 h1:9ERbMyp+DZd+4/ZUUmJS2fSdV78we76nK5ItARXYq2g=
 github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3/go.mod h1:KaIWij1g41q0MnVSAe2pyReheMYhrHsMcwlBQGppv9A=
-github.com/sunshineplan/service v0.0.0-20210203082611-7ff3efb46371 h1:m3v6IHXcUZvKFhRcPLOl9+I+HtfDVHsGrF0tb8qoJ94=
-github.com/sunshineplan/service v0.0.0-20210203082611-7ff3efb46371/go.mod h1:5toRZ0t2LQSFT9Lbi7xklpZuRu0F/RC+fbPr/AxsmSA=
+github.com/sunshineplan/service v0.0.0-20210205062753-c0b8e361f671 h1:g4w3z676f43L92P+jbXsApVWTdVfTP58iT7SxITg7Cs=
+github.com/sunshineplan/service v0.0.0-20210205062753-c0b8e361f671/go.mod h1:5toRZ0t2LQSFT9Lbi7xklpZuRu0F/RC+fbPr/AxsmSA=
 github.com/sunshineplan/stock v0.0.0-20210119040752-e07218c962a1 h1:yb+8vj071U/wlQSQsV+vLCxyDMmqTIFYBjyC1c7k7lU=
 github.com/sunshineplan/stock v0.0.0-20210119040752-e07218c962a1/go.mod h1:gBDMUouQKj1A0my1/AEDX4z954Vg5oeu5bf+JPLIJqs=
 github.com/sunshineplan/utils v0.0.0-20210204043226-e62f7f5c2218 h1:xUDmyFghCIYZdhKYXUzahqry3UNSWBjcCPeRuIUv6hQ=
