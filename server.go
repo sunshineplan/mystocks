@@ -52,6 +52,9 @@ func run() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		if err := redis.SetKeyPrefix(store, "account_"); err != nil {
+			log.Fatal(err)
+		}
 		router.Use(sessions.Sessions("session", store))
 	} else {
 		if err := ioutil.WriteFile(joinPath(dir(self), "public/build/script.js"),
@@ -84,12 +87,13 @@ func run() {
 		auth.GET("/logout", authRequired, func(c *gin.Context) {
 			session := sessions.Default(c)
 			session.Clear()
+			session.Options(sessions.Options{MaxAge: -1})
 			if err := session.Save(); err != nil {
 				log.Print(err)
 				c.String(500, "")
 				return
 			}
-			c.Redirect(302, "/")
+			c.String(200, "bye")
 		})
 		auth.POST("/chgpwd", authRequired, chgpwd)
 	}

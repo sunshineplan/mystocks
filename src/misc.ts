@@ -46,7 +46,8 @@ export const post = (url: string, data?: object) => {
   return fetch(url, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    credentials: 'include'
   })
 }
 
