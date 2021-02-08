@@ -5,7 +5,7 @@
   export let user: string;
 
   const logout = async () => {
-    const resp = await post("@universal@/logout");
+    const resp = await post("@universal@/logout", undefined, true);
     if (resp.ok) {
       $username = "";
       window.history.pushState({}, "", "/");

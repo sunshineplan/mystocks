@@ -42,13 +42,14 @@ export const valid = () => {
   return result
 }
 
-export const post = (url: string, data?: object) => {
-  return fetch(url, {
+export const post = (url: string, data?: object, universal?: boolean) => {
+  const init: RequestInit = {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-    credentials: 'include'
-  })
+    body: JSON.stringify(data)
+  }
+  if (universal) init.credentials = 'include'
+  return fetch(url, init)
 }
 
 export const checkTime = () => {
