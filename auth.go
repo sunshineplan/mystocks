@@ -11,7 +11,7 @@ import (
 )
 
 type user struct {
-	ID       int
+	ID       string
 	Username string
 	Password string
 }
@@ -23,7 +23,7 @@ func authRequired(c *gin.Context) {
 	}
 }
 
-func getUser(c *gin.Context) (id int, username string, err error) {
+func getUser(c *gin.Context) (id, username string, err error) {
 	session := sessions.Default(c)
 	sid := session.Get("id")
 	if sid == nil {
@@ -34,7 +34,7 @@ func getUser(c *gin.Context) (id int, username string, err error) {
 		err = db.QueryRow("SELECT id FROM user WHERE uid = ?", sid).Scan(&id)
 		return
 	}
-	id, _ = sid.(int)
+	id, _ = sid.(string)
 	return
 }
 
@@ -95,6 +95,7 @@ func login(c *gin.Context) {
 			}
 		}
 	}
+
 	c.JSON(200, gin.H{"status": 0, "message": message})
 }
 
@@ -139,6 +140,7 @@ func chgpwd(c *gin.Context) {
 			c.String(500, "")
 			return
 		}
+
 		session.Clear()
 		session.Options(sessions.Options{MaxAge: -1})
 		if err := session.Save(); err != nil {
@@ -146,8 +148,10 @@ func chgpwd(c *gin.Context) {
 			c.String(500, "")
 			return
 		}
+
 		c.JSON(200, gin.H{"status": 1})
 		return
 	}
+
 	c.JSON(200, gin.H{"status": 0, "message": message, "error": errorCode})
 }

@@ -76,7 +76,7 @@ func backup() {
 	}
 	defer os.Remove(tmpfile.Name())
 
-	b, err := ioutil.ReadFile(tmpfile.Name())
+	b, err := os.ReadFile(tmpfile.Name())
 	if err != nil {
 		log.Fatal(err)
 	}

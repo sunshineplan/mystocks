@@ -2,7 +2,7 @@ package main
 
 import (
 	"crypto/rand"
-	"io/ioutil"
+	_ "embed"
 	"log"
 	"net/http"
 	"os"
@@ -14,14 +14,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//go:embed public/build/bundle.js
+var js string
+
 func run() {
 	if *logPath != "" {
 		f, err := os.OpenFile(*logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
 		if err != nil {
 			log.Fatalln("Failed to open log file:", err)
 		}
+
 		gin.DefaultWriter = f
 		gin.DefaultErrorWriter = f
+
 		log.SetOutput(f)
 	}
 
@@ -32,19 +37,14 @@ func run() {
 	router := gin.Default()
 	server.Handler = router
 
-	js, err := ioutil.ReadFile(joinPath(dir(self), "public/build/bundle.js"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	if universal {
 		var redisStore struct{ Endpoint, Password, Secret, API string }
 		if err := meta.Get("account_redis", &redisStore); err != nil {
 			log.Fatal(err)
 		}
 
-		if err := ioutil.WriteFile(joinPath(dir(self), "public/build/script.js"),
-			[]byte(strings.ReplaceAll(string(js), "@universal@", redisStore.API)), 0644); err != nil {
+		if err := os.WriteFile(joinPath(dir(self), "public/build/script.js"),
+			[]byte(strings.ReplaceAll(js, "@universal@", redisStore.API)), 0644); err != nil {
 			log.Fatal(err)
 		}
 
@@ -57,8 +57,8 @@ func run() {
 		}
 		router.Use(sessions.Sessions("universal", store))
 	} else {
-		if err := ioutil.WriteFile(joinPath(dir(self), "public/build/script.js"),
-			[]byte(strings.ReplaceAll(string(js), "@universal@", "")), 0644); err != nil {
+		if err := os.WriteFile(joinPath(dir(self), "public/build/script.js"),
+			[]byte(strings.ReplaceAll(js, "@universal@", "")), 0644); err != nil {
 			log.Fatal(err)
 		}
 

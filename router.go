@@ -8,6 +8,8 @@ import (
 	"github.com/sunshineplan/stock"
 )
 
+var stockCache = &cache{data: make(map[string]stocks)}
+
 func myStocks(c *gin.Context) {
 	userID, _, err := getUser(c)
 	if err != nil {
@@ -16,29 +18,13 @@ func myStocks(c *gin.Context) {
 		return
 	}
 
-	rows, err := db.Query(`SELECT idx, code FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
-WHERE stock.user_id = ? ORDER BY seq`, userID)
+	stocks, err := stockCache.get(userID)
 	if err != nil {
-		if strings.Contains(err.Error(), "no such table") {
-			restore("")
-			c.String(501, "")
-			return
-		}
 		log.Println("Failed to get all stocks:", err)
 		c.String(500, "")
 		return
 	}
-	defer rows.Close()
-	var stocks []stock.Stock
-	for rows.Next() {
-		var index, code string
-		if err := rows.Scan(&index, &code); err != nil {
-			log.Println("Failed to scan all stocks:", err)
-			c.String(500, "")
-			return
-		}
-		stocks = append(stocks, stock.Init(index, code))
-	}
+
 	c.JSON(200, stock.Realtimes(stocks))
 }
 
@@ -89,7 +75,7 @@ func star(c *gin.Context) {
 		log.Println("Failed to get user:", err)
 		c.String(500, "")
 		return
-	} else if userID == 0 {
+	} else if userID == "" {
 		c.String(200, "0")
 		return
 	}
@@ -113,7 +99,7 @@ func doStar(c *gin.Context) {
 		log.Println("Failed to get user:", err)
 		c.String(500, "")
 		return
-	} else if userID == 0 {
+	} else if userID == "" {
 		c.String(200, "0")
 		return
 	}
@@ -143,6 +129,9 @@ func doStar(c *gin.Context) {
 			return
 		}
 	}
+
+	stockCache.delete(userID)
+
 	c.String(200, "1")
 }
 
@@ -152,7 +141,7 @@ func reorder(c *gin.Context) {
 		log.Println("Failed to get user:", err)
 		c.String(500, "")
 		return
-	} else if userID == 0 {
+	} else if userID == "" {
 		c.String(200, "0")
 		return
 	}
@@ -203,5 +192,8 @@ WHERE idx = ? AND code = ? AND stock.user_id = ?`,
 		c.String(500, "")
 		return
 	}
+
+	stockCache.delete(userID)
+
 	c.String(200, "1")
 }
