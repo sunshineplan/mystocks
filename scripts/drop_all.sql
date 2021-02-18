@@ -1,8 +1,0 @@
--- Drop any existing data.
-
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS stock;
-DROP TABLE IF EXISTS seq;
-DROP TRIGGER IF EXISTS add_user;
-DROP TRIGGER IF EXISTS add_seq;
-DROP TRIGGER IF EXISTS reorder;

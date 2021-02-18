@@ -1,38 +1,29 @@
 package main
 
 import (
-	"database/sql"
-	"time"
-
-	"github.com/sunshineplan/utils/database"
-	"github.com/sunshineplan/utils/database/mysql"
-	"github.com/sunshineplan/utils/database/sqlite"
+	"github.com/sunshineplan/utils/database/mongodb"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var dbConfig database.Database
-var db *sql.DB
+var dbConfig mongodb.Config
+var collAccount *mongo.Collection
+var collStock *mongo.Collection
 
 func initDB() (err error) {
-	if local {
-		dbConfig = &sqlite.Config{
-			Path: joinPath(dir(self), "instance/mystocks.db"),
-		}
-	} else {
-		var config mysql.Config
-		if err = meta.Get("mystocks_mysql", &config); err != nil {
-			return
-		}
-		dbConfig = &config
+	if err = meta.Get("mystocks_mongo", &dbConfig); err != nil {
+		return
 	}
 
-	db, err = dbConfig.Open()
+	var client *mongo.Client
+	client, err = dbConfig.Open()
 	if err != nil {
 		return
 	}
 
-	db.SetConnMaxLifetime(time.Minute * 1)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(10)
+	database := client.Database(dbConfig.Database)
+
+	collAccount = database.Collection("account")
+	collStock = database.Collection("stock")
 
 	return
 }

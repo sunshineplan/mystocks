@@ -1,15 +1,17 @@
 package main
 
 import (
-	"bytes"
+	"context"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/sunshineplan/utils/archive"
 	"github.com/sunshineplan/utils/mail"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func addUser(username string) {
@@ -19,12 +21,55 @@ func addUser(username string) {
 	}
 
 	username = strings.TrimSpace(strings.ToLower(username))
-	if _, err := db.Exec("INSERT INTO user(username, uid) VALUES (?, ?)", username, username); err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			log.Fatalf("Username %s already exists.", username)
-		} else {
-			log.Fatalln("Failed to add user:", err)
-		}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	res, err := collAccount.InsertOne(ctx, bson.D{
+		{Key: "username", Value: username},
+		{Key: "password", Value: "123456"},
+		{Key: "uid", Value: username},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	objectID, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		log.Fatal("Failed to get last insert id.")
+	}
+	if _, err := collStock.InsertMany(ctx, []interface{}{
+		bson.D{
+			{Key: "index", Value: "SSE"},
+			{Key: "code", Value: "000001"},
+			{Key: "user", Value: objectID.Hex()},
+			{Key: "seq", Value: 1},
+		},
+		bson.D{
+			{Key: "index", Value: "SZSE"},
+			{Key: "code", Value: "399001"},
+			{Key: "user", Value: objectID.Hex()},
+			{Key: "seq", Value: 2},
+		},
+		bson.D{
+			{Key: "index", Value: "SZSE"},
+			{Key: "code", Value: "399106"},
+			{Key: "user", Value: objectID.Hex()},
+			{Key: "seq", Value: 3},
+		},
+		bson.D{
+			{Key: "index", Value: "SZSE"},
+			{Key: "code", Value: "399005"},
+			{Key: "user", Value: objectID.Hex()},
+			{Key: "seq", Value: 4},
+		},
+		bson.D{
+			{Key: "index", Value: "SZSE"},
+			{Key: "code", Value: "399006"},
+			{Key: "user", Value: objectID.Hex()},
+			{Key: "seq", Value: 5},
+		},
+	}); err != nil {
+		log.Fatal(err)
 	}
 	log.Print("Done!")
 }
@@ -36,16 +81,72 @@ func deleteUser(username string) {
 	}
 
 	username = strings.TrimSpace(strings.ToLower(username))
-	res, err := db.Exec("DELETE FROM user WHERE username = ?", username)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	res, err := collAccount.DeleteOne(ctx, bson.M{"username": username})
 	if err != nil {
 		log.Fatalln("Failed to delete user:", err)
-	}
-	if n, err := res.RowsAffected(); err != nil {
-		log.Fatalln("Failed to get affected rows:", err)
-	} else if n == 0 {
+	} else if res.DeletedCount == 0 {
 		log.Fatalf("User %s does not exist.", username)
 	}
 	log.Print("Done!")
+}
+
+func reorderStock(userID interface{}, orig, dest []string) error {
+	var origStock, destStock struct {
+		ID  primitive.ObjectID `bson:"_id"`
+		Seq int
+	}
+
+	c := make(chan error, 1)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		c <- collStock.FindOne(
+			ctx, bson.M{"index": orig[0], "code": orig[1], "user": userID}).Decode(&origStock)
+	}()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := collStock.FindOne(
+		ctx, bson.M{"index": dest[0], "code": dest[1], "user": userID}).Decode(&destStock); err != nil {
+		return err
+	}
+	if err := <-c; err != nil {
+		return err
+	}
+
+	var filter, update bson.M
+	if origStock.Seq > destStock.Seq {
+		filter = bson.M{"user": userID, "seq": bson.M{"$gte": destStock.Seq, "$lt": origStock.Seq}}
+		update = bson.M{"$inc": bson.M{"seq": 1}}
+	} else {
+		filter = bson.M{"user": userID, "seq": bson.M{"$gt": origStock.Seq, "$lte": destStock.Seq}}
+		update = bson.M{"$inc": bson.M{"seq": -1}}
+	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if _, err := collStock.UpdateMany(ctx, filter, update); err != nil {
+		log.Println("Failed to reorder stock:", err)
+		return err
+	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if _, err := collStock.UpdateOne(
+		ctx, bson.M{"_id": origStock.ID}, bson.M{"$set": bson.M{"seq": destStock.Seq}}); err != nil {
+		log.Println("Failed to reorder stock:", err)
+		return err
+	}
+
+	return nil
 }
 
 func backup() {
@@ -65,36 +166,22 @@ func backup() {
 		Account:  config.Account,
 		Password: config.Password,
 	}
+
 	tmpfile, err := ioutil.TempFile("", "tmp")
 	if err != nil {
 		log.Fatalln("Failed to create temporary file:", err)
 	}
 	tmpfile.Close()
-
 	if err := dbConfig.Backup(tmpfile.Name()); err != nil {
 		log.Fatal(err)
 	}
 	defer os.Remove(tmpfile.Name())
 
-	b, err := os.ReadFile(tmpfile.Name())
-	if err != nil {
-		log.Fatal(err)
-	}
-	var buf bytes.Buffer
-	if err := archive.Pack(&buf, archive.ZIP, archive.File{Name: "database", Body: b}); err != nil {
-		log.Fatal(err)
-	}
-	var subject string
-	if local {
-		subject = "My Stocks Backup(Local) - " + time.Now().Format("20060102")
-	} else {
-		subject = "My Stocks Backup - " + time.Now().Format("20060102")
-	}
 	if err := dialer.Send(
 		&mail.Message{
 			To:          config.To,
-			Subject:     subject,
-			Attachments: []*mail.Attachment{{Bytes: buf.Bytes(), Filename: "backup.zip"}},
+			Subject:     fmt.Sprintf("My Stocks Backup-%s", time.Now().Format("20060102")),
+			Attachments: []*mail.Attachment{{Path: tmpfile.Name(), Filename: "database"}},
 		},
 	); err != nil {
 		log.Fatalln("Failed to send mail:", err)
@@ -104,20 +191,8 @@ func backup() {
 
 func restore(file string) {
 	log.Print("Start!")
-	if file == "" {
-		if local {
-			file = joinPath(dir(self), "scripts/sqlite.sql")
-		} else {
-			file = joinPath(dir(self), "scripts/mysql.sql")
-		}
-	} else {
-		if _, err := os.Stat(file); err != nil {
-			log.Fatalln("File not found:", err)
-		}
-	}
-	dropAll := joinPath(dir(self), "scripts/drop_all.sql")
-	if err := dbConfig.Restore(dropAll); err != nil {
-		log.Fatal(err)
+	if _, err := os.Stat(file); err != nil {
+		log.Fatalln("File not found:", err)
 	}
 	if err := dbConfig.Restore(file); err != nil {
 		log.Fatal(err)

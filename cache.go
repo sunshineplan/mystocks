@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"log"
 	"sync"
 	"time"
 
 	"github.com/sunshineplan/stock"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type stocks struct {
@@ -19,7 +23,13 @@ type cache struct {
 
 func (c *cache) get(id string) ([]stock.Stock, error) {
 	if id == "" {
-		id = "0"
+		return []stock.Stock{
+			stock.Init("SSE", "000001"),
+			stock.Init("SZSE", "399001"),
+			stock.Init("SZSE", "399106"),
+			stock.Init("SZSE", "399006"),
+			stock.Init("SZSE", "399005"),
+		}, nil
 	}
 
 	c.RLock()
@@ -41,20 +51,27 @@ func (c *cache) init(id string) ([]stock.Stock, error) {
 	c.Lock()
 	defer c.Unlock()
 
-	rows, err := db.Query(`SELECT idx, code FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
-WHERE stock.user_id = ? ORDER BY seq`, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := collStock.Find(
+		ctx, bson.M{"user": id}, options.Find().SetSort(bson.M{"seq": 1}))
 	if err != nil {
+		log.Println("Failed to query stocks:", err)
 		return nil, err
 	}
-	defer rows.Close()
+
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	var ss []stock.Stock
-	for rows.Next() {
-		var index, code string
-		if err := rows.Scan(&index, &code); err != nil {
-			return nil, err
-		}
-		ss = append(ss, stock.Init(index, code))
+	var res []struct{ Index, Code string }
+	if err := cursor.All(ctx, &res); err != nil {
+		log.Println("Failed to get stocks:", err)
+		return nil, err
+	}
+	for _, i := range res {
+		ss = append(ss, stock.Init(i.Index, i.Code))
 	}
 
 	c.data[id] = stocks{

@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/stock"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var stockCache = &cache{data: make(map[string]stocks)}
@@ -84,11 +89,15 @@ func star(c *gin.Context) {
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
 
-	var exist string
-	if err := db.QueryRow("SELECT idx FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-		index, code, userID).Scan(&exist); err == nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := collStock.FindOne(
+		ctx, bson.M{"index": index, "code": code, "user": userID}).Err(); err == nil {
 		c.String(200, "1")
 		return
+	} else if err != mongo.ErrNoDocuments {
+		log.Print(err)
 	}
 	c.String(200, "0")
 }
@@ -115,22 +124,81 @@ func doStar(c *gin.Context) {
 	}
 
 	if r.Action == "unstar" {
-		if _, err := db.Exec("DELETE FROM stock WHERE idx = ? AND code = ? AND user_id = ?",
-			index, code, userID); err != nil {
-			log.Println("Failed to unstar stock:", err)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		var s struct{ Seq int }
+		if err := collStock.FindOneAndDelete(ctx,
+			bson.M{"index": index, "code": code, "user": userID}).Decode(&s); err != nil {
+			log.Println("Failed to delete stock:", err)
+			c.String(500, "")
+			return
+		}
+
+		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if _, err := collStock.UpdateMany(ctx,
+			bson.M{"user": userID, "seq": bson.M{"$gt": s.Seq}},
+			bson.M{"$inc": bson.M{"seq": -1}},
+		); err != nil {
+			log.Println("Failed to reorder after delete stock:", err)
 			c.String(500, "")
 			return
 		}
 	} else {
-		if _, err := db.Exec("INSERT INTO stock (idx, code, user_id) VALUES (?, ?, ?)",
-			index, code, userID); err != nil {
-			log.Println("Failed to star stock:", err)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		cursor, err := collStock.Find(
+			ctx, bson.M{"user": userID}, options.Find().SetSort(bson.M{"seq": -1}).SetLimit(1))
+		if err != nil {
+			log.Println("Failed to query stocks:", err)
 			c.String(500, "")
 			return
 		}
-	}
 
-	stockCache.init(userID)
+		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		var s []struct{ Seq int }
+		if err := cursor.All(ctx, &s); err != nil {
+			log.Println("Failed to get stocks:", err)
+			c.String(500, "")
+			return
+		}
+
+		var seq int
+		if len(s) == 0 {
+			seq = 1
+		} else {
+			seq = s[0].Seq + 1
+		}
+
+		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		res, err := collStock.UpdateOne(
+			ctx,
+			bson.D{
+				{Key: "index", Value: index},
+				{Key: "code", Value: code},
+				{Key: "user", Value: userID},
+			},
+			bson.M{"seq": seq},
+			options.Update().SetUpsert(true),
+		)
+		if err != nil {
+			log.Println("Failed to add stock:", err)
+			c.String(500, "")
+			return
+		}
+
+		if res.MatchedCount == 1 {
+			log.Print("Stock already exists")
+		}
+		stockCache.init(userID)
+	}
 
 	c.String(200, "1")
 }
@@ -155,40 +223,8 @@ func reorder(c *gin.Context) {
 	orig := strings.Split(r.Old, " ")
 	dest := strings.Split(r.New, " ")
 
-	ec := make(chan error, 1)
-	var oldID, old, new int
-	go func() {
-		ec <- db.QueryRow(`SELECT id, seq FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
-WHERE idx = ? AND code = ? AND stock.user_id = ?`, orig[0], orig[1], userID).Scan(&oldID, &old)
-	}()
-	if err := db.QueryRow(`SELECT seq FROM stock JOIN seq ON stock.user_id = seq.user_id AND stock.id = seq.stock_id
-WHERE idx = ? AND code = ? AND stock.user_id = ?`,
-		dest[0], dest[1], userID).Scan(&new); err != nil {
-		log.Println("Failed to scan dest seq:", err)
-		c.String(500, "")
-		return
-	}
-	if err := <-ec; err != nil {
-		log.Println("Failed to scan orig seq:", err)
-		c.String(500, "")
-		return
-	}
-
-	if old > new {
-		_, err = db.Exec("UPDATE seq SET seq = seq + 1 WHERE seq >= ? AND seq < ? AND user_id = ?",
-			new, old, userID)
-	} else {
-		_, err = db.Exec("UPDATE seq SET seq = seq - 1 WHERE seq > ? AND seq <= ? AND user_id = ?",
-			old, new, userID)
-	}
-	if err != nil {
-		log.Println("Failed to update other seq:", err)
-		c.String(500, "")
-		return
-	}
-	if _, err := db.Exec("UPDATE seq SET seq = ? WHERE stock_id = ? AND user_id = ?",
-		new, oldID, userID); err != nil {
-		log.Println("Failed to update orig seq:", err)
+	if err := reorderStock(userID, orig, dest); err != nil {
+		log.Println("Failed to reorder stock:", err)
 		c.String(500, "")
 		return
 	}

@@ -18,7 +18,7 @@ import (
 )
 
 var self string
-var local, universal bool
+var universal bool
 var logPath *string
 var refresh int
 var meta metadata.Server
@@ -60,7 +60,6 @@ usage: %s <command>
 }
 
 func main() {
-	flag.BoolVar(&local, "local", true, "Use local database or not")
 	flag.BoolVar(&universal, "universal", false, "Use Universal account id or not")
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")

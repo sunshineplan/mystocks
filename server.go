@@ -84,7 +84,7 @@ func run() {
 	if !universal {
 		auth := router.Group("/")
 		auth.POST("/login", login)
-		auth.GET("/logout", authRequired, func(c *gin.Context) {
+		auth.POST("/logout", authRequired, func(c *gin.Context) {
 			session := sessions.Default(c)
 			session.Clear()
 			session.Options(sessions.Options{MaxAge: -1})
