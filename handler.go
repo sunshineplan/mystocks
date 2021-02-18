@@ -13,8 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var stockCache = &cache{data: make(map[string]stocks)}
-
 func myStocks(c *gin.Context) {
 	userID, _, err := getUser(c)
 	if err != nil {
@@ -197,8 +195,9 @@ func doStar(c *gin.Context) {
 		if res.MatchedCount == 1 {
 			log.Print("Stock already exists")
 		}
-		stockCache.init(userID)
 	}
+
+	stockCache.init(userID)
 
 	c.String(200, "1")
 }

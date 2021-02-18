@@ -107,10 +107,6 @@ func main() {
 			err = svc.Update()
 		case "backup":
 			backup()
-		case "init":
-			if utils.Confirm("Do you want to initialize database?", 3) {
-				restore("")
-			}
 		default:
 			usage(fmt.Sprintf("Unknown argument: %s", flag.Arg(0)))
 		}

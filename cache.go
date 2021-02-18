@@ -21,6 +21,8 @@ type cache struct {
 	data map[string]stocks
 }
 
+var stockCache = &cache{data: make(map[string]stocks)}
+
 func (c *cache) get(id string) ([]stock.Stock, error) {
 	if id == "" {
 		return []stock.Stock{
