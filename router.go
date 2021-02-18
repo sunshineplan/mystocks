@@ -130,7 +130,7 @@ func doStar(c *gin.Context) {
 		}
 	}
 
-	stockCache.delete(userID)
+	stockCache.init(userID)
 
 	c.String(200, "1")
 }
@@ -193,7 +193,7 @@ WHERE idx = ? AND code = ? AND stock.user_id = ?`,
 		return
 	}
 
-	stockCache.delete(userID)
+	stockCache.init(userID)
 
 	c.String(200, "1")
 }

@@ -18,17 +18,22 @@ type cache struct {
 }
 
 func (c *cache) get(id string) ([]stock.Stock, error) {
-	c.RLock()
-	defer c.RUnlock()
+	if id == "" {
+		id = "0"
+	}
 
+	c.RLock()
 	stocks, ok := c.data[id]
+	c.RUnlock()
+
 	if ok {
-		if time.Now().UnixNano() > stocks.expiration {
-			c.delete(id)
+		if stocks.expiration != 0 && time.Now().UnixNano() > stocks.expiration {
+			stocks.expiration = 0
 			defer c.init(id)
 		}
 		return stocks.stocks, nil
 	}
+
 	return c.init(id)
 }
 
@@ -58,13 +63,4 @@ WHERE stock.user_id = ? ORDER BY seq`, id)
 	}
 
 	return ss, nil
-}
-
-func (c *cache) delete(id string) {
-	c.Lock()
-	defer c.Unlock()
-
-	if _, ok := c.data[id]; ok {
-		delete(c.data, id)
-	}
 }
