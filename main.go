@@ -45,8 +45,6 @@ func init() {
 	if err != nil {
 		log.Fatalln("Failed to get self path:", err)
 	}
-	os.MkdirAll(joinPath(dir(self), "instance"), 0755)
-
 }
 
 func usage(errmsg string) {
