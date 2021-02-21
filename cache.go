@@ -3,27 +3,17 @@ package main
 import (
 	"context"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/sunshineplan/stock"
+	"github.com/sunshineplan/utils/cache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type stocks struct {
-	stocks     []stock.Stock
-	expiration int64
-}
+var stockCache = cache.New(true)
 
-type cache struct {
-	sync.RWMutex
-	data map[string]stocks
-}
-
-var stockCache = &cache{data: make(map[string]stocks)}
-
-func (c *cache) get(id string) ([]stock.Stock, error) {
+func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 	if id == "" {
 		return []stock.Stock{
 			stock.Init("SSE", "000001"),
@@ -34,25 +24,31 @@ func (c *cache) get(id string) ([]stock.Stock, error) {
 		}, nil
 	}
 
-	c.RLock()
-	stocks, ok := c.data[id]
-	c.RUnlock()
-
-	if ok {
-		if stocks.expiration != 0 && time.Now().UnixNano() > stocks.expiration {
-			stocks.expiration = 0
-			defer c.init(id)
+	if !init {
+		value, ok := stockCache.Get(id)
+		if ok {
+			return value.([]stock.Stock), nil
 		}
-		return stocks.stocks, nil
 	}
 
-	return c.init(id)
+	ss, err := getStocks(id)
+	if err != nil {
+		return nil, err
+	}
+
+	stockCache.Set(id, ss, 10*time.Minute, func() interface{} {
+		ss, err := getStocks(id)
+		if err != nil {
+			log.Print(err)
+			return []stock.Stock{}
+		}
+		return ss
+	})
+
+	return ss, nil
 }
 
-func (c *cache) init(id string) ([]stock.Stock, error) {
-	c.Lock()
-	defer c.Unlock()
-
+func getStocks(id interface{}) ([]stock.Stock, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -74,11 +70,6 @@ func (c *cache) init(id string) ([]stock.Stock, error) {
 	}
 	for _, i := range res {
 		ss = append(ss, stock.Init(i.Index, i.Code))
-	}
-
-	c.data[id] = stocks{
-		stocks:     ss,
-		expiration: time.Now().Add(10 * time.Minute).UnixNano(),
 	}
 
 	return ss, nil

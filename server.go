@@ -110,6 +110,13 @@ func run() {
 	base.GET("/star", star)
 	base.POST("/star", doStar)
 	base.POST("/reorder", reorder)
+	base.POST("/refresh", func(c *gin.Context) {
+		userID, _, _ := getUser(c)
+		if userID != "" {
+			loadStocks(userID, true)
+		}
+		c.String(200, "")
+	})
 
 	router.NoRoute(func(c *gin.Context) {
 		c.Redirect(302, "/")

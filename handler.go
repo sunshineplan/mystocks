@@ -21,7 +21,7 @@ func myStocks(c *gin.Context) {
 		return
 	}
 
-	stocks, err := stockCache.get(userID)
+	stocks, err := loadStocks(userID, false)
 	if err != nil {
 		log.Println("Failed to get all stocks:", err)
 		c.String(500, "")
@@ -197,7 +197,7 @@ func doStar(c *gin.Context) {
 		}
 	}
 
-	stockCache.init(userID)
+	loadStocks(userID, true)
 
 	c.String(200, "1")
 }
@@ -228,7 +228,7 @@ func reorder(c *gin.Context) {
 		return
 	}
 
-	stockCache.init(userID)
+	loadStocks(userID, true)
 
 	c.String(200, "1")
 }
