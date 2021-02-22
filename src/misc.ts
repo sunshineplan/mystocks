@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'
+import type Chart from 'chart.js'
 import type { Stock } from './stores'
 
 const color = (last: number, value?: number) => {
@@ -131,4 +132,4 @@ export const intraday = {
       ]
     }
   }
-}
+} as Chart.ChartConfiguration

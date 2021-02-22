@@ -46,7 +46,7 @@
   const start = () => {
     chart = new Chart(
       document.querySelector("#stockChart") as HTMLCanvasElement,
-      intraday as Chart.ChartConfiguration
+      intraday
     );
     if ($current.code != "n/a") {
       autoUpdate.push(setInterval(loadRealtime, $refresh * 1000));
