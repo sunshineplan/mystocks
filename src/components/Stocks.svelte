@@ -114,7 +114,7 @@
     transition: transform 0.4s linear;
     font-size: 30px;
     color: #1a73e8;
-    cursor: default;
+    cursor: pointer;
   }
 
   .refresh:hover {
