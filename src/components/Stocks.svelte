@@ -84,6 +84,9 @@
 
 <header>
   <AutoComplete />
+  <span style="padding-left:10px" on:click={() => post("/refresh")}>
+    <i class="material-icons refresh">refresh</i>
+  </span>
 </header>
 <div class="table-responsive">
   <table class="table table-hover table-sm">
@@ -107,6 +110,17 @@
 </div>
 
 <style>
+  .refresh {
+    transition: transform 0.4s linear;
+    font-size: 30px;
+    color: #1a73e8;
+    cursor: default;
+  }
+
+  .refresh:hover {
+    transform: rotate(360deg);
+  }
+
   .table-responsive {
     height: calc(100% - 54px);
     padding: 0px 30px;
