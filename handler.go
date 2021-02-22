@@ -209,7 +209,7 @@ func reorder(c *gin.Context) {
 		c.String(500, "")
 		return
 	} else if userID == "" {
-		c.String(200, "0")
+		c.String(200, "")
 		return
 	}
 
@@ -222,13 +222,13 @@ func reorder(c *gin.Context) {
 	orig := strings.Split(r.Old, " ")
 	dest := strings.Split(r.New, " ")
 
+	code := 200
 	if err := reorderStock(userID, orig, dest); err != nil {
 		log.Println("Failed to reorder stock:", err)
-		c.String(500, "")
-		return
+		code = 500
 	}
 
 	loadStocks(userID, true)
 
-	c.String(200, "1")
+	c.String(code, "")
 }

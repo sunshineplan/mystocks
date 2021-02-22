@@ -36,7 +36,7 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 		return nil, err
 	}
 
-	stockCache.Set(id, ss, 10*time.Minute, func() interface{} {
+	stockCache.Set(id, ss, 1*time.Hour, func() interface{} {
 		ss, err := getStocks(id)
 		if err != nil {
 			log.Print(err)
