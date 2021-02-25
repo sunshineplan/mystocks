@@ -1,25 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Chart from "chart.js";
-  import annotation from "chartjs-plugin-annotation";
   import AutoComplete from "./AutoComplete.svelte";
   import Realtime from "./Realtime.svelte";
   import StockChart from "./Chart.svelte";
   import { checkTime, post, intraday } from "../misc";
   import { component, current, refresh } from "../stores";
   import type { Stock } from "../stores";
-
-  Chart.defaults.global.maintainAspectRatio = false;
-  (Chart.defaults.global.legend as Chart.ChartLegendOptions).display = false;
-  (Chart.defaults.global.hover as Chart.ChartHoverOptions).mode = "index";
-  (Chart.defaults.global.hover as Chart.ChartHoverOptions).intersect = false;
-  Chart.defaults.global.tooltips.mode = "index";
-  Chart.defaults.global.tooltips.intersect = false;
-  Chart.defaults.global.tooltips.displayColors = false;
-  (Chart.defaults.global.animation as Chart.ChartAnimationOptions).duration = 0;
-  Chart.plugins.register({
-    annotation,
-  } as Chart.PluginServiceGlobalRegistration & Chart.PluginServiceRegistrationOptions);
 
   let autoUpdate: number[] = [];
   let stock: Stock = {

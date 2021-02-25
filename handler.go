@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sunshineplan/capital-flows-data/sector"
 	"github.com/sunshineplan/stock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,6 +31,19 @@ func myStocks(c *gin.Context) {
 	}
 
 	c.JSON(200, stock.Realtimes(stocks))
+}
+
+func capitalFlows(c *gin.Context) {
+	tz, _ := time.LoadLocation("Asia/Shanghai")
+	t := time.Now().In(tz)
+	flows, err := sector.GetChart(fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day()), collFlows)
+	if err != nil {
+		log.Println("Failed to get flows chart:", err)
+		c.String(500, "")
+		return
+	}
+
+	c.JSON(200, flows)
 }
 
 func indices(c *gin.Context) {

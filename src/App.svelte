@@ -3,6 +3,7 @@
   import Login from "./components/Login.svelte";
   import Setting from "./components/Setting.svelte";
   import Stocks from "./components/Stocks.svelte";
+  import Flows from "./components/Flows.svelte";
   import Stock from "./components/Stock.svelte";
   import Indices from "./components/Indices.svelte";
   import { username as user, current, component, refresh } from "./stores";
@@ -28,11 +29,13 @@
       | typeof Login
       | typeof Setting
       | typeof Stocks
+      | typeof Flows
       | typeof Stock;
   } = {
     login: Login,
     setting: Setting,
-    stocks: Stocks,
+    stocks: Flows,
+    flows: Stocks,
     stock: Stock,
   };
 </script>

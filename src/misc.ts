@@ -1,6 +1,9 @@
 import Swal from 'sweetalert2'
-import type Chart from 'chart.js'
+import Chart from "chart.js";
+import annotation from "chartjs-plugin-annotation";
 import type { Stock } from './stores'
+
+Chart.plugins.register(annotation);
 
 const color = (last: number, value?: number) => {
   if (value === undefined) {
@@ -23,6 +26,8 @@ const timeLabels = (start: number, end: number) => {
   }
   return times
 }
+
+export const labels = timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60))
 
 export const fire = (
   title?: string | undefined,
@@ -81,12 +86,23 @@ export const addColor = (stock: Stock, val: string) => {
   return 'color:initial'
 }
 
+export const getColor = (i: number) => {
+  const chartColors = [
+    'rgb(255, 99, 132)', // red
+    'rgb(255, 159, 64)', // orange
+    'rgb(255, 205, 86)', // yellow
+    'rgb(75, 192, 192)', // green
+    'rgb(54, 162, 235)', // blue
+    'rgb(153, 102, 255)', // purple
+    'rgb(201, 203, 207)' // grey
+  ]
+  return chartColors[i % chartColors.length]
+}
+
 export const intraday = {
   type: 'line',
   data: {
-    labels: timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(
-      timeLabels(13 * 60 + 1, 15 * 60)
-    ),
+    labels,
     datasets: [
       {
         label: 'Price',
@@ -101,6 +117,18 @@ export const intraday = {
     ]
   },
   options: {
+    maintainAspectRatio: false,
+    legend: { display: false },
+    hover: {
+      mode: 'index',
+      intersect: false
+    },
+    tooltips: {
+      mode: 'index',
+      intersect: false,
+      displayColors: false
+    },
+    animation: { duration: 0 },
     scales: {
       xAxes: [
         {
