@@ -3,6 +3,7 @@
   import Chart from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import { getToday, checkTime, labels, getColor } from "../misc";
+  import type { Flows } from "../stores";
 
   const today = getToday();
 
@@ -16,8 +17,11 @@
     event: MouseEvent,
     legendItem: Chart.ChartLegendLabelItem
   ) => {
-    const index = legendItem.datasetIndex as number;
+    display(legendItem.datasetIndex as number);
+    chart.update();
+  };
 
+  const display = (index: number) => {
     if (!show.length) {
       (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
@@ -40,7 +44,6 @@
       });
       show.push(index);
     }
-    chart.update();
   };
 
   const capitalflows = {
@@ -55,6 +58,14 @@
         onClick,
       },
       animation: { duration: 0 },
+      tooltips: {
+        callbacks: {
+          label: (tooltipItem) => {
+            const value = tooltipItem.value as string;
+            return Math.round(parseFloat(value) * 10000) / 10000 + "亿";
+          },
+        },
+      },
       scales: {
         xAxes: [
           {
@@ -69,7 +80,13 @@
         yAxes: [
           {
             gridLines: { drawTicks: false },
-            ticks: { padding: 12 },
+            ticks: {
+              padding: 12,
+              callback: (value) => {
+                if (value) return value + "亿";
+                else return value;
+              },
+            },
           },
         ],
       },
@@ -94,11 +111,12 @@
     if (date) url = url + `?date=${date}`;
     if (checkTime() || force) {
       const resp = await fetch(url);
+      if (!resp.ok) return;
       const array = await resp.json();
-      if (resp.ok && array && array.length) {
+      if (array && array.length) {
         const datasets = chart.data.datasets as Chart.ChartDataSets[];
         datasets.length = 0;
-        array.forEach((e: any, i: number) => {
+        array.forEach((e: Flows, i: number) => {
           datasets.push({
             label: e.sector,
             fill: false,
@@ -108,9 +126,15 @@
             backgroundColor: getColor(i),
             pointRadius: 0,
             pointHoverRadius: 3,
-            data: e.chart,
+            data: e.chart.map((i) => (i.y as number) / 100000000),
           });
         });
+        if (show.length)
+          datasets.forEach((e, i) => {
+            const meta = chart.getDatasetMeta(i);
+            if (show.includes(i)) meta.hidden = false;
+            else meta.hidden = true;
+          });
         chart.update();
         if (!date || (date && date == today))
           last = new Date().toLocaleString();
@@ -119,6 +143,7 @@
   };
 
   const goto = (day?: string) => {
+    show.length = 0;
     if (day && day != today) {
       if (autoUpdate) clearInterval(autoUpdate);
       load(true, day);

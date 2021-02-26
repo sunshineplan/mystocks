@@ -16,6 +16,11 @@ export interface Stock {
     update?: string
 }
 
+export interface Flows {
+    sector: string
+    chart: Chart.ChartPoint[]
+}
+
 export const username = writable('')
 export const component = writable('stocks')
 export const current = writable({ index: 'n/a', code: 'n/a' })

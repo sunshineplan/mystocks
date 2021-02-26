@@ -38,7 +38,7 @@ func capitalFlows(c *gin.Context) {
 	var date string
 	if date, _ = c.GetQuery("date"); date != "" {
 		url := fmt.Sprintf(
-			"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
+			"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 			strings.ReplaceAll(date, "-", "/"),
 		)
 
