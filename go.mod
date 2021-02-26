@@ -6,9 +6,9 @@ require (
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-mail/mail v2.3.1+incompatible // indirect
-	github.com/sunshineplan/capital-flows-data v0.0.0-20210224162558-f36cceee86cb
+	github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3
 	github.com/sunshineplan/service v0.0.0-20210225015410-ded17aad0e4b
-	github.com/sunshineplan/stock v0.0.0-20210223024350-aaaa404a22c7
+	github.com/sunshineplan/stock v0.0.0-20210225131947-bdf65b0f8ae5
 	github.com/sunshineplan/utils v0.0.0-20210224010154-f102cd242d60
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
 	go.mongodb.org/mongo-driver v1.4.6

@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/capital-flows-data/sector"
+	"github.com/sunshineplan/gohttp"
 	"github.com/sunshineplan/stock"
+	"github.com/sunshineplan/stock/capitalflows/sector"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,9 +35,34 @@ func myStocks(c *gin.Context) {
 }
 
 func capitalFlows(c *gin.Context) {
+	var date string
+	if date, _ = c.GetQuery("date"); date != "" {
+		url := fmt.Sprintf(
+			"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
+			strings.ReplaceAll(date, "-", "/"),
+		)
+
+		var tl []sector.TimeLine
+		if err := gohttp.Get(url, nil).JSON(&tl); err != nil {
+			log.Println("Failed to get flows chart:", err)
+			c.String(500, "")
+			return
+		}
+
+		var flows []sector.Chart
+		for _, i := range tl {
+			flows = append(flows, sector.TimeLine2Chart(i))
+		}
+
+		c.JSON(200, flows)
+		return
+	}
+
 	tz, _ := time.LoadLocation("Asia/Shanghai")
 	t := time.Now().In(tz)
-	flows, err := sector.GetChart(fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day()), collFlows)
+	date = fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
+
+	flows, err := sector.GetChart(date, collFlows)
 	if err != nil {
 		log.Println("Failed to get flows chart:", err)
 		c.String(500, "")

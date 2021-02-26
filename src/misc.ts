@@ -58,6 +58,14 @@ export const post = (url: string, data?: object, universal?: boolean) => {
   return fetch(url, init)
 }
 
+export const getToday = () => {
+  const today = new Date()
+  const dd = String(today.getDate()).padStart(2, '0')
+  const mm = String(today.getMonth() + 1).padStart(2, '0')
+  const yyyy = today.getFullYear()
+  return `${yyyy}-${mm}-${dd}`
+}
+
 export const checkTime = () => {
   const date = new Date()
   const hour = date.getUTCHours()
