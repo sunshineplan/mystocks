@@ -4,47 +4,41 @@
   import AutoComplete from "./AutoComplete.svelte";
   import { getToday, checkTime, labels, getColor } from "../misc";
 
+  const today = getToday();
+
+  let autoUpdate = 0;
+  let chart: Chart;
+  let show: number[] = [];
+  let date = today;
+  let last = "";
+
   const onClick = (
     event: MouseEvent,
     legendItem: Chart.ChartLegendLabelItem
   ) => {
     const index = legendItem.datasetIndex as number;
-    const current = chart.getDatasetMeta(index);
-    const alreadyHidden =
-      current.hidden === undefined || current.hidden === null
-        ? false
-        : current.hidden;
-    let anyOthersAlreadyHidden = false;
-    let allOthersHidden = true;
 
-    (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
-      const meta = chart.getDatasetMeta(i);
-      if (i !== index) {
-        if (meta.hidden) {
-          anyOthersAlreadyHidden = true;
-        } else {
-          allOthersHidden = false;
-        }
-      }
-    });
-    if (alreadyHidden) {
-      current.hidden = undefined;
+    if (!show.length) {
+      (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
+        const meta = chart.getDatasetMeta(i);
+        if (i !== index) meta.hidden = true;
+      });
+      show.push(index);
+    } else if (show.includes(index) && show.length == 1) {
+      (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
+        const meta = chart.getDatasetMeta(i);
+        meta.hidden = undefined;
+      });
+      show.length = 0;
+    } else if (show.includes(index) && show.length > 1) {
+      chart.getDatasetMeta(index).hidden = true;
+      show.splice(show.indexOf(index), 1);
     } else {
       (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
-        if (i !== index) {
-          if (anyOthersAlreadyHidden && !allOthersHidden) {
-            meta.hidden = true;
-          } else {
-            meta.hidden =
-              meta.hidden === undefined || meta.hidden === null
-                ? !meta.hidden
-                : undefined;
-          }
-        } else {
-          meta.hidden = undefined;
-        }
+        if (i == index) meta.hidden = false;
       });
+      show.push(index);
     }
     chart.update();
   };
@@ -67,7 +61,7 @@
             gridLines: { drawTicks: false },
             ticks: {
               padding: 10,
-              autoSkipPadding: 100,
+              maxTicksLimit: 9,
               maxRotation: 0,
             },
           },
@@ -95,20 +89,13 @@
     },
   } as Chart.ChartConfiguration;
 
-  const today = getToday();
-
-  let autoUpdate = 0;
-  let chart: Chart;
-  let date = today;
-  let last = "";
-
   const load = async (force?: boolean, date?: string) => {
     var url = "/flows";
     if (date) url = url + `?date=${date}`;
     if (checkTime() || force) {
       const resp = await fetch(url);
       const array = await resp.json();
-      if (array && array.length) {
+      if (resp.ok && array && array.length) {
         const datasets = chart.data.datasets as Chart.ChartDataSets[];
         datasets.length = 0;
         array.forEach((e: any, i: number) => {
