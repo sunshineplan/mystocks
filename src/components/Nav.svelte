@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fire, post } from "../misc";
-  import { username, component } from "../stores";
+  import { username, component, flows } from "../stores";
 
   export let user: string;
 
@@ -23,6 +23,9 @@
     }}
   >
     My Stocks
+  </span>
+  <span style="color:white" on:click={flows.toggle}>
+    Switch to {$flows ? "Stocks" : "Flows"}
   </span>
   <div class="navbar-nav flex-row">
     {#if user}
@@ -70,11 +73,6 @@
     font-size: 25px;
     letter-spacing: 0.3px;
     color: white;
-  }
-
-  .brand:hover {
-    color: white;
-    text-decoration: none;
   }
 
   .topbar .nav-link {

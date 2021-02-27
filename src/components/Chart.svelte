@@ -1,4 +1,6 @@
-<canvas class="chart" id="stockChart" />
+<div class="chart">
+  <canvas id="stockChart" />
+</div>
 
 <style>
   .chart {

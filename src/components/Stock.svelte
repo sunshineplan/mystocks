@@ -103,23 +103,21 @@
   <title>My Stocks</title>
 </svelte:head>
 
-<div class="content">
-  <header>
-    <AutoComplete />
-    <div
-      class="home"
-      on:click={() => {
-        window.history.pushState({}, "", "/");
-        $component = "stocks";
-      }}
-    >
-      <div class="icon"><i class="material-icons">home</i></div>
-      <span>Home</span>
-    </div>
-    <Realtime bind:stock />
-  </header>
-  <StockChart />
-</div>
+<header>
+  <AutoComplete />
+  <div
+    class="home"
+    on:click={() => {
+      window.history.pushState({}, "", "/");
+      $component = "stocks";
+    }}
+  >
+    <div class="icon"><i class="material-icons">home</i></div>
+    <span>Home</span>
+  </div>
+  <Realtime bind:stock />
+</header>
+<StockChart />
 
 <style>
   .home {

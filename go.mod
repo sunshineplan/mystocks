@@ -9,7 +9,7 @@ require (
 	github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3
 	github.com/sunshineplan/service v0.0.0-20210225015410-ded17aad0e4b
 	github.com/sunshineplan/stock v0.0.0-20210225131947-bdf65b0f8ae5
-	github.com/sunshineplan/utils v0.0.0-20210224010154-f102cd242d60
+	github.com/sunshineplan/utils v0.0.0-20210227021811-07998f7b7052
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
 	go.mongodb.org/mongo-driver v1.4.6
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
