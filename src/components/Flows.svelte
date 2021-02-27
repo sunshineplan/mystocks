@@ -104,10 +104,27 @@
         ],
       },
     },
+    plugins: [
+      {
+        afterDraw: (chart) => {
+          if (!chart.data.datasets || !chart.data.datasets.length) {
+            const ctx = chart.ctx as CanvasRenderingContext2D;
+            const width = chart.width as number;
+            const height = chart.height as number;
+            ctx.save();
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.font = "italic bold 48px Arial";
+            ctx.fillText("No data", width / 2, height / 2);
+            ctx.restore();
+          }
+        },
+      },
+    ],
   } as Chart.ChartConfiguration;
 
   const load = async (force?: boolean, date?: string) => {
-    var url = "/flows";
+    let url = "/flows";
     if (date) url = url + `?date=${date}`;
     if (checkTime() || force) {
       const resp = await fetch(url);
