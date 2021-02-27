@@ -8,6 +8,7 @@ import (
 var dbConfig mongodb.Config
 var collAccount *mongo.Collection
 var collStock *mongo.Collection
+var collFlows *mongo.Collection
 
 func initDB() (err error) {
 	if err = meta.Get("mystocks_mongo", &dbConfig); err != nil {
@@ -24,6 +25,7 @@ func initDB() (err error) {
 
 	collAccount = database.Collection("account")
 	collStock = database.Collection("stock")
+	collFlows = database.Collection("capitalflows")
 
 	return
 }

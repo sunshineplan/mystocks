@@ -104,6 +104,7 @@ func run() {
 		c.HTML(200, "index.html", nil)
 	})
 	base.GET("/mystocks", myStocks)
+	base.GET("/flows", capitalFlows)
 	base.GET("/indices", indices)
 	base.POST("/get", getStock)
 	base.POST("/suggest", getSuggest)

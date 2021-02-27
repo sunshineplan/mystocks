@@ -3,9 +3,24 @@
   import Login from "./components/Login.svelte";
   import Setting from "./components/Setting.svelte";
   import Stocks from "./components/Stocks.svelte";
+  import Flows from "./components/Flows.svelte";
   import Stock from "./components/Stock.svelte";
   import Indices from "./components/Indices.svelte";
-  import { username as user, current, component, refresh } from "./stores";
+  import {
+    username as user,
+    current,
+    component,
+    refresh,
+    flows,
+  } from "./stores";
+
+  const components: {
+    [component: string]: typeof Login | typeof Setting | typeof Stock;
+  } = {
+    login: Login,
+    setting: Setting,
+    stock: Stock,
+  };
 
   const getInfo = async () => {
     const resp = await fetch("/info");
@@ -22,25 +37,19 @@
     }
   };
   const promise = getInfo();
-
-  const components: {
-    [component: string]:
-      | typeof Login
-      | typeof Setting
-      | typeof Stocks
-      | typeof Stock;
-  } = {
-    login: Login,
-    setting: Setting,
-    stocks: Stocks,
-    stock: Stock,
-  };
 </script>
 
 <Nav bind:user={$user} />
 {#await promise then _}
   <div class="content">
-    <svelte:component this={components[$component]} on:info={getInfo} />
+    <svelte:component
+      this={$component != "stocks"
+        ? components[$component]
+        : $flows
+        ? Flows
+        : Stocks}
+      on:info={getInfo}
+    />
   </div>
 {/await}
 <Indices />
