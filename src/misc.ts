@@ -1,9 +1,9 @@
 import Swal from 'sweetalert2'
-import Chart from "chart.js";
-import annotation from "chartjs-plugin-annotation";
+import Chart from 'chart.js'
+import annotation from 'chartjs-plugin-annotation'
 import type { Stock } from './stores'
 
-Chart.plugins.register(annotation);
+Chart.plugins.register(annotation)
 
 const color = (last: number, value?: number) => {
   if (value === undefined) {
@@ -27,7 +27,7 @@ const timeLabels = (start: number, end: number) => {
   return times
 }
 
-export const labels = timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60))
+const labels = timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60))
 
 export const fire = (
   title?: string | undefined,
@@ -58,11 +58,12 @@ export const post = (url: string, data?: object, universal?: boolean) => {
   return fetch(url, init)
 }
 
-export const getToday = () => {
-  const today = new Date()
-  const dd = String(today.getDate()).padStart(2, '0')
-  const mm = String(today.getMonth() + 1).padStart(2, '0')
-  const yyyy = today.getFullYear()
+export const getDate = (n: -1 | 0 | 1) => {
+  const date = new Date()
+  date.setDate(date.getDate() + n)
+  const dd = String(date.getDate()).padStart(2, '0')
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const yyyy = date.getFullYear()
   return `${yyyy}-${mm}-${dd}`
 }
 
@@ -168,4 +169,76 @@ export const intraday = {
       ]
     }
   }
+} as Chart.ChartConfiguration
+
+export const capitalflows = {
+  type: 'line',
+  data: { labels },
+  options: {
+    maintainAspectRatio: false,
+    legend: { position: 'right' },
+    animation: { duration: 0 },
+    tooltips: {
+      callbacks: {
+        label: (tooltipItem) => {
+          const value = tooltipItem.value as string
+          return Math.round(parseFloat(value) * 10000) / 10000 + '亿'
+        }
+      }
+    },
+    scales: {
+      xAxes: [
+        {
+          gridLines: { drawTicks: false },
+          ticks: {
+            padding: 10,
+            maxTicksLimit: 9,
+            maxRotation: 0
+          }
+        }
+      ],
+      yAxes: [
+        {
+          gridLines: { drawTicks: false },
+          ticks: {
+            padding: 12,
+            callback: (value) => {
+              if (value) return value + '亿'
+              else return value
+            }
+          }
+        }
+      ]
+    },
+    annotation: {
+      annotations: [
+        {
+          id: 'zero',
+          type: 'line',
+          mode: 'horizontal',
+          scaleID: 'y-axis-0',
+          value: 0,
+          borderColor: 'black',
+          borderWidth: 0.75
+        }
+      ]
+    }
+  },
+  plugins: [
+    {
+      afterDraw: (chart) => {
+        if (!chart.data.datasets || !chart.data.datasets.length) {
+          const ctx = chart.ctx as CanvasRenderingContext2D
+          const width = chart.width as number
+          const height = chart.height as number
+          ctx.save()
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.font = 'italic bold 48px Arial'
+          ctx.fillText('No data', width / 2, height / 2)
+          ctx.restore()
+        }
+      }
+    }
+  ]
 } as Chart.ChartConfiguration

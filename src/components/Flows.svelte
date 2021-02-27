@@ -2,18 +2,21 @@
   import { onMount } from "svelte";
   import Chart from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
-  import { getToday, checkTime, labels, getColor } from "../misc";
+  import { getDate, checkTime, getColor, capitalflows } from "../misc";
   import type { Flows } from "../stores";
 
-  const today = getToday();
+  const today = getDate(0);
 
   let autoUpdate = 0;
   let chart: Chart;
   let show: number[] = [];
   let date = today;
   let last = "";
+  let loading = 0;
+  let status = 0;
 
-  const onClick = (
+  ((capitalflows.options as Chart.ChartOptions)
+    .legend as Chart.ChartLegendOptions).onClick = (
     event: MouseEvent,
     legendItem: Chart.ChartLegendLabelItem
   ) => {
@@ -46,91 +49,20 @@
     }
   };
 
-  const capitalflows = {
-    type: "line",
-    data: {
-      labels,
-    },
-    options: {
-      maintainAspectRatio: false,
-      legend: {
-        position: "right",
-        onClick,
-      },
-      animation: { duration: 0 },
-      tooltips: {
-        callbacks: {
-          label: (tooltipItem) => {
-            const value = tooltipItem.value as string;
-            return Math.round(parseFloat(value) * 10000) / 10000 + "亿";
-          },
-        },
-      },
-      scales: {
-        xAxes: [
-          {
-            gridLines: { drawTicks: false },
-            ticks: {
-              padding: 10,
-              maxTicksLimit: 9,
-              maxRotation: 0,
-            },
-          },
-        ],
-        yAxes: [
-          {
-            gridLines: { drawTicks: false },
-            ticks: {
-              padding: 12,
-              callback: (value) => {
-                if (value) return value + "亿";
-                else return value;
-              },
-            },
-          },
-        ],
-      },
-      annotation: {
-        annotations: [
-          {
-            id: "zero",
-            type: "line",
-            mode: "horizontal",
-            scaleID: "y-axis-0",
-            value: 0,
-            borderColor: "black",
-            borderWidth: 0.75,
-          },
-        ],
-      },
-    },
-    plugins: [
-      {
-        afterDraw: (chart) => {
-          if (!chart.data.datasets || !chart.data.datasets.length) {
-            const ctx = chart.ctx as CanvasRenderingContext2D;
-            const width = chart.width as number;
-            const height = chart.height as number;
-            ctx.save();
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.font = "italic bold 48px Arial";
-            ctx.fillText("No data", width / 2, height / 2);
-            ctx.restore();
-          }
-        },
-      },
-    ],
-  } as Chart.ChartConfiguration;
-
   const load = async (force?: boolean, date?: string) => {
     let url = "/flows";
     if (date) url = url + `?date=${date}`;
     if (checkTime() || force) {
+      loading++;
       const resp = await fetch(url);
-      if (!resp.ok) return;
+      if (!resp.ok) {
+        status = 0;
+        loading--;
+        return;
+      }
       const array = await resp.json();
       if (array && array.length) {
+        status = 1;
         const datasets = chart.data.datasets as Chart.ChartDataSets[];
         datasets.length = 0;
         array.forEach((e: Flows, i: number) => {
@@ -155,18 +87,20 @@
         chart.update();
         if (!date || (date && date == today))
           last = new Date().toLocaleString();
-      }
+      } else status = -1;
+      loading--;
     }
   };
 
-  const goto = (day?: string) => {
+  const goto = (day: string) => {
     show.length = 0;
-    if (day && day != today) {
+    (chart.data.datasets as Chart.ChartDataSets[]).length = 0;
+    chart.update();
+    if (day != today) {
       if (autoUpdate) clearInterval(autoUpdate);
       load(true, day);
     } else {
       last = "";
-      date = today;
       load(true);
       autoUpdate = setInterval(load, 60000);
     }
@@ -194,17 +128,38 @@
 
 <header style="height:80px">
   <AutoComplete />
-  <div class="input-group">
-    <div class="input-group-prepend">
-      <label class="input-group-text" for="date">Date</label>
+  <div>
+    <div class="input-group">
+      <div class="input-group-prepend">
+        <button class="input-group-text">+</button>
+      </div>
+      <input
+        class="form-control"
+        type="date"
+        bind:value={date}
+        on:change={() => goto(date)}
+        id="date"
+      />
+      <div class="input-group-append">
+        <button class="input-group-text">-</button>
+      </div>
     </div>
-    <input class="form-control" type="date" bind:value={date} id="date" />
-    <div class="input-group-append">
-      <button class="btn btn-primary" on:click={() => goto(date)}>Go</button>
-    </div>
-    <div class="input-group-append">
-      <button class="btn btn-danger" on:click={() => goto()}>Reset</button>
-    </div>
+    <button class="btn btn-danger" on:click={() => (date = today)}>
+      Reset
+    </button>
+    {#if loading}
+      <div class="spinner-border text-secondary" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    {:else if status}
+      {#if status == 1}
+        <i class="material-icons text-success">done</i>
+      {:else}
+        <i class="material-icons text-warning">warning_amber</i>
+      {/if}
+    {:else}
+      <i class="material-icons text-danger">close</i>
+    {/if}
   </div>
   {#if date == today && last}
     <small>Last update: {last}</small>
@@ -216,7 +171,21 @@
 
 <style>
   .input-group {
-    width: 350px;
+    display: inline-flex;
+    width: 240px;
+    vertical-align: middle;
+  }
+
+  .spinner-border {
+    height: 32px;
+    width: 32px;
+    vertical-align: middle;
+  }
+
+  .material-icons {
+    vertical-align: middle;
+    font-size: 36px;
+    cursor: default;
   }
 
   .chart {
