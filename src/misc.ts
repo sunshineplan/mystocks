@@ -58,15 +58,6 @@ export const post = (url: string, data?: object, universal?: boolean) => {
   return fetch(url, init)
 }
 
-export const getDate = (n: -1 | 0 | 1) => {
-  const date = new Date()
-  date.setDate(date.getDate() + n)
-  const dd = String(date.getDate()).padStart(2, '0')
-  const mm = String(date.getMonth() + 1).padStart(2, '0')
-  const yyyy = date.getFullYear()
-  return `${yyyy}-${mm}-${dd}`
-}
-
 export const checkTime = () => {
   const date = new Date()
   const hour = date.getUTCHours()
