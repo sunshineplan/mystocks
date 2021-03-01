@@ -42,8 +42,15 @@ func capitalFlows(c *gin.Context) {
 			strings.ReplaceAll(date, "-", "/"),
 		)
 
+		resp := gohttp.Get(url, nil)
+		if resp.StatusCode == 404 {
+			resp.Close()
+			c.JSON(200, nil)
+			return
+		}
+
 		var tl []sector.TimeLine
-		if err := gohttp.Get(url, nil).JSON(&tl); err != nil {
+		if err := resp.JSON(&tl); err != nil {
 			log.Println("Failed to get flows chart:", err)
 			c.String(500, "")
 			return
@@ -58,8 +65,7 @@ func capitalFlows(c *gin.Context) {
 		return
 	}
 
-	tz, _ := time.LoadLocation("Asia/Shanghai")
-	t := time.Now().In(tz)
+	t := time.Now().In(time.FixedZone("CST", 8*60*60))
 	date = fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
 
 	flows, err := sector.GetChart(date, collFlows)
