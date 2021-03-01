@@ -174,7 +174,7 @@ export const capitalflows = {
         label: (tooltipItem, data) => {
           const label = (data.datasets as Chart.ChartDataSets[])[tooltipItem.datasetIndex as number].label
           const value = tooltipItem.value as string
-          return `${label} - ${Math.round(parseFloat(value) * 10000) / 10000}亿`
+          return `${label} ${Math.round(parseFloat(value) * 10000) / 10000}亿`
         }
       }
     },
