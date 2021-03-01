@@ -162,7 +162,15 @@
         <button class="input-group-text" on:click={() => getDate(1)}>+</button>
       </div>
     </div>
-    <button class="btn btn-danger" on:click={() => getDate(0)}>Reset</button>
+    <button
+      class="btn btn-danger"
+      on:click={() => {
+        getDate(0);
+        show.length = 0;
+      }}
+    >
+      Reset
+    </button>
     {#if loading}
       <div class="spinner-border text-secondary" role="status">
         <span class="sr-only">Loading...</span>
