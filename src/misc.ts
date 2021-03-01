@@ -88,13 +88,13 @@ export const addColor = (stock: Stock, val: string) => {
 
 export const getColor = (i: number) => {
   const chartColors = [
-    'rgb(255, 99, 132)', // red
-    'rgb(255, 159, 64)', // orange
-    'rgb(255, 205, 86)', // yellow
-    'rgb(75, 192, 192)', // green
-    'rgb(54, 162, 235)', // blue
-    'rgb(153, 102, 255)', // purple
-    'rgb(201, 203, 207)' // grey
+    '#dc3545', // red
+    '#fd7e14', // orange
+    '#ffc107', // yellow
+    '#28a745', // green
+    '#007bff', // blue
+    '#6f42c1', // purple
+    '#6c757d' // gray
   ]
   return chartColors[i % chartColors.length]
 }
@@ -171,9 +171,10 @@ export const capitalflows = {
     animation: { duration: 0 },
     tooltips: {
       callbacks: {
-        label: (tooltipItem) => {
+        label: (tooltipItem, data) => {
+          const label = (data.datasets as Chart.ChartDataSets[])[tooltipItem.datasetIndex as number].label
           const value = tooltipItem.value as string
-          return Math.round(parseFloat(value) * 10000) / 10000 + '亿'
+          return `${label} - ${Math.round(parseFloat(value) * 10000) / 10000}亿`
         }
       }
     },
