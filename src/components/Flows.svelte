@@ -155,11 +155,28 @@
   <div>
     <div class="input-group">
       <div class="input-group-prepend">
-        <button class="input-group-text" on:click={() => getDate(-1)}>-</button>
+        <button
+          class="input-group-text"
+          disabled={loading ? true : false}
+          on:click={() => getDate(-1)}
+        >
+          -
+        </button>
       </div>
-      <input class="form-control" type="date" bind:value={date} />
+      <input
+        class="form-control"
+        type="date"
+        disabled={loading ? true : false}
+        bind:value={date}
+      />
       <div class="input-group-append">
-        <button class="input-group-text" on:click={() => getDate(1)}>+</button>
+        <button
+          class="input-group-text"
+          disabled={loading ? true : false}
+          on:click={() => getDate(1)}
+        >
+          +
+        </button>
       </div>
     </div>
     <button
