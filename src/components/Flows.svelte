@@ -182,8 +182,9 @@
     <button
       class="btn btn-danger"
       on:click={() => {
-        getDate(0);
         show.length = 0;
+        chart.update();
+        getDate(0);
       }}
     >
       Reset
