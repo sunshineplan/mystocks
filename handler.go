@@ -37,12 +37,17 @@ func myStocks(c *gin.Context) {
 func capitalFlows(c *gin.Context) {
 	var date string
 	if date, _ = c.GetQuery("date"); date != "" {
-		url := fmt.Sprintf(
-			"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
-			strings.ReplaceAll(date, "-", "/"),
-		)
+		date = strings.ReplaceAll(date, "-", "/")
 
-		resp := gohttp.Get(url, nil)
+		github := "https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json"
+		jsdelivr := "https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json"
+
+		resp := gohttp.Get(fmt.Sprintf(github, date), nil)
+		if resp.Error != nil {
+			log.Print(resp.Error)
+			resp = gohttp.Get(fmt.Sprintf(jsdelivr, date), nil)
+		}
+
 		if resp.StatusCode == 404 {
 			resp.Close()
 			c.JSON(200, nil)
