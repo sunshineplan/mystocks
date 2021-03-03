@@ -7,6 +7,7 @@
 
   let autoUpdate = 0;
   let chart: Chart;
+  let datasets: Chart.ChartDataSets[];
   let show: number[] = [];
   let date = "";
   let last = "";
@@ -39,13 +40,13 @@
 
   const display = (index: number) => {
     if (!show.length) {
-      (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
+      datasets.forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
         if (i !== index) meta.hidden = true;
       });
       show.push(index);
     } else if (show.includes(index) && show.length == 1) {
-      (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
+      datasets.forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
         meta.hidden = undefined;
       });
@@ -54,7 +55,7 @@
       chart.getDatasetMeta(index).hidden = true;
       show.splice(show.indexOf(index), 1);
     } else {
-      (chart.data.datasets as Chart.ChartDataSets[]).forEach((e, i) => {
+      datasets.forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
         if (i == index) meta.hidden = false;
       });
@@ -71,7 +72,6 @@
       }
       url = url + `?date=${date}`;
     }
-    const datasets = chart.data.datasets as Chart.ChartDataSets[];
     if (force) {
       datasets.length = 0;
       chart.update();
@@ -118,7 +118,7 @@
   const goto = () => {
     if (!chart) return;
     show.length = 0;
-    (chart.data.datasets as Chart.ChartDataSets[]).length = 0;
+    datasets.length = 0;
     chart.update();
     if (date != today) {
       if (autoUpdate) clearInterval(autoUpdate);
@@ -135,6 +135,7 @@
       document.querySelector("#flowsChart") as HTMLCanvasElement,
       capitalflows
     );
+    datasets = chart.data.datasets as Chart.ChartDataSets[];
 
     load(true);
     autoUpdate = setInterval(load, 60000);
@@ -182,6 +183,10 @@
     <button
       class="btn btn-danger"
       on:click={() => {
+        datasets.forEach((e, i) => {
+          const meta = chart.getDatasetMeta(i);
+          meta.hidden = undefined;
+        });
         show.length = 0;
         chart.update();
         getDate(0);
