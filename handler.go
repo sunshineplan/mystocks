@@ -42,12 +42,36 @@ func capitalFlows(c *gin.Context) {
 		github := "https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json"
 		jsdelivr := "https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json"
 
-		resp := gohttp.Get(fmt.Sprintf(github, date), nil)
-		if resp.Error != nil {
-			log.Print(resp.Error)
-			resp = gohttp.Get(fmt.Sprintf(jsdelivr, date), nil)
+		rc := make(chan *gohttp.Response, 1)
+		done := make(chan bool, 1)
+		get := func(url string) {
+			var status int
+			c := make(chan *gohttp.Response, 1)
+			go func() { c <- gohttp.Get(fmt.Sprintf(url, date), nil) }()
+			for {
+				select {
+				case ok := <-done:
+					if ok {
+						status = 1
+						return
+					}
+					status = -1
+				case resp := <-c:
+					if resp.Error != nil && status == 0 {
+						done <- false
+						return
+					}
+					rc <- resp
+					done <- true
+					return
+				}
+			}
 		}
 
+		go get(github)
+		go get(jsdelivr)
+
+		resp := <-rc
 		if resp.StatusCode == 404 {
 			resp.Close()
 			c.JSON(200, nil)
