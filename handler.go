@@ -45,19 +45,18 @@ func capitalFlows(c *gin.Context) {
 		rc := make(chan *gohttp.Response, 1)
 		done := make(chan bool, 1)
 		get := func(url string) {
-			var status int
+			var mustReturn bool
 			c := make(chan *gohttp.Response, 1)
 			go func() { c <- gohttp.Get(fmt.Sprintf(url, date), nil) }()
 			for {
 				select {
 				case ok := <-done:
+					mustReturn = true
 					if ok {
-						status = 1
 						return
 					}
-					status = -1
 				case resp := <-c:
-					if resp.Error != nil && status == 0 {
+					if resp.Error != nil && !mustReturn {
 						done <- false
 						return
 					}
