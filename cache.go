@@ -2,16 +2,18 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/sunshineplan/stock"
+	"github.com/sunshineplan/stock/capitalflows/sector"
 	"github.com/sunshineplan/utils/cache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var stockCache = cache.New(true)
+var memoryCache = cache.New(true)
 
 func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 	if id == "" {
@@ -25,7 +27,7 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 	}
 
 	if !init {
-		value, ok := stockCache.Get(id)
+		value, ok := memoryCache.Get(id)
 		if ok {
 			return value.([]stock.Stock), nil
 		}
@@ -36,7 +38,7 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 		return nil, err
 	}
 
-	stockCache.Set(id, ss, 1*time.Hour, func() interface{} {
+	memoryCache.Set(id, ss, 1*time.Hour, func() interface{} {
 		ss, err := getStocks(id)
 		if err != nil {
 			log.Print(err)
@@ -46,6 +48,25 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 	})
 
 	return ss, nil
+}
+
+func loadFlows() ([]sector.Chart, error) {
+	t := time.Now().In(time.FixedZone("CST", 8*60*60))
+	date := fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
+
+	value, ok := memoryCache.Get("flows")
+	if ok {
+		return value.([]sector.Chart), nil
+	}
+
+	flows, err := sector.GetChart(date, collFlows)
+	if err != nil {
+		return nil, err
+	}
+
+	memoryCache.Set("flows", flows, time.Minute, nil)
+
+	return flows, nil
 }
 
 func getStocks(id interface{}) ([]stock.Stock, error) {

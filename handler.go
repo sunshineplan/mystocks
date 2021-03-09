@@ -93,10 +93,7 @@ func capitalFlows(c *gin.Context) {
 		return
 	}
 
-	t := time.Now().In(time.FixedZone("CST", 8*60*60))
-	date = fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
-
-	flows, err := sector.GetChart(date, collFlows)
+	flows, err := loadFlows()
 	if err != nil {
 		log.Println("Failed to get flows chart:", err)
 		c.String(500, "")
