@@ -14,6 +14,11 @@ import (
 )
 
 func run() {
+	router := gin.New()
+	server.Handler = router
+
+	router.Use(gin.Recovery())
+
 	if *logPath != "" {
 		f, err := os.OpenFile(*logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
 		if err != nil {
@@ -24,14 +29,13 @@ func run() {
 		gin.DefaultErrorWriter = f
 
 		log.SetOutput(f)
+
+		router.Use(gin.Logger())
 	}
 
 	if err := initDB(); err != nil {
 		log.Fatalln("Failed to initialize database:", err)
 	}
-
-	router := gin.Default()
-	server.Handler = router
 
 	js, err := os.ReadFile(joinPath(dir(self), "public/build/bundle.js"))
 	if err != nil {
