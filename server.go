@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -31,6 +32,8 @@ func run() {
 		log.SetOutput(f)
 
 		router.Use(gin.Logger())
+	} else {
+		log.SetOutput(io.Discard)
 	}
 
 	if err := initDB(); err != nil {
