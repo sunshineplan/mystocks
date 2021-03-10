@@ -75,13 +75,21 @@
     }
     if (checkTime() || force) {
       loading++;
-      const resp = await fetch(url);
-      if (!resp.ok) {
+      let array: any;
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) {
+          status = 0;
+          loading--;
+          return;
+        }
+        array = await resp.json();
+      } catch (e) {
+        console.log(e);
         status = 0;
         loading--;
         return;
       }
-      const array = await resp.json();
       if (array && array.length) {
         status = 1;
         datasets.length = 0;
