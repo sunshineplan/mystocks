@@ -30,10 +30,7 @@
   const today = getDate(0);
 
   ((capitalflows.options as Chart.ChartOptions)
-    .legend as Chart.ChartLegendOptions).onClick = (
-    event: MouseEvent,
-    legendItem: Chart.ChartLegendLabelItem
-  ) => {
+    .legend as Chart.ChartLegendOptions).onClick = (event, legendItem) => {
     display(legendItem.datasetIndex as number);
     chart.update();
   };

@@ -30,6 +30,23 @@
 
   $: $current, load();
 
+  const callbacks = ((intraday.options as Chart.ChartOptions)
+    .tooltips as Chart.ChartTooltipOptions)
+    .callbacks as Chart.ChartTooltipCallback;
+
+  callbacks.label = (tooltipItem) => {
+    const value = parseFloat(tooltipItem.value as string);
+    const percent =
+      Math.round(((value - stock.last) / stock.last) * 10000) / 100;
+    return `${value}   ${percent}%`;
+  };
+  callbacks.labelTextColor = (tooltipItem) => {
+    const change = parseFloat(tooltipItem.value as string) - stock.last;
+    if (change > 0) return "red";
+    else if (change < 0) return "green";
+    return "black";
+  };
+
   const start = () => {
     chart = new Chart(
       document.querySelector("#stockChart") as HTMLCanvasElement,

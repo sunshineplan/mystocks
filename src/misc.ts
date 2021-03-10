@@ -109,8 +109,8 @@ export const intraday = {
         fill: false,
         lineTension: 0,
         borderWidth: 2,
-        borderColor: 'red',
-        backgroundColor: 'red',
+        borderColor: '#17a2b8',
+        backgroundColor: '#17a2b8',
         pointRadius: 0,
         pointHoverRadius: 3
       }
@@ -126,7 +126,12 @@ export const intraday = {
     tooltips: {
       mode: 'index',
       intersect: false,
-      displayColors: false
+      displayColors: false,
+      backgroundColor: 'rgba(210, 210, 210, 0.8)',
+      titleFontColor: 'black',
+      bodyFontStyle: 'bold',
+      bodyFontSize: 15,
+      callbacks: {}
     },
     animation: { duration: 0 },
     scales: {
@@ -173,8 +178,8 @@ export const capitalflows = {
       callbacks: {
         label: (tooltipItem, data) => {
           const label = (data.datasets as Chart.ChartDataSets[])[tooltipItem.datasetIndex as number].label
-          const value = tooltipItem.value as string
-          return `${label} ${Math.round(parseFloat(value) * 10000) / 10000}亿`
+          const value = Math.round(parseFloat(tooltipItem.value as string) * 10000) / 10000
+          return `${label}   ${value}亿`
         }
       }
     },
