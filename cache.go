@@ -13,7 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var memoryCache = cache.New(true)
+var stockCache = cache.New(false)
+var flowsCache = cache.New(true)
 
 func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 	if id == "" {
@@ -27,7 +28,7 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 	}
 
 	if !init {
-		value, ok := memoryCache.Get(id)
+		value, ok := stockCache.Get(id)
 		if ok {
 			return value.([]stock.Stock), nil
 		}
@@ -38,13 +39,8 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 		return nil, err
 	}
 
-	memoryCache.Set(id, ss, 1*time.Hour, func() interface{} {
-		ss, err := getStocks(id)
-		if err != nil {
-			log.Print(err)
-			return []stock.Stock{}
-		}
-		return ss
+	stockCache.Set(id, ss, 1*time.Hour, func() (interface{}, error) {
+		return getStocks(id)
 	})
 
 	return ss, nil
@@ -54,7 +50,7 @@ func loadFlows() ([]sector.Chart, error) {
 	t := time.Now().In(time.FixedZone("CST", 8*60*60))
 	date := fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
 
-	value, ok := memoryCache.Get("flows")
+	value, ok := flowsCache.Get("flows")
 	if ok {
 		return value.([]sector.Chart), nil
 	}
@@ -64,7 +60,7 @@ func loadFlows() ([]sector.Chart, error) {
 		return nil, err
 	}
 
-	memoryCache.Set("flows", flows, time.Minute, nil)
+	flowsCache.Set("flows", flows, time.Minute, nil)
 
 	return flows, nil
 }
