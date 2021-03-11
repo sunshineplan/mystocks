@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/gohttp"
 	"github.com/sunshineplan/stock"
-	"github.com/sunshineplan/stock/capitalflows/sector"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -35,65 +32,9 @@ func myStocks(c *gin.Context) {
 }
 
 func capitalFlows(c *gin.Context) {
-	var date string
-	if date, _ = c.GetQuery("date"); date != "" {
-		date = strings.ReplaceAll(date, "-", "/")
+	date, _ := c.GetQuery("date")
 
-		github := "https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json"
-		jsdelivr := "https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json"
-
-		rc := make(chan *gohttp.Response, 1)
-		done := make(chan bool, 1)
-		get := func(url string) {
-			var mustReturn bool
-			c := make(chan *gohttp.Response, 1)
-			go func() { c <- gohttp.Get(fmt.Sprintf(url, date), nil) }()
-			for {
-				select {
-				case ok := <-done:
-					mustReturn = true
-					if ok {
-						return
-					}
-				case resp := <-c:
-					if resp.Error != nil && !mustReturn {
-						done <- false
-						return
-					}
-					rc <- resp
-					done <- true
-					return
-				}
-			}
-		}
-
-		go get(github)
-		go get(jsdelivr)
-
-		resp := <-rc
-		if resp.StatusCode == 404 {
-			resp.Close()
-			c.JSON(200, nil)
-			return
-		}
-
-		var tl []sector.TimeLine
-		if err := resp.JSON(&tl); err != nil {
-			log.Println("Failed to get flows chart:", err)
-			c.String(500, "")
-			return
-		}
-
-		var flows []sector.Chart
-		for _, i := range tl {
-			flows = append(flows, sector.TimeLine2Chart(i))
-		}
-
-		c.JSON(200, flows)
-		return
-	}
-
-	flows, err := loadFlows()
+	flows, err := loadFlows(date)
 	if err != nil {
 		log.Println("Failed to get flows chart:", err)
 		c.String(500, "")
