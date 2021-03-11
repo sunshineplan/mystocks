@@ -10,7 +10,7 @@ import (
 
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/stock"
-	_ "github.com/sunshineplan/stock/txzq"
+	_ "github.com/sunshineplan/stock/eastmoney"
 	"github.com/sunshineplan/utils"
 	"github.com/sunshineplan/utils/httpsvr"
 	"github.com/sunshineplan/utils/metadata"

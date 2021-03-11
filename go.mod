@@ -8,7 +8,7 @@ require (
 	github.com/go-mail/mail v2.3.1+incompatible // indirect
 	github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3
 	github.com/sunshineplan/service v0.0.0-20210225015410-ded17aad0e4b
-	github.com/sunshineplan/stock v0.0.0-20210225131947-bdf65b0f8ae5
+	github.com/sunshineplan/stock v0.0.0-20210311120903-4c4650eb6360
 	github.com/sunshineplan/utils v0.0.0-20210310015804-6fe1b48a3fa3
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
 	go.mongodb.org/mongo-driver v1.5.0
