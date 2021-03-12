@@ -137,8 +137,9 @@ github.com/sunshineplan/service v0.0.0-20210225015410-ded17aad0e4b/go.mod h1:Zy1
 github.com/sunshineplan/stock v0.0.0-20210311120903-4c4650eb6360 h1:5hhl3yBeQ85ytR6HRf/ItlNiLjWrZROBoFQDemVGbkE=
 github.com/sunshineplan/stock v0.0.0-20210311120903-4c4650eb6360/go.mod h1:Ya377k8okiwFMKeLxhKD2FJz0OJAhMzqUD2HIdDFJGM=
 github.com/sunshineplan/utils v0.0.0-20210224010154-f102cd242d60/go.mod h1:fJ8/Fjbd50RwQ8/wxBmBgkuDHfcXrCJu6c/iRsgkYok=
-github.com/sunshineplan/utils v0.0.0-20210310015804-6fe1b48a3fa3 h1:q0z0qIDmWyefYVIDh9j4eiHDvilTPOyAM73T/RxYljY=
 github.com/sunshineplan/utils v0.0.0-20210310015804-6fe1b48a3fa3/go.mod h1:fJ8/Fjbd50RwQ8/wxBmBgkuDHfcXrCJu6c/iRsgkYok=
+github.com/sunshineplan/utils v0.0.0-20210312020649-866f5f91640b h1:hjaS9zsdp5jNztxVOFby3MVeNjMG+f5JoVhDAzE7K+c=
+github.com/sunshineplan/utils v0.0.0-20210312020649-866f5f91640b/go.mod h1:fJ8/Fjbd50RwQ8/wxBmBgkuDHfcXrCJu6c/iRsgkYok=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
