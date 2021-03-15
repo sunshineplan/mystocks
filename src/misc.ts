@@ -9,7 +9,7 @@ const color = (last: number, value?: number) => {
   if (value === undefined) {
     if (last < 0) return 'color:green'
     else if (last > 0) return 'color:red'
-  } else {
+  } else if (value) {
     if (last < value) return 'color:red'
     else if (last > value) return 'color:green'
   }
