@@ -7,12 +7,13 @@
 
   let autoUpdate = 0;
   let chart: Chart;
-  let datasets: Chart.ChartDataSets[];
+  let datasets: Chart.ChartDataSets[] = [];
   let show: number[] = [];
   let date = "";
   let last = "";
   let loading = 0;
   let status = 0;
+  let hover = false;
 
   $: date && goto();
 
@@ -36,6 +37,7 @@
   };
 
   const display = (index: number) => {
+    const datasets = chart.data.datasets as Chart.ChartDataSets[];
     if (!show.length) {
       datasets.forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
@@ -69,10 +71,7 @@
       }
       url = url + `?date=${date}`;
     }
-    if (force) {
-      datasets.length = 0;
-      chart.update();
-    }
+    if (force) updateChart(true);
     if (checkTime() || force) {
       loading++;
       let array: any;
@@ -106,15 +105,10 @@
             data: e.chart.map((i) => (i.y as number) / 100000000),
           });
         });
-        if (show.length)
-          datasets.forEach((e, i) => {
-            const meta = chart.getDatasetMeta(i);
-            if (show.includes(i)) meta.hidden = false;
-            else meta.hidden = true;
-          });
-        chart.update();
-        if (!date || (date && date == today))
-          last = new Date().toLocaleString();
+        if (force || !hover) {
+          chart.data.datasets = [...datasets];
+          updateChart();
+        }
       } else status = -1;
       loading--;
     }
@@ -123,8 +117,7 @@
   const goto = () => {
     if (!chart) return;
     show.length = 0;
-    datasets.length = 0;
-    chart.update();
+    updateChart(true);
     if (date != today) {
       if (autoUpdate) clearInterval(autoUpdate);
       load(true, date);
@@ -135,12 +128,28 @@
     }
   };
 
+  const updateChart = (empty?: boolean) => {
+    const datasets = chart.data.datasets as Chart.ChartDataSets[];
+    if (empty) {
+      datasets.length = 0;
+      chart.update();
+      return;
+    }
+    if (show.length)
+      datasets.forEach((e, i) => {
+        const meta = chart.getDatasetMeta(i);
+        if (show.includes(i)) meta.hidden = false;
+        else meta.hidden = true;
+      });
+    chart.update();
+    if (!date || (date && date == today)) last = new Date().toLocaleString();
+  };
+
   onMount(() => {
     chart = new Chart(
       document.querySelector("#flowsChart") as HTMLCanvasElement,
       capitalflows
     );
-    datasets = chart.data.datasets as Chart.ChartDataSets[];
 
     load(true);
     autoUpdate = setInterval(load, 60000);
@@ -221,7 +230,15 @@
     <small>Last update: {last}</small>
   {/if}
 </header>
-<div class="chart">
+<div
+  class="chart"
+  on:mouseenter={() => (hover = true)}
+  on:mouseleave={() => {
+    hover = false;
+    chart.data.datasets = [...datasets];
+    updateChart();
+  }}
+>
   <canvas id="flowsChart" />
 </div>
 

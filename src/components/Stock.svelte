@@ -3,7 +3,6 @@
   import Chart from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import Realtime from "./Realtime.svelte";
-  import StockChart from "./Chart.svelte";
   import { checkTime, post, intraday } from "../misc";
   import { component, current, refresh } from "../stores";
   import type { Stock } from "../stores";
@@ -27,6 +26,7 @@
   let data: Chart.ChartPoint[] = [];
   let chart: Chart;
   let update = "";
+  let hover = false;
 
   $: $current, load();
 
@@ -67,7 +67,7 @@
     (((chart.options.scales as Chart.ChartScales).yAxes as Chart.ChartYAxe[])[0]
       .ticks as Chart.TickOptions).suggestedMax = stock.last * 1.01;
     (chart as any).annotation.elements.PreviousClose.options.value = stock.last;
-    updateChart();
+    updateChart(true);
   };
 
   const loadRealtime = async (force?: boolean) => {
@@ -99,8 +99,8 @@
     }
   };
 
-  const updateChart = () => {
-    if (data.length && stock.now) {
+  const updateChart = (force?: boolean) => {
+    if (data.length && stock.now && (force || !hover)) {
       data[data.length - 1].y = stock.now;
       (chart.data.datasets as Chart.ChartDataSets[])[0].data = data;
       chart.update();
@@ -134,7 +134,16 @@
   </div>
   <Realtime bind:stock />
 </header>
-<StockChart />
+<div
+  class="chart"
+  on:mouseenter={() => (hover = true)}
+  on:mouseleave={() => {
+    hover = false;
+    updateChart(true);
+  }}
+>
+  <canvas id="stockChart" />
+</div>
 
 <style>
   .home {
@@ -165,5 +174,11 @@
     display: flex;
     justify-content: center;
     padding-left: 20px;
+  }
+
+  .chart {
+    max-width: 1000px;
+    max-height: 500px;
+    height: calc(100% - 210px);
   }
 </style>
