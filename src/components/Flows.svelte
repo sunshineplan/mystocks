@@ -197,10 +197,12 @@
     <button
       class="btn btn-danger"
       on:click={() => {
-        datasets.forEach((e, i) => {
-          const meta = chart.getDatasetMeta(i);
-          meta.hidden = undefined;
-        });
+        if (chart.data.datasets && date == today)
+          chart.data.datasets.forEach((e, i) => {
+            const meta = chart.getDatasetMeta(i);
+            meta.hidden = undefined;
+          });
+        else chart.data.datasets = [];
         show.length = 0;
         chart.update();
         getDate(0);
@@ -235,8 +237,10 @@
   on:mouseenter={() => (hover = true)}
   on:mouseleave={() => {
     hover = false;
-    chart.data.datasets = [...datasets];
-    updateChart();
+    if (date == today) {
+      chart.data.datasets = [...datasets];
+      updateChart();
+    }
   }}
 >
   <canvas id="flowsChart" />
