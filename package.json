@@ -13,7 +13,7 @@
     "@types/chart.js": "^2.9.31",
     "@types/chartjs-plugin-annotation": "^0.5.1",
     "@types/sortablejs": "^1.10.6",
-    "rollup": "^2.41.2",
+    "rollup": "^2.41.5",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.1.0",
@@ -29,6 +29,6 @@
     "chart.js": "^2.9.4",
     "chartjs-plugin-annotation": "^0.5.7",
     "sortablejs": "^1.13.0",
-    "sweetalert2": "^10.15.5"
+    "sweetalert2": "^10.15.6"
   }
 }

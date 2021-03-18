@@ -76,7 +76,9 @@
       loading++;
       let array: any;
       try {
-        const resp = await fetch(url);
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 50000);
+        const resp = await fetch(url, { signal: controller.signal });
         if (!resp.ok) {
           status = 0;
           loading--;
