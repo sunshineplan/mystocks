@@ -11,7 +11,7 @@ require (
 	github.com/sunshineplan/stock v0.0.0-20210311120903-4c4650eb6360
 	github.com/sunshineplan/utils v0.0.0-20210318052909-87522d87aa73
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
-	go.mongodb.org/mongo-driver v1.5.0
+	go.mongodb.org/mongo-driver v1.5.1
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/mail.v2 v2.3.1 // indirect
 )

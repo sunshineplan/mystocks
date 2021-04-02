@@ -151,6 +151,10 @@ func reorderStock(userID interface{}, orig, dest []string) error {
 
 func backup() {
 	log.Print("Start!")
+	if err := initDB(); err != nil {
+		log.Fatalln("Failed to initialize database:", err)
+	}
+
 	var config struct {
 		Host              string
 		Port              int
@@ -194,6 +198,11 @@ func restore(file string) {
 	if _, err := os.Stat(file); err != nil {
 		log.Fatalln("File not found:", err)
 	}
+
+	if err := initDB(); err != nil {
+		log.Fatalln("Failed to initialize database:", err)
+	}
+
 	if err := dbConfig.Restore(file); err != nil {
 		log.Fatal(err)
 	}
