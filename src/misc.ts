@@ -156,7 +156,7 @@ export const intraday: ChartConfiguration<'line'> = {
         annotations: [
           {
             type: 'line',
-            scaleID: 'y-axis-0',
+            scaleID: 'y',
             borderColor: 'black',
             borderWidth: 0.75
           }
@@ -200,7 +200,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
       legend: { position: 'right' },
       tooltip: {
         callbacks: {
-          label: function (this, tooltipItem) {
+          label: function (tooltipItem) {
             const label = tooltipItem.label
             const value = Math.round(parseFloat(tooltipItem.formattedValue) * 10000) / 10000
             return `${label}   ${value}亿`

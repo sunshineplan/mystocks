@@ -1,3 +1,4 @@
+import type { ScatterDataPoint } from 'chart.js'
 import { writable } from 'svelte/store'
 
 export interface Stock {
@@ -18,7 +19,7 @@ export interface Stock {
 
 export interface Flows {
   sector: string
-  chart: Chart.ChartPoint[]
+  chart: ScatterDataPoint[]
 }
 
 export const username = writable('')
