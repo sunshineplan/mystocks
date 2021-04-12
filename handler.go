@@ -196,7 +196,7 @@ func doStar(c *gin.Context) {
 				{Key: "code", Value: code},
 				{Key: "user", Value: userID},
 			},
-			bson.M{"seq": seq},
+			bson.M{"$setOnInsert": bson.M{"seq": seq}},
 			options.Update().SetUpsert(true),
 		)
 		if err != nil {
