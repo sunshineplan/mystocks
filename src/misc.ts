@@ -1,9 +1,9 @@
 import Swal from 'sweetalert2'
-import Chart from 'chart.js'
+import { Chart, ChartConfiguration } from 'chart.js'
 import annotation from 'chartjs-plugin-annotation'
 import type { Stock } from './stores'
 
-Chart.plugins.register(annotation)
+Chart.register(annotation)
 
 const color = (last: number, value?: number) => {
   if (value === undefined) {
@@ -99,15 +99,16 @@ export const getColor = (i: number) => {
   return chartColors[i % chartColors.length]
 }
 
-export const intraday = {
+export const intraday: ChartConfiguration<'line'> = {
   type: 'line',
   data: {
     labels,
     datasets: [
       {
+        data: [],
         label: 'Price',
         fill: false,
-        lineTension: 0,
+        tension: 0,
         borderWidth: 2,
         borderColor: '#17a2b8',
         backgroundColor: '#17a2b8',
@@ -118,116 +119,115 @@ export const intraday = {
   },
   options: {
     maintainAspectRatio: false,
-    legend: { display: false },
     hover: {
       mode: 'index',
       intersect: false
     },
-    tooltips: {
-      mode: 'index',
-      intersect: false,
-      displayColors: false,
-      backgroundColor: 'rgba(210, 210, 210, 0.8)',
-      titleFontColor: 'black',
-      bodyFontStyle: 'bold',
-      bodyFontSize: 15,
-      callbacks: {}
-    },
     animation: { duration: 0 },
     scales: {
-      xAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: {
-            padding: 10,
-            autoSkipPadding: 100,
-            maxRotation: 0,
-          }
+      x: {
+        grid: { drawTicks: false },
+        ticks: {
+          padding: 10,
+          autoSkipPadding: 100,
+          maxRotation: 0,
         }
-      ],
-      yAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: { padding: 12 }
-        }
-      ]
+      },
+      y: {
+        grid: { drawTicks: false },
+        ticks: { padding: 12 }
+      }
     },
-    annotation: {
-      annotations: [
-        {
-          id: 'PreviousClose',
-          type: 'line',
-          mode: 'horizontal',
-          scaleID: 'y-axis-0',
-          borderColor: 'black',
-          borderWidth: 0.75
-        }
-      ]
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        displayColors: false,
+        backgroundColor: 'rgba(210, 210, 210, 0.8)',
+        titleColor: 'black',
+        bodyFont: {
+          weight: 'bold',
+          size: 15
+        },
+        callbacks: {}
+      },
+      annotation: {
+        annotations: [
+          {
+            type: 'line',
+            scaleID: 'y-axis-0',
+            borderColor: 'black',
+            borderWidth: 0.75
+          }
+        ]
+      }
     }
   }
-} as Chart.ChartConfiguration
+}
 
-export const capitalflows = {
+export const capitalflows: ChartConfiguration<'line'> = {
   type: 'line',
-  data: { labels },
+  data: {
+    labels,
+    datasets: []
+  },
   options: {
     maintainAspectRatio: false,
-    legend: { position: 'right' },
     animation: { duration: 0 },
-    tooltips: {
-      callbacks: {
-        label: (tooltipItem, data) => {
-          const label = (data.datasets as Chart.ChartDataSets[])[tooltipItem.datasetIndex as number].label
-          const value = Math.round(parseFloat(tooltipItem.value as string) * 10000) / 10000
-          return `${label}   ${value}亿`
+    scales: {
+      x: {
+        grid: { drawTicks: false },
+        ticks: {
+          padding: 10,
+          maxTicksLimit: 9,
+          maxRotation: 0
+        }
+      },
+      y: {
+        grid: { drawTicks: false },
+        ticks: {
+          padding: 12,
+          callback: (value: string | number) => {
+            let suffix = ''
+            if (value) suffix = '亿'
+            return value + suffix
+          }
         }
       }
     },
-    scales: {
-      xAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: {
-            padding: 10,
-            maxTicksLimit: 9,
-            maxRotation: 0
+    plugins: {
+      legend: { position: 'right' },
+      tooltip: {
+        callbacks: {
+          label: function (this, tooltipItem) {
+            const label = tooltipItem.label
+            const value = Math.round(parseFloat(tooltipItem.formattedValue) * 10000) / 10000
+            return `${label}   ${value}亿`
           }
         }
-      ],
-      yAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: {
-            padding: 12,
-            callback: (value) => {
-              if (value) return value + '亿'
-              else return value
-            }
+      },
+      annotation: {
+        annotations: [
+          {
+            type: 'line',
+            scaleID: 'y-axis-0',
+            value: 0,
+            borderColor: 'black',
+            borderWidth: 0.75
           }
-        }
-      ]
-    },
-    annotation: {
-      annotations: [
-        {
-          id: 'zero',
-          type: 'line',
-          mode: 'horizontal',
-          scaleID: 'y-axis-0',
-          value: 0,
-          borderColor: 'black',
-          borderWidth: 0.75
-        }
-      ]
+        ]
+      }
     }
   },
   plugins: [
     {
-      afterDraw: (chart) => {
+      id: 'nodata',
+      afterDraw: (chart: Chart) => {
         if (!chart.data.datasets || !chart.data.datasets.length) {
-          const ctx = chart.ctx as CanvasRenderingContext2D
-          const width = chart.width as number
-          const height = chart.height as number
+          const ctx = chart.ctx
+          const width = chart.width
+          const height = chart.height
           ctx.save()
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
@@ -238,4 +238,4 @@ export const capitalflows = {
       }
     }
   ]
-} as Chart.ChartConfiguration
+}
