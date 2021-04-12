@@ -7,10 +7,12 @@
   import { component, current, refresh } from "../stores";
   import type { Stock } from "../stores";
   import type {
+    ChartItem,
     ScatterDataPoint,
     TooltipCallbacks,
     LinearScaleOptions,
   } from "chart.js";
+  import type { AnnotationOptions } from "chartjs-plugin-annotation";
 
   let autoUpdate: number[] = [];
   let stock: Stock = {
@@ -39,7 +41,7 @@
     ?.callbacks as TooltipCallbacks<"line">;
 
   callbacks.label = (tooltipItem) => {
-    const value = parseFloat(tooltipItem.formattedValue);
+    const value = tooltipItem.parsed.y;
     const percent =
       Math.round(((value - stock.last) / stock.last) * 10000) / 100;
     return `${value}   ${percent}%`;
@@ -53,7 +55,7 @@
 
   const start = () => {
     chart = new Chart(
-      document.querySelector("#stockChart") as HTMLCanvasElement,
+      document.querySelector("#stockChart") as ChartItem,
       intraday
     );
     if ($current.code != "n/a") {
@@ -69,8 +71,9 @@
     const yAxes = chart.options?.scales?.y as LinearScaleOptions;
     yAxes.suggestedMin = stock.last / 1.01;
     yAxes.suggestedMax = stock.last * 1.01;
-    console.log(chart);
-    //chart.options.annotations.elements.PreviousClose.options.value = stock.last;
+    const annotations = chart.options.plugins?.annotation
+      ?.annotations as AnnotationOptions[];
+    annotations[0].value = stock.last;
     updateChart(true);
   };
 

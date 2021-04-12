@@ -1,7 +1,8 @@
 import Swal from 'sweetalert2'
-import { Chart, ChartConfiguration } from 'chart.js'
+import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
 import type { Stock } from './stores'
+import type { ChartConfiguration } from 'chart.js'
 
 Chart.register(annotation)
 
@@ -123,7 +124,7 @@ export const intraday: ChartConfiguration<'line'> = {
       mode: 'index',
       intersect: false
     },
-    animation: { duration: 0 },
+    animation: false,
     scales: {
       x: {
         grid: { drawTicks: false },
@@ -135,7 +136,10 @@ export const intraday: ChartConfiguration<'line'> = {
       },
       y: {
         grid: { drawTicks: false },
-        ticks: { padding: 12 }
+        ticks: {
+          padding: 12,
+          format: { useGrouping: false }
+        }
       }
     },
     plugins: {
@@ -174,7 +178,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
   },
   options: {
     maintainAspectRatio: false,
-    animation: { duration: 0 },
+    animation: false,
     scales: {
       x: {
         grid: { drawTicks: false },
@@ -188,7 +192,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
         grid: { drawTicks: false },
         ticks: {
           padding: 12,
-          callback: (value: string | number) => {
+          callback: (value) => {
             let suffix = ''
             if (value) suffix = '亿'
             return value + suffix
@@ -200,9 +204,9 @@ export const capitalflows: ChartConfiguration<'line'> = {
       legend: { position: 'right' },
       tooltip: {
         callbacks: {
-          label: function (tooltipItem) {
-            const label = tooltipItem.label
-            const value = Math.round(parseFloat(tooltipItem.formattedValue) * 10000) / 10000
+          label: (tooltipItem) => {
+            const label = tooltipItem.dataset.label
+            const value = Math.round(tooltipItem.parsed.y * 10000) / 10000
             return `${label}   ${value}亿`
           }
         }
@@ -211,7 +215,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
         annotations: [
           {
             type: 'line',
-            scaleID: 'y-axis-0',
+            scaleID: 'y',
             value: 0,
             borderColor: 'black',
             borderWidth: 0.75
@@ -223,7 +227,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
   plugins: [
     {
       id: 'nodata',
-      afterDraw: (chart: Chart) => {
+      afterDraw: (chart) => {
         if (!chart.data.datasets || !chart.data.datasets.length) {
           const ctx = chart.ctx
           const width = chart.width
@@ -232,6 +236,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
           ctx.font = 'italic bold 48px Arial'
+          ctx.fillStyle = '#666666'
           ctx.fillText('No data', width / 2, height / 2)
           ctx.restore()
         }

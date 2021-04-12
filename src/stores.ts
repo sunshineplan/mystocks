@@ -1,5 +1,5 @@
-import type { ScatterDataPoint } from 'chart.js'
 import { writable } from 'svelte/store'
+import type { ScatterDataPoint } from 'chart.js'
 
 export interface Stock {
   index: string
