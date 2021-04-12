@@ -23,12 +23,13 @@
       placeHolder: "Search Stock",
       threshold: 2,
       debounce: 300,
-      maxResults: 10,
-      noResults: (dataFeedback, generateList) => {
-        generateList(autoCompletejs, dataFeedback, dataFeedback.results);
-        const result = document.createElement("li");
-        result.innerHTML = "No Results";
-        document.querySelector("#autoComplete_list").appendChild(result);
+      resultsList: {
+        maxResults: 10,
+        noResults: (list) => {
+          const result = document.createElement("li");
+          result.innerHTML = "No Results";
+          list.appendChild(result);
+        },
       },
       onSelection: (feedback) => {
         const stock = feedback.selection.value.split(" ")[0].split(":");
