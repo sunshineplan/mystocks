@@ -30,6 +30,12 @@ const timeLabels = (start: number, end: number) => {
 
 const labels = timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60))
 
+const callback = (value: string | number) => {
+  value = labels[value as number]
+  if (value.includes(':00') || value.includes(':30')) return value
+  return ''
+}
+
 export const fire = (
   title?: string | undefined,
   html?: string | undefined,
@@ -130,8 +136,8 @@ export const intraday: ChartConfiguration<'line'> = {
         grid: { drawTicks: false },
         ticks: {
           padding: 10,
-          autoSkipPadding: 100,
           maxRotation: 0,
+          callback
         }
       },
       y: {
@@ -184,8 +190,8 @@ export const capitalflows: ChartConfiguration<'line'> = {
         grid: { drawTicks: false },
         ticks: {
           padding: 10,
-          maxTicksLimit: 9,
-          maxRotation: 0
+          maxRotation: 0,
+          callback
         }
       },
       y: {
@@ -201,7 +207,14 @@ export const capitalflows: ChartConfiguration<'line'> = {
       }
     },
     plugins: {
-      legend: { position: 'right' },
+      legend: {
+        position: 'right',
+        fullSize: false,
+        labels: {
+          boxWidth: 12,
+          boxHeight: 12
+        }
+      },
       tooltip: {
         callbacks: {
           label: (tooltipItem) => {

@@ -111,6 +111,9 @@
       data[data.length - 1].y = stock.now;
       chart.data.datasets[0].data = data;
       chart.update();
+    } else if (!data.length) {
+      chart.data.datasets[0].data = [];
+      chart.update();
     }
   };
 
