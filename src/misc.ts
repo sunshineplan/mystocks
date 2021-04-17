@@ -33,7 +33,7 @@ const labels = timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 +
 const callback = (value: string | number) => {
   value = labels[value as number]
   if (value.includes(':00') || value.includes(':30')) return value
-  return ''
+  return null
 }
 
 export const fire = (
