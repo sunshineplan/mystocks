@@ -1,9 +1,10 @@
 import Swal from 'sweetalert2'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
 import type { Stock } from './stores'
+import type { ChartConfiguration } from 'chart.js'
 
-Chart.plugins.register(annotation)
+Chart.register(annotation)
 
 const color = (last: number, value?: number) => {
   if (value === undefined) {
@@ -28,6 +29,12 @@ const timeLabels = (start: number, end: number) => {
 }
 
 const labels = timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60))
+
+const callback = (value: string | number) => {
+  value = labels[value as number]
+  if (value.includes(':00') || value.includes(':30')) return value
+  return null
+}
 
 export const fire = (
   title?: string | undefined,
@@ -99,15 +106,16 @@ export const getColor = (i: number) => {
   return chartColors[i % chartColors.length]
 }
 
-export const intraday = {
+export const intraday: ChartConfiguration<'line'> = {
   type: 'line',
   data: {
     labels,
     datasets: [
       {
+        data: [],
         label: 'Price',
         fill: false,
-        lineTension: 0,
+        tension: 0,
         borderWidth: 2,
         borderColor: '#17a2b8',
         backgroundColor: '#17a2b8',
@@ -118,124 +126,134 @@ export const intraday = {
   },
   options: {
     maintainAspectRatio: false,
-    legend: { display: false },
     hover: {
       mode: 'index',
       intersect: false
     },
-    tooltips: {
-      mode: 'index',
-      intersect: false,
-      displayColors: false,
-      backgroundColor: 'rgba(210, 210, 210, 0.8)',
-      titleFontColor: 'black',
-      bodyFontStyle: 'bold',
-      bodyFontSize: 15,
-      callbacks: {}
-    },
-    animation: { duration: 0 },
+    animation: false,
     scales: {
-      xAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: {
-            padding: 10,
-            autoSkipPadding: 100,
-            maxRotation: 0,
-          }
+      x: {
+        grid: { drawTicks: false },
+        ticks: {
+          padding: 10,
+          maxRotation: 0,
+          callback
         }
-      ],
-      yAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: { padding: 12 }
-        }
-      ]
-    },
-    annotation: {
-      annotations: [
-        {
-          id: 'PreviousClose',
-          type: 'line',
-          mode: 'horizontal',
-          scaleID: 'y-axis-0',
-          borderColor: 'black',
-          borderWidth: 0.75
-        }
-      ]
-    }
-  }
-} as Chart.ChartConfiguration
-
-export const capitalflows = {
-  type: 'line',
-  data: { labels },
-  options: {
-    maintainAspectRatio: false,
-    legend: { position: 'right' },
-    animation: { duration: 0 },
-    tooltips: {
-      callbacks: {
-        label: (tooltipItem, data) => {
-          const label = (data.datasets as Chart.ChartDataSets[])[tooltipItem.datasetIndex as number].label
-          const value = Math.round(parseFloat(tooltipItem.value as string) * 10000) / 10000
-          return `${label}   ${value}亿`
+      },
+      y: {
+        grid: { drawTicks: false },
+        ticks: {
+          padding: 12,
+          format: { useGrouping: false }
         }
       }
     },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        displayColors: false,
+        backgroundColor: 'rgba(210, 210, 210, 0.8)',
+        titleColor: 'black',
+        bodyFont: {
+          weight: 'bold',
+          size: 15
+        },
+        callbacks: {}
+      },
+      annotation: {
+        annotations: [
+          {
+            type: 'line',
+            scaleID: 'y',
+            borderColor: 'black',
+            borderWidth: 0.75
+          }
+        ]
+      }
+    }
+  }
+}
+
+export const capitalflows: ChartConfiguration<'line'> = {
+  type: 'line',
+  data: {
+    labels,
+    datasets: []
+  },
+  options: {
+    maintainAspectRatio: false,
+    animation: false,
     scales: {
-      xAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: {
-            padding: 10,
-            maxTicksLimit: 9,
-            maxRotation: 0
+      x: {
+        grid: { drawTicks: false },
+        ticks: {
+          padding: 10,
+          maxRotation: 0,
+          callback
+        }
+      },
+      y: {
+        grid: { drawTicks: false },
+        ticks: {
+          padding: 12,
+          callback: (value) => {
+            let suffix = ''
+            if (value) suffix = '亿'
+            return value + suffix
           }
         }
-      ],
-      yAxes: [
-        {
-          gridLines: { drawTicks: false },
-          ticks: {
-            padding: 12,
-            callback: (value) => {
-              if (value) return value + '亿'
-              else return value
-            }
-          }
-        }
-      ]
+      }
     },
-    annotation: {
-      annotations: [
-        {
-          id: 'zero',
-          type: 'line',
-          mode: 'horizontal',
-          scaleID: 'y-axis-0',
-          value: 0,
-          borderColor: 'black',
-          borderWidth: 0.75
+    plugins: {
+      legend: {
+        position: 'right',
+        fullSize: false,
+        labels: {
+          boxWidth: 12,
+          boxHeight: 12
         }
-      ]
+      },
+      tooltip: {
+        callbacks: {
+          label: (tooltipItem) => {
+            const label = tooltipItem.dataset.label
+            const value = Math.round(tooltipItem.parsed.y * 10000) / 10000
+            return `${label}   ${value}亿`
+          }
+        }
+      },
+      annotation: {
+        annotations: [
+          {
+            type: 'line',
+            scaleID: 'y',
+            value: 0,
+            borderColor: 'black',
+            borderWidth: 0.75
+          }
+        ]
+      }
     }
   },
   plugins: [
     {
+      id: 'nodata',
       afterDraw: (chart) => {
         if (!chart.data.datasets || !chart.data.datasets.length) {
-          const ctx = chart.ctx as CanvasRenderingContext2D
-          const width = chart.width as number
-          const height = chart.height as number
+          const ctx = chart.ctx
+          const width = chart.width
+          const height = chart.height
           ctx.save()
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
           ctx.font = 'italic bold 48px Arial'
+          ctx.fillStyle = '#666666'
           ctx.fillText('No data', width / 2, height / 2)
           ctx.restore()
         }
       }
     }
   ]
-} as Chart.ChartConfiguration
+}

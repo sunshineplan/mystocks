@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Chart from "chart.js";
+  import { Chart } from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import { checkTime, getColor, capitalflows } from "../misc";
   import type { Flows } from "../stores";
+  import type { ChartDataset, LegendOptions } from "chart.js";
 
   let autoUpdate = 0;
-  let chart: Chart;
-  let datasets: Chart.ChartDataSets[] = [];
+  let chart: Chart<"line">;
+  let datasets: ChartDataset<"line">[] = [];
   let show: number[] = [];
   let date = "";
   let last = "";
@@ -30,14 +31,15 @@
   };
   const today = getDate(0);
 
-  ((capitalflows.options as Chart.ChartOptions)
-    .legend as Chart.ChartLegendOptions).onClick = (event, legendItem) => {
-    display(legendItem.datasetIndex as number);
+  const legend = capitalflows.options?.plugins?.legend as LegendOptions;
+
+  legend.onClick = (event, legendItem) => {
+    display(legendItem.datasetIndex);
     chart.update();
   };
 
   const display = (index: number) => {
-    const datasets = chart.data.datasets as Chart.ChartDataSets[];
+    const datasets = chart.data.datasets;
     if (!show.length) {
       datasets.forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
@@ -47,7 +49,7 @@
     } else if (show.includes(index) && show.length == 1) {
       datasets.forEach((e, i) => {
         const meta = chart.getDatasetMeta(i);
-        meta.hidden = undefined;
+        meta.hidden = false;
       });
       show.length = 0;
     } else if (show.includes(index) && show.length > 1) {
@@ -98,7 +100,7 @@
           datasets.push({
             label: e.sector,
             fill: false,
-            lineTension: 0,
+            tension: 0,
             borderWidth: 1.5,
             borderColor: getColor(i),
             backgroundColor: getColor(i),
@@ -131,7 +133,7 @@
   };
 
   const updateChart = (empty?: boolean) => {
-    const datasets = chart.data.datasets as Chart.ChartDataSets[];
+    const datasets = chart.data.datasets;
     if (empty) {
       datasets.length = 0;
       chart.update();
@@ -202,7 +204,7 @@
         if (chart.data.datasets && date == today)
           chart.data.datasets.forEach((e, i) => {
             const meta = chart.getDatasetMeta(i);
-            meta.hidden = undefined;
+            meta.hidden = false;
           });
         else chart.data.datasets = [];
         show.length = 0;

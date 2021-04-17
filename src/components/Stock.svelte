@@ -1,11 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Chart from "chart.js";
+  import { Chart } from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import Realtime from "./Realtime.svelte";
   import { checkTime, post, intraday } from "../misc";
   import { component, current, refresh } from "../stores";
   import type { Stock } from "../stores";
+  import type {
+    ChartItem,
+    ScatterDataPoint,
+    TooltipCallbacks,
+    LinearScaleOptions,
+  } from "chart.js";
+  import type { AnnotationOptions } from "chartjs-plugin-annotation";
 
   let autoUpdate: number[] = [];
   let stock: Stock = {
@@ -23,25 +30,24 @@
     buy5: [],
     update: "",
   };
-  let data: Chart.ChartPoint[] = [];
-  let chart: Chart;
+  let data: ScatterDataPoint[] = [];
+  let chart: Chart<"line">;
   let update = "";
   let hover = false;
 
   $: $current, load();
 
-  const callbacks = ((intraday.options as Chart.ChartOptions)
-    .tooltips as Chart.ChartTooltipOptions)
-    .callbacks as Chart.ChartTooltipCallback;
+  const callbacks = intraday.options?.plugins?.tooltip
+    ?.callbacks as TooltipCallbacks<"line">;
 
   callbacks.label = (tooltipItem) => {
-    const value = parseFloat(tooltipItem.value as string);
+    const value = tooltipItem.parsed.y;
     const percent =
       Math.round(((value - stock.last) / stock.last) * 10000) / 100;
     return `${value}   ${percent}%`;
   };
   callbacks.labelTextColor = (tooltipItem) => {
-    const change = parseFloat(tooltipItem.value as string) - stock.last;
+    const change = parseFloat(tooltipItem.formattedValue) - stock.last;
     if (change > 0) return "red";
     else if (change < 0) return "green";
     return "black";
@@ -49,7 +55,7 @@
 
   const start = () => {
     chart = new Chart(
-      document.querySelector("#stockChart") as HTMLCanvasElement,
+      document.querySelector("#stockChart") as ChartItem,
       intraday
     );
     if ($current.code != "n/a") {
@@ -62,11 +68,12 @@
     update = "";
     await loadRealtime(true);
     await loadChart(true);
-    (((chart.options.scales as Chart.ChartScales).yAxes as Chart.ChartYAxe[])[0]
-      .ticks as Chart.TickOptions).suggestedMin = stock.last / 1.01;
-    (((chart.options.scales as Chart.ChartScales).yAxes as Chart.ChartYAxe[])[0]
-      .ticks as Chart.TickOptions).suggestedMax = stock.last * 1.01;
-    (chart as any).annotation.elements.PreviousClose.options.value = stock.last;
+    const yAxes = chart.options?.scales?.y as LinearScaleOptions;
+    yAxes.suggestedMin = stock.last / 1.01;
+    yAxes.suggestedMax = stock.last * 1.01;
+    const annotations = chart.options.plugins?.annotation
+      ?.annotations as AnnotationOptions[];
+    annotations[0].value = stock.last;
     updateChart(true);
   };
 
@@ -102,7 +109,10 @@
   const updateChart = (force?: boolean) => {
     if (data.length && stock.now && (force || !hover)) {
       data[data.length - 1].y = stock.now;
-      (chart.data.datasets as Chart.ChartDataSets[])[0].data = data;
+      chart.data.datasets[0].data = data;
+      chart.update();
+    } else if (!data.length) {
+      chart.data.datasets[0].data = [];
       chart.update();
     }
   };
