@@ -37,6 +37,26 @@
 
   $: $current, load();
 
+  const y = intraday.options?.scales?.y as LinearScaleOptions;
+  const y2 = intraday.options?.scales?.y2 as LinearScaleOptions;
+
+  y.afterFit = (axis) => {
+    if (chart) {
+      const y2 = chart.options?.scales?.y2 as LinearScaleOptions;
+      y2.min = axis.min;
+      y2.max = axis.max;
+    }
+  };
+
+  y2.ticks.callback = (value) => {
+    if (stock.last)
+      return `${
+        Math.round((((value as number) - stock.last) / stock.last) * 10000) /
+        100
+      }%`;
+    return null;
+  };
+
   const callbacks = intraday.options?.plugins?.tooltip
     ?.callbacks as TooltipCallbacks<"line">;
 
