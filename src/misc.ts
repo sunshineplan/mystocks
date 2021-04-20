@@ -2,7 +2,7 @@ import Swal from 'sweetalert2'
 import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
 import type { Stock } from './stores'
-import type { ChartConfiguration } from 'chart.js'
+import type { ChartConfiguration, LinearScaleOptions } from 'chart.js'
 
 Chart.register(annotation)
 
@@ -146,6 +146,14 @@ export const intraday: ChartConfiguration<'line'> = {
           padding: 12,
           format: { useGrouping: false }
         }
+      },
+      y2: {
+        position: 'right',
+        grid: {
+          drawTicks: false,
+          drawOnChartArea: false
+        },
+        ticks: { padding: 12 }
       }
     },
     plugins: {
@@ -198,7 +206,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
         grid: { drawTicks: false },
         ticks: {
           padding: 12,
-          callback: (value) => {
+          callback: value => {
             let suffix = ''
             if (value) suffix = '亿'
             return value + suffix
@@ -217,7 +225,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
       },
       tooltip: {
         callbacks: {
-          label: (tooltipItem) => {
+          label: tooltipItem => {
             const label = tooltipItem.dataset.label
             const value = Math.round(tooltipItem.parsed.y * 10000) / 10000
             return `${label}   ${value}亿`
@@ -240,7 +248,7 @@ export const capitalflows: ChartConfiguration<'line'> = {
   plugins: [
     {
       id: 'nodata',
-      afterDraw: (chart) => {
+      afterDraw: chart => {
         if (!chart.data.datasets || !chart.data.datasets.length) {
           const ctx = chart.ctx
           const width = chart.width
