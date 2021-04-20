@@ -67,7 +67,7 @@
     return `${value}   ${percent}%`;
   };
   callbacks.labelTextColor = (tooltipItem) => {
-    const change = parseFloat(tooltipItem.formattedValue) - stock.last;
+    const change = tooltipItem.parsed.y - stock.last;
     if (change > 0) return "red";
     else if (change < 0) return "green";
     return "black";
