@@ -37,14 +37,17 @@
 
   $: $current, load();
 
-  const y = intraday.options?.scales?.y as LinearScaleOptions;
   const y2 = intraday.options?.scales?.y2 as LinearScaleOptions;
+  const callbacks = intraday.options?.plugins?.tooltip
+    ?.callbacks as TooltipCallbacks<"line">;
 
-  y.afterFit = (axis) => {
+  y2.afterBuildTicks = (axis) => {
     if (chart) {
-      const y2 = chart.options?.scales?.y2 as LinearScaleOptions;
-      y2.min = axis.min;
-      y2.max = axis.max;
+      axis.ticks = chart.scales.y.ticks.map(({ value }) => {
+        return { value };
+      });
+      axis.max = chart.scales.y.max;
+      axis.min = chart.scales.y.min;
     }
   };
 
@@ -56,9 +59,6 @@
       }%`;
     return null;
   };
-
-  const callbacks = intraday.options?.plugins?.tooltip
-    ?.callbacks as TooltipCallbacks<"line">;
 
   callbacks.label = (tooltipItem) => {
     const value = tooltipItem.parsed.y;
