@@ -92,8 +92,8 @@
     yAxes.suggestedMin = stock.last / 1.01;
     yAxes.suggestedMax = stock.last * 1.01;
     const annotations = chart.options.plugins?.annotation
-      ?.annotations as AnnotationOptions[];
-    annotations[0].value = stock.last;
+      ?.annotations as Record<string, AnnotationOptions>;
+    annotations.last.value = stock.last;
     updateChart(true);
   };
 

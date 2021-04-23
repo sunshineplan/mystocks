@@ -2,7 +2,8 @@ import Swal from 'sweetalert2'
 import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
 import type { Stock } from './stores'
-import type { ChartConfiguration, LinearScaleOptions } from 'chart.js'
+import type { ChartConfiguration } from 'chart.js'
+import type { AnnotationOptions } from 'chartjs-plugin-annotation'
 
 Chart.register(annotation)
 
@@ -34,6 +35,15 @@ const callback = (value: string | number) => {
   value = labels[value as number]
   if (value.includes(':00') || value.includes(':30')) return value
   return null
+}
+
+const lunch_break: AnnotationOptions = {
+  type: 'line',
+  scaleID: 'x',
+  drawTime: 'beforeDraw',
+  value: 120,
+  borderColor: '#e5e5e5',
+  borderWidth: 2
 }
 
 export const fire = (
@@ -171,14 +181,15 @@ export const intraday: ChartConfiguration<'line'> = {
         callbacks: {}
       },
       annotation: {
-        annotations: [
-          {
+        annotations: {
+          lunch_break,
+          last: {
             type: 'line',
             scaleID: 'y',
-            borderColor: 'black',
-            borderWidth: 0.75
+            drawTime: 'beforeDraw',
+            borderWidth: 1
           }
-        ]
+        }
       }
     }
   }
@@ -233,15 +244,16 @@ export const capitalflows: ChartConfiguration<'line'> = {
         }
       },
       annotation: {
-        annotations: [
-          {
+        annotations: {
+          lunch_break,
+          zero: {
             type: 'line',
             scaleID: 'y',
+            drawTime: 'beforeDraw',
             value: 0,
-            borderColor: 'black',
-            borderWidth: 0.75
+            borderWidth: 1
           }
-        ]
+        }
       }
     }
   },

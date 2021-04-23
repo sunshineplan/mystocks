@@ -27,6 +27,6 @@
     "chart.js": "^3.1.1",
     "chartjs-plugin-annotation": "^1.0.0",
     "sortablejs": "^1.13.0",
-    "sweetalert2": "^10.16.4"
+    "sweetalert2": "^10.16.6"
   }
 }
