@@ -70,8 +70,8 @@
     if (e.key == "Enter") await setting();
   }}
 >
-  <div class="form-group">
-    <label for="password">Current Password</label>
+  <div class="mb-3">
+    <label for="password" class="form-label">Current Password</label>
     <input
       class="form-control"
       type="password"
@@ -82,8 +82,8 @@
     />
     <div class="invalid-feedback">This field is required.</div>
   </div>
-  <div class="form-group">
-    <label for="password1">New Password</label>
+  <div class="mb-3">
+    <label for="password1" class="form-label">New Password</label>
     <input
       class="form-control"
       type="password"
@@ -94,8 +94,8 @@
     />
     <div class="invalid-feedback">This field is required.</div>
   </div>
-  <div class="form-group">
-    <label for="password2">Confirm Password</label>
+  <div class="mb-3">
+    <label for="password2" class="form-label">Confirm Password</label>
     <input
       class="form-control"
       type="password"

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { post, addColor } from "../misc";
+  import { post, color, addColor } from "../misc";
   import { current } from "../stores";
-  import type { Stock } from "../stores";
+  import type { Stock } from "../index";
 
   export let stock: Stock;
 
@@ -78,8 +78,14 @@
               <span style="display: inline-flex">
                 卖盘:&nbsp;
                 {#each stock.sell5 as sell, index (index)}
-                  <div class="sellbuy" style="color: red">
-                    {sell.Price}-{sell.Volume}
+                  <div class="sellbuy">
+                    <span style={color(stock.last, sell.Price)}>
+                      {sell.Price}
+                    </span>
+                    -
+                    <span style={color(stock.last, sell.Price)}>
+                      {sell.Volume}
+                    </span>
                   </div>
                 {/each}
               </span>
@@ -90,8 +96,14 @@
               <span style="display: inline-flex">
                 买盘:&nbsp;
                 {#each stock.buy5 as buy, index (index)}
-                  <div class="sellbuy" style="color: green">
-                    {buy.Price}-{buy.Volume}
+                  <div class="sellbuy">
+                    <span style={color(stock.last, buy.Price)}>
+                      {buy.Price}
+                    </span>
+                    -
+                    <span style={color(stock.last, buy.Price)}>
+                      {buy.Volume}
+                    </span>
                   </div>
                 {/each}
               </span>

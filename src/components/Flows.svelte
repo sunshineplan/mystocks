@@ -3,8 +3,8 @@
   import { Chart } from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import { checkTime, getColor, capitalflows } from "../misc";
-  import type { Flows } from "../stores";
   import type { ChartDataset, LegendOptions } from "chart.js";
+  import type { Flows } from "../index";
 
   let autoUpdate = 0;
   let chart: Chart<"line">;
@@ -216,7 +216,7 @@
     </button>
     {#if loading}
       <div class="spinner-border text-secondary" role="status">
-        <span class="sr-only">Loading...</span>
+        <span class="visually-hidden">Loading...</span>
       </div>
     {:else if status}
       {#if status == 1}

@@ -4,7 +4,7 @@
   import AutoComplete from "./AutoComplete.svelte";
   import { checkTime, post, addColor } from "../misc";
   import { current, component, refresh } from "../stores";
-  import type { Stock } from "../stores";
+  import type { Stock } from "../index";
 
   const columns = {
     指数: "index",
@@ -125,13 +125,12 @@
     height: calc(100% - 54px);
     padding: 0px 30px;
     cursor: default;
+    width: 100%;
   }
 
   th {
     position: sticky;
     top: 0;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
     background-color: white;
   }
 

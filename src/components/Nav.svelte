@@ -66,6 +66,7 @@
     width: 100%;
     height: 60px;
     background-color: #1a73e8;
+    padding: .5rem 1rem;
   }
 
   .brand {

@@ -63,8 +63,8 @@
     if (e.key == "Enter") await login();
   }}
 >
-  <div class="form-group">
-    <label for="username">Username</label>
+  <div class="mb-3">
+    <label for="username" class="form-label">Username</label>
     <!-- svelte-ignore a11y-autofocus -->
     <input
       class="form-control"
@@ -76,8 +76,8 @@
       required
     />
   </div>
-  <div class="form-group">
-    <label for="password">Password</label>
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
     <input
       class="form-control"
       type="password"
@@ -88,7 +88,7 @@
       required
     />
   </div>
-  <div class="form-group form-check">
+  <div class="mb-3 form-check">
     <input
       type="checkbox"
       class="form-check-input"

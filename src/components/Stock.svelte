@@ -5,7 +5,6 @@
   import Realtime from "./Realtime.svelte";
   import { checkTime, post, intraday } from "../misc";
   import { component, current, refresh } from "../stores";
-  import type { Stock } from "../stores";
   import type {
     ChartItem,
     ScatterDataPoint,
@@ -13,6 +12,7 @@
     LinearScaleOptions,
   } from "chart.js";
   import type { AnnotationOptions } from "chartjs-plugin-annotation";
+  import type { Stock } from "../index";
 
   let autoUpdate: number[] = [];
   let stock: Stock = {

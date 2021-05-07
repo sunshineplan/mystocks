@@ -1,22 +1,11 @@
 import Swal from 'sweetalert2'
 import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
-import type { Stock } from './stores'
+import type { Stock } from './index'
 import type { ChartConfiguration } from 'chart.js'
 import type { AnnotationOptions } from 'chartjs-plugin-annotation'
 
 Chart.register(annotation)
-
-const color = (last: number, value?: number) => {
-  if (value === undefined) {
-    if (last < 0) return 'color:green'
-    else if (last > 0) return 'color:red'
-  } else if (value) {
-    if (last < value) return 'color:red'
-    else if (last > value) return 'color:green'
-  }
-  return 'color:initial'
-}
 
 const timeLabels = (start: number, end: number) => {
   let times: string[] = []
@@ -82,6 +71,17 @@ export const checkTime = () => {
   if (hour >= 1 && hour <= 8 && day >= 1 && day <= 5)
     return true
   return false
+}
+
+export const color = (last: number, value?: number) => {
+  if (value === undefined) {
+    if (last < 0) return 'color:green'
+    else if (last > 0) return 'color:red'
+  } else if (value) {
+    if (last < value) return 'color:red'
+    else if (last > value) return 'color:green'
+  }
+  return 'color:initial'
 }
 
 export const addColor = (stock: Stock, val: string) => {

@@ -25,6 +25,7 @@
       debounce: 300,
       resultsList: {
         maxResults: 10,
+        className: "autoComplete_list",
         noResults: (list) => {
           const result = document.createElement("li");
           result.innerHTML = "No Results";
