@@ -132,8 +132,8 @@ github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3 h1:9ERbMyp+DZd+4/ZUUmJS2fSdV78we76nK5ItARXYq2g=
 github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3/go.mod h1:KaIWij1g41q0MnVSAe2pyReheMYhrHsMcwlBQGppv9A=
-github.com/sunshineplan/service v0.0.0-20210527094821-51dc65f50fad h1:NRiBc4gd59Tib0S32w8fRcuc+TZDsGhawXa4a8JWUtU=
-github.com/sunshineplan/service v0.0.0-20210527094821-51dc65f50fad/go.mod h1:Pev64yUao6MQcTiP2vQUWTNGwQNX/QqG3li9dKwoOyk=
+github.com/sunshineplan/service v0.0.0-20210601113540-d8bdeafd4b85 h1:AD6wMVxYJQofKHh2UpFnEaU1vjNC/0VI3WFYIw7ZCAU=
+github.com/sunshineplan/service v0.0.0-20210601113540-d8bdeafd4b85/go.mod h1:JvLUzydHf60YZfLSQ0+MQbv0Mtgt7ygrexbgm71yz7Q=
 github.com/sunshineplan/stock v0.0.0-20210311120903-4c4650eb6360 h1:5hhl3yBeQ85ytR6HRf/ItlNiLjWrZROBoFQDemVGbkE=
 github.com/sunshineplan/stock v0.0.0-20210311120903-4c4650eb6360/go.mod h1:Ya377k8okiwFMKeLxhKD2FJz0OJAhMzqUD2HIdDFJGM=
 github.com/sunshineplan/utils v0.0.0-20210310015804-6fe1b48a3fa3/go.mod h1:fJ8/Fjbd50RwQ8/wxBmBgkuDHfcXrCJu6c/iRsgkYok=
@@ -186,8 +186,8 @@ golang.org/x/sys v0.0.0-20190531175056-4c3a928424d2/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200116001909-b77594299b42/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea h1:+WiDlPBBaO+h9vPNZi8uJ3k4BkKQB7Iow3aqwHVA5hI=
-golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20210601080250-7ecdf8ef093b h1:qh4f65QIVFjq9eBURLEYWqaEXmOyqdUyiBSgaXWccWk=
+golang.org/x/sys v0.0.0-20210601080250-7ecdf8ef093b/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=

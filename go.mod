@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-mail/mail v2.3.1+incompatible // indirect
 	github.com/sunshineplan/gohttp v0.0.0-20210204014530-daea15215be3
-	github.com/sunshineplan/service v0.0.0-20210527094821-51dc65f50fad
+	github.com/sunshineplan/service v0.0.0-20210601113540-d8bdeafd4b85
 	github.com/sunshineplan/stock v0.0.0-20210311120903-4c4650eb6360
 	github.com/sunshineplan/utils v0.0.0-20210508081115-49f48cf588e1
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
