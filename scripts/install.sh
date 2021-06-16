@@ -28,6 +28,8 @@ configMyStocks() {
     [ -z $host ] && host=127.0.0.1
     read -p 'Please enter port(default: 12345): ' port
     [ -z $port ] && port=12345
+    read -p 'Please enter refresh time(second, default: 3): ' refresh
+    [ -z $refresh ] && refresh=3
     read -p 'Please enter log path(default: /var/log/app/mystocks.log): ' log
     [ -z $log ] && log=/var/log/app/mystocks.log
     read -p 'Please enter update URL: ' update
@@ -38,9 +40,10 @@ configMyStocks() {
     sed -i "s/\$value/$value/" /var/www/mystocks/config.ini
     sed -i "s/\$universal/$universal/" /var/www/mystocks/config.ini
     sed -i "s,\$unix,$unix," /var/www/mystocks/config.ini
-    sed -i "s,\$log,$log," /var/www/mystocks/config.ini
     sed -i "s/\$host/$host/" /var/www/mystocks/config.ini
     sed -i "s/\$port/$port/" /var/www/mystocks/config.ini
+    sed -i "s/\$refresh/$refresh/" /var/www/mystocks/config.ini
+    sed -i "s,\$log,$log," /var/www/mystocks/config.ini
     sed -i "s,\$update,$update," /var/www/mystocks/config.ini
     sed -i "s|\$exclude|$exclude|" /var/www/mystocks/config.ini
     ./mystocks install || exit 1

@@ -5,6 +5,7 @@ universal = $universal
 unix      = $unix
 host      = $host
 port      = $port
+refresh   = $refresh
 log       = $log
 update    = $update
 exclude   = $exclude

@@ -30,7 +30,7 @@ var svc = service.Service{
 	Exec: run,
 	Options: service.Options{
 		Dependencies: []string{"After=network.target"},
-		Others:       []string{"Environment=GIN_MODE=release"},
+		Environment:  map[string]string{"GIN_MODE": "release"},
 	},
 }
 

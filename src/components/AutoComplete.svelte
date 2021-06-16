@@ -7,7 +7,7 @@
   let suggest = "";
 
   onMount(async () => {
-    const autoCompletejs = new autoComplete({
+    new autoComplete({
       selector: "#suggest",
       data: {
         src: async () => {
