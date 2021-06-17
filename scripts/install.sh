@@ -95,11 +95,6 @@ writeLogrotateScrip() {
     fi
 }
 
-createCronTask() {
-    cp -s $INSTALL_PATH/scripts/mystocks.cron /etc/cron.monthly/mystocks
-    chmod +x $INSTALL_PATH/scripts/mystocks.cron
-}
-
 setupNGINX() {
     cp -s $INSTALL_PATH/scripts/mystocks.conf /etc/nginx/conf.d
     sed -i"" -e "s/\$domain/$domain/" $INSTALL_PATH/scripts/mystocks.conf
@@ -114,7 +109,6 @@ main() {
     if [ ${ON_LINUX-} ]; then
         read -p 'Please enter domain:' domain
         writeLogrotateScrip
-        createCronTask
         setupNGINX
         service mystocks start
     fi
