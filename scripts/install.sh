@@ -1,14 +1,43 @@
 #! /bin/bash
 
+OS=$(uname)
+if [ $OS = "Linux" ]; then
+    ON_LINUX=1
+    INSTALL_PATH=/var/www/mystocks
+    SOCKET=/run/mystocks.sock
+    LOG=/var/log/app/mystocks.log
+elif [ $OS = "Darwin" ]; then
+    INSTALL_PATH=$HOME/www/mystocks
+    SOCKET=none
+    LOG=none
+else
+    abort "Only supported on macOS and Linux."
+fi
+
 installSoftware() {
-    apt -qq -y install nginx mongodb-org-tools
+    if [ ${ON_LINUX-} ]; then
+        apt -qq -y install nginx mongodb-org-tools
+    else
+        [ -x $(command -v brew) ] || abort "Require Homebrew."
+        brew tap mongodb/brew
+        brew install go node mongodb/brew/mongodb-database-tools
+    fi
 }
 
 installMyStocks() {
-    mkdir -p /var/www/mystocks
-    curl -Lo- https://github.com/sunshineplan/mystocks/releases/download/v1.0/release-linux.tar.gz | tar zxC /var/www/mystocks
-    cd /var/www/mystocks
-    chmod +x mystocks
+    if [ ${ON_LINUX-} ]; then
+        mkdir -p $INSTALL_PATH
+        curl -Lo- https://github.com/sunshineplan/mystocks/releases/download/v1.0/release-linux.tar.gz | tar zxC $INSTALL_PATH
+        chmod +x $INSTALL_PATH/mystocks
+    else
+        TMPDIR=$(mktemp -d)
+        curl -Lo- https://github.com/sunshineplan/mystocks/archive/refs/tags/v1.0.tar.gz | tar zxC $TMPDIR
+        cd $TMPDIR/*
+        go build -ldflags "-s -w" && npm i && npm run build || exit 1
+        mkdir -p $INSTALL_PATH
+        cp -r public mystocks config.ini.default $INSTALL_PATH
+        rm -rf $TMPDIR
+    fi
 }
 
 configMyStocks() {
@@ -22,32 +51,33 @@ configMyStocks() {
         [ $universal = true -o $universal = false ] && break
         echo Use Universal ID must be true or false!
     done
-    read -p 'Please enter unix socket(default: /run/mystocks.sock): ' unix
-    [ -z $unix ] && unix=/run/mystocks.sock
+    read -p "Please enter unix socket(default: $SOCKET): " unix
+    [ -z $unix ] && unix=$SOCKET
+    [ $unix = none ] && unix=
     read -p 'Please enter host(default: 127.0.0.1): ' host
     [ -z $host ] && host=127.0.0.1
     read -p 'Please enter port(default: 12345): ' port
     [ -z $port ] && port=12345
     read -p 'Please enter refresh time(second, default: 3): ' refresh
     [ -z $refresh ] && refresh=3
-    read -p 'Please enter log path(default: /var/log/app/mystocks.log): ' log
-    [ -z $log ] && log=/var/log/app/mystocks.log
+    read -p "Please enter log path(default: $LOG): " log
+    [ -z $log ] && log=$LOG
+    [ $log = none ] && log=
     read -p 'Please enter update URL: ' update
     read -p 'Please enter exclude files: ' exclude
-    mkdir -p $(dirname $log)
-    sed "s,\$server,$server," /var/www/mystocks/config.ini.default > /var/www/mystocks/config.ini
-    sed -i "s/\$header/$header/" /var/www/mystocks/config.ini
-    sed -i "s/\$value/$value/" /var/www/mystocks/config.ini
-    sed -i "s/\$universal/$universal/" /var/www/mystocks/config.ini
-    sed -i "s,\$unix,$unix," /var/www/mystocks/config.ini
-    sed -i "s/\$host/$host/" /var/www/mystocks/config.ini
-    sed -i "s/\$port/$port/" /var/www/mystocks/config.ini
-    sed -i "s/\$refresh/$refresh/" /var/www/mystocks/config.ini
-    sed -i "s,\$log,$log," /var/www/mystocks/config.ini
-    sed -i "s,\$update,$update," /var/www/mystocks/config.ini
-    sed -i "s|\$exclude|$exclude|" /var/www/mystocks/config.ini
-    ./mystocks install || exit 1
-    service mystocks start
+    [ $log ] && mkdir -p $(dirname $log)
+    sed "s,\$server,$server," $INSTALL_PATH/config.ini.default > $INSTALL_PATH/config.ini
+    sed -i"" -e "s/\$header/$header/" $INSTALL_PATH/config.ini
+    sed -i"" -e "s/\$value/$value/" $INSTALL_PATH/config.ini
+    sed -i"" -e "s/\$universal/$universal/" $INSTALL_PATH/config.ini
+    sed -i"" -e "s,\$unix,$unix," $INSTALL_PATH/config.ini
+    sed -i"" -e "s/\$host/$host/" $INSTALL_PATH/config.ini
+    sed -i"" -e "s/\$port/$port/" $INSTALL_PATH/config.ini
+    sed -i"" -e "s/\$refresh/$refresh/" $INSTALL_PATH/config.ini
+    sed -i"" -e "s,\$log,$log," $INSTALL_PATH/config.ini
+    sed -i"" -e "s,\$update,$update," $INSTALL_PATH/config.ini
+    sed -i"" -e "s|\$exclude|$exclude|" $INSTALL_PATH/config.ini
+    $INSTALL_PATH/mystocks install || exit 1
 }
 
 writeLogrotateScrip() {
@@ -66,25 +96,28 @@ writeLogrotateScrip() {
 }
 
 createCronTask() {
-    cp -s /var/www/mystocks/scripts/stock.cron /etc/cron.monthly/mystocks
-    chmod +x /var/www/mystocks/scripts/mystocks.cron
+    cp -s $INSTALL_PATH/scripts/mystocks.cron /etc/cron.monthly/mystocks
+    chmod +x $INSTALL_PATH/scripts/mystocks.cron
 }
 
 setupNGINX() {
-    cp -s /var/www/mystocks/scripts/mystocks.conf /etc/nginx/conf.d
-    sed -i "s/\$domain/$domain/" /var/www/mystocks/scripts/mystocks.conf
-    sed -i "s,\$unix,$unix," /var/www/mystocks/scripts/mystocks.conf
+    cp -s $INSTALL_PATH/scripts/mystocks.conf /etc/nginx/conf.d
+    sed -i"" -e "s/\$domain/$domain/" $INSTALL_PATH/scripts/mystocks.conf
+    sed -i"" -e "s,\$unix,$unix," $INSTALL_PATH/scripts/mystocks.conf
     service nginx reload
 }
 
 main() {
-    read -p 'Please enter domain:' domain
     installSoftware
     installMyStocks
     configMyStocks
-    writeLogrotateScrip
-    createCronTask
-    setupNGINX
+    if [ ${ON_LINUX-} ]; then
+        read -p 'Please enter domain:' domain
+        writeLogrotateScrip
+        createCronTask
+        setupNGINX
+        service mystocks start
+    fi
 }
 
 main
