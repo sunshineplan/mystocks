@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/sunshineplan/utils"
 	"github.com/sunshineplan/utils/database/mongodb"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -11,7 +12,9 @@ var collStock *mongo.Collection
 var collFlows *mongo.Collection
 
 func initDB() (err error) {
-	if err = meta.Get("mystocks_mongo", &dbConfig); err != nil {
+	if err = utils.Retry(func() error {
+		return meta.Get("mystocks_mongo", &dbConfig)
+	}, 3, 20); err != nil {
 		return
 	}
 
@@ -28,4 +31,13 @@ func initDB() (err error) {
 	collFlows = database.Collection("capitalflows")
 
 	return
+}
+
+func test() error {
+	if err := meta.Get("mystocks_mongo", &dbConfig); err != nil {
+		return err
+	}
+
+	_, err := dbConfig.Open()
+	return err
 }

@@ -25,9 +25,10 @@ var meta metadata.Server
 var server httpsvr.Server
 
 var svc = service.Service{
-	Name: "MyStocks",
-	Desc: "Instance to serve My Stocks",
-	Exec: run,
+	Name:     "MyStocks",
+	Desc:     "Instance to serve My Stocks",
+	Exec:     run,
+	TestExec: test,
 	Options: service.Options{
 		Dependencies: []string{"After=network.target"},
 		Environment:  map[string]string{"GIN_MODE": "release"},
@@ -86,11 +87,13 @@ func main() {
 	var err error
 	switch flag.NArg() {
 	case 0:
-		run()
+		svc.Run(false)
 	case 1:
 		switch flag.Arg(0) {
 		case "run", "debug":
-			run()
+			svc.Run(true)
+		case "test":
+			err = svc.Test()
 		case "install":
 			err = svc.Install()
 		case "remove":
@@ -103,8 +106,8 @@ func main() {
 			err = svc.Restart()
 		case "update":
 			err = svc.Update()
-		case "backup":
-			backup()
+		case "add", "delete", "backup", "restore":
+			log.Fatalf("%s need two arguments", flag.Arg(0))
 		default:
 			usage(fmt.Sprintf("Unknown argument: %s", flag.Arg(0)))
 		}
@@ -116,6 +119,8 @@ func main() {
 			if utils.Confirm(fmt.Sprintf("Do you want to delete user %s?", flag.Arg(1)), 3) {
 				deleteUser(flag.Arg(1))
 			}
+		case "backup":
+			backup(flag.Arg(1))
 		case "restore":
 			if utils.Confirm("Do you want to restore database?", 3) {
 				restore(flag.Arg(1))

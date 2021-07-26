@@ -37,7 +37,7 @@ jobs:
           GOOS=windows go build -ldflags "-s -w"
           tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
           zip -9vr release-windows.zip public scripts mystocks.exe config.ini.default
-          echo "::set-output name=date::$(TZ=CST date +'%Y-%m-%d')"
+          echo "::set-output name=date::$(TZ=PRC date +'%Y-%m-%d')"
 
       - name: Delete Old Release
         uses: actions/github-script@v4
