@@ -27,11 +27,11 @@ installSoftware() {
 installMyStocks() {
     if [ ${ON_LINUX-} ]; then
         mkdir -p $INSTALL_PATH
-        curl -Lo- https://github.com/sunshineplan/mystocks/releases/download/v1.0/release-linux.tar.gz | tar zxC $INSTALL_PATH
+        curl -Lo- https://github.com/sunshineplan/mystocks/releases/latest/download/release-linux.tar.gz | tar zxC $INSTALL_PATH
         chmod +x $INSTALL_PATH/mystocks
     else
         TMPDIR=$(mktemp -d)
-        curl -Lo- https://github.com/sunshineplan/mystocks/archive/refs/tags/v1.0.tar.gz | tar zxC $TMPDIR
+        curl -Lo- https://github.com/sunshineplan/mystocks/archive/main.tar.gz | tar zxC $TMPDIR
         cd $TMPDIR/*
         go build -ldflags "-s -w" && npm i && npm run build || exit 1
         mkdir -p $INSTALL_PATH

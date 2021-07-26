@@ -35,8 +35,6 @@ jobs:
           #sudo apt install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
           #GOOS=windows CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ go build -ldflags "-s -w"
           GOOS=windows go build -ldflags "-s -w"
-          tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
-          zip -9vr release-windows.zip public scripts mystocks.exe config.ini.default
           echo "::set-output name=date::$(TZ=PRC date +'%Y-%m-%d')"
 
       - name: Delete Old Release
@@ -66,6 +64,11 @@ jobs:
               repo: context.repo.repo,
               ref: 'tags/v1.0'
             })
+
+      - name: Pack
+        run: |
+          tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
+          zip -9vr release-windows.zip public scripts mystocks.exe config.ini.default
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
