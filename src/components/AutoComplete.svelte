@@ -6,8 +6,8 @@
 
   let suggest = "";
 
-  onMount(async () => {
-    new autoComplete({
+  onMount(() => {
+    const autoCompleteJS = new autoComplete({
       selector: "#suggest",
       data: {
         src: async () => {
@@ -16,7 +16,6 @@
           return data.map((i) => `${i.Index}:${i.Code} ${i.Name} ${i.Type}`);
         },
       },
-      trigger: { event: ["input", "focus"] },
       searchEngine: (query, record) => {
         return record;
       },
@@ -25,19 +24,29 @@
       debounce: 300,
       resultsList: {
         maxResults: 10,
-        className: "autoComplete_list",
-        noResults: (list) => {
-          const result = document.createElement("li");
-          result.innerHTML = "No Results";
-          list.appendChild(result);
+        noResults: true,
+        element: (list, data) => {
+          if (!data.results.length) {
+            const result = document.createElement("span");
+            result.innerText = "No Results";
+            list.appendChild(result);
+          }
         },
       },
-      onSelection: (feedback) => {
-        const stock = feedback.selection.value.split(" ")[0].split(":");
-        $current = { index: stock[0], code: stock[1] };
-        window.history.pushState({}, "", `/stock/${stock[0]}/${stock[1]}`);
-        $component = "stock";
-        suggest = "";
+      events: {
+        input: {
+          focus() {
+            if (suggest) autoCompleteJS.start();
+          },
+          selection(event) {
+            const feedback = event.detail;
+            const stock = feedback.selection.value.split(" ")[0].split(":");
+            $current = { index: stock[0], code: stock[1] };
+            window.history.pushState({}, "", `/stock/${stock[0]}/${stock[1]}`);
+            $component = "stock";
+            suggest = "";
+          },
+        },
       },
     });
   });
@@ -87,8 +96,9 @@
     }
   }
 
-  :global(.autoComplete_list) {
+  :global(.autoComplete_wrapper > ul) {
     position: absolute;
+    left: 0;
     background-color: white;
     box-shadow: 0px 5px 4px rgba(101, 119, 134, 0.2),
       5px 2px 4px rgba(101, 119, 134, 0.2),
@@ -103,13 +113,13 @@
     z-index: 99;
   }
 
-  :global(.autoComplete_result:hover) {
+  :global(.autoComplete_wrapper > ul > li:hover) {
     color: white;
     background-color: #008eff;
     border-radius: 5px;
   }
 
-  :global(.autoComplete_selected) {
+  :global(.autoComplete_wrapper > ul > li[aria-selected="true"]) {
     color: white;
     background-color: #008eff;
     border-radius: 5px;
