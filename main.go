@@ -74,6 +74,7 @@ func main() {
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
 	flag.IntVar(&refresh, "refresh", 3, "Refresh Interval")
+	flag.StringVar(&pemPath, "pem", "", "PEM File Path")
 	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
 	exclude := flag.String("exclude", "", "Exclude Files")
 	//flag.StringVar(&logPath, "log", joinPath(dir(self), "access.log"), "Log Path")
