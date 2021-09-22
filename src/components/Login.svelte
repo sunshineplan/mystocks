@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { fire, post } from "../misc";
-  import { component } from "../stores";
+  import { encrypt, fire, post } from "../misc";
+  import { pubkey, component } from "../stores";
 
   const dispatch = createEventDispatcher();
 
@@ -23,11 +23,14 @@
     )
       await fire("Error", "Password cannot be empty.", "error");
     else {
+      var pwd: string;
+      if (pubkey.length) pwd = encrypt(pubkey, password) as string;
+      else pwd = password;
       const resp = await post(
         "@universal@/login",
         {
           username,
-          password,
+          password: pwd,
           rememberme,
         },
         true
@@ -45,6 +48,10 @@
       } else await fire("Error", await resp.text(), "error");
     }
   };
+
+  const handleEnter = async (event: KeyboardEvent) => {
+    if (event.key === "Enter") await login();
+  };
 </script>
 
 <svelte:head>
@@ -59,12 +66,7 @@
     Log In
   </h3>
 </header>
-<div
-  class="login"
-  on:keydown={async (e) => {
-    if (e.key == "Enter") await login();
-  }}
->
+<div class="login" on:keyup={handleEnter}>
   <div class="mb-3">
     <label for="username" class="form-label">Username</label>
     <!-- svelte-ignore a11y-autofocus -->

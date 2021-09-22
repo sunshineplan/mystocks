@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"flag"
 	"fmt"
 	"log"
@@ -8,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sunshineplan/password"
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/stock"
 	_ "github.com/sunshineplan/stock/eastmoney"
@@ -19,10 +23,12 @@ import (
 
 var self string
 var universal bool
-var logPath *string
+var pemPath, logPath string
+var maxRetry int
 var refresh int
 var meta metadata.Server
 var server httpsvr.Server
+var priv *rsa.PrivateKey
 
 var svc = service.Service{
 	Name:     "MyStocks",
@@ -63,19 +69,35 @@ func main() {
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
 	flag.StringVar(&meta.Value, "value", "", "Verify Header Value")
+	flag.IntVar(&maxRetry, "retry", 5, "Max number of retries on wrong password")
 	flag.StringVar(&server.Unix, "unix", "", "UNIX-domain Socket")
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
 	flag.IntVar(&refresh, "refresh", 3, "Refresh Interval")
 	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
 	exclude := flag.String("exclude", "", "Exclude Files")
-	//logPath = flag.String("log", joinPath(dir(self), "access.log"), "Log Path")
-	logPath = flag.String("log", "", "Log Path")
+	//flag.StringVar(&logPath, "log", joinPath(dir(self), "access.log"), "Log Path")
+	flag.StringVar(&logPath, "log", "", "Log Path")
 	iniflags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	iniflags.SetAllowMissingConfigFile(true)
 	iniflags.SetAllowUnknownFlags(true)
 	iniflags.Parse()
 
+	password.SetMaxAttempts(maxRetry)
+	if pemPath != "" {
+		b, err := os.ReadFile(pemPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		block, _ := pem.Decode(b)
+		if block == nil {
+			log.Fatal("no PEM data is found")
+		}
+		priv, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	svc.Options.ExcludeFiles = strings.Split(*exclude, ",")
 	stock.SetTimeout(refresh)
 

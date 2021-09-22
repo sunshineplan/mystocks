@@ -1,3 +1,4 @@
+import JSEncrypt from 'jsencrypt'
 import Swal from 'sweetalert2'
 import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
@@ -33,6 +34,12 @@ const lunch_break: AnnotationOptions = {
   value: 120,
   borderColor: '#e5e5e5',
   borderWidth: 2
+}
+
+export const encrypt = (pubkey: string, password: string) => {
+  const encrypt = new JSEncrypt()
+  encrypt.setPublicKey(pubkey)
+  return encrypt.encrypt(password)
 }
 
 export const fire = (

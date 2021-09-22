@@ -7,11 +7,12 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.5",
     "@rollup/plugin-typescript": "^8.2.5",
     "@tsconfig/svelte": "^2.0.1",
     "@types/sortablejs": "^1.10.7",
-    "rollup": "^2.56.3",
+    "rollup": "^2.57.0",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-svelte": "^7.1.0",
@@ -26,6 +27,7 @@
     "@tarekraafat/autocomplete.js": "^10.2.6",
     "chart.js": "^3.5.1",
     "chartjs-plugin-annotation": "^1.0.2",
+    "jsencrypt": "^3.2.1",
     "sortablejs": "^1.14.0",
     "sweetalert2": "^11.1.6"
   }

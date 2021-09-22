@@ -13,3 +13,5 @@ const createFlows = () => {
   }
 }
 export const flows = createFlows()
+
+export const pubkey = "@pubkey@"
