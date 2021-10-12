@@ -27,9 +27,9 @@ var pemPath, logPath string
 var maxRetry int
 var refresh int
 var meta metadata.Server
-var server httpsvr.Server
 var priv *rsa.PrivateKey
 
+var server = httpsvr.New()
 var svc = service.Service{
 	Name:     "MyStocks",
 	Desc:     "Instance to serve My Stocks",
