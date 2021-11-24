@@ -1,18 +1,18 @@
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
-	"github.com/sunshineplan/gohttp"
+	"github.com/sunshineplan/database/mongodb/api"
 	"github.com/sunshineplan/stock"
 	"github.com/sunshineplan/stock/capitalflows/sector"
 	"github.com/sunshineplan/utils/cache"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/sunshineplan/utils/executor"
 )
 
 var stockCache = cache.New(false)
@@ -48,31 +48,21 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 	return ss, nil
 }
 
-func getStocks(id interface{}) ([]stock.Stock, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	cursor, err := collStock.Find(
-		ctx, bson.M{"user": id}, options.Find().SetSort(bson.M{"seq": 1}))
-	if err != nil {
-		log.Println("Failed to query stocks:", err)
-		return nil, err
-	}
-
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	var ss []stock.Stock
+func getStocks(id interface{}) (ss []stock.Stock, err error) {
 	var res []struct{ Index, Code string }
-	if err := cursor.All(ctx, &res); err != nil {
+	if err = stockClient.Find(
+		api.M{"user": id},
+		&api.FindOpt{Sort: api.M{"seq": 1}},
+		&res,
+	); err != nil {
 		log.Println("Failed to get stocks:", err)
-		return nil, err
+		return
 	}
 	for _, i := range res {
 		ss = append(ss, stock.Init(i.Index, i.Code))
 	}
 
-	return ss, nil
+	return
 }
 
 func loadFlows(date string) ([]sector.Chart, error) {
@@ -100,48 +90,33 @@ func loadFlows(date string) ([]sector.Chart, error) {
 
 func getFlows(date string) (flows []sector.Chart, err error) {
 	if date != "" {
-		date = strings.ReplaceAll(date, "-", "/")
-
-		github := "https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json"
-		jsdelivr := "https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json"
-
-		rc := make(chan *gohttp.Response, 1)
-		done := make(chan bool, 1)
-		get := func(url string) {
-			var mustReturn bool
-			c := make(chan *gohttp.Response, 1)
-			go func() { c <- gohttp.Get(fmt.Sprintf(url, date), nil) }()
-			for {
-				select {
-				case ok := <-done:
-					mustReturn = true
-					if ok {
-						return
-					}
-				case resp := <-c:
-					if resp.Error != nil && !mustReturn {
-						done <- false
-						return
-					}
-					rc <- resp
-					done <- true
-					return
-				}
-			}
-		}
-
-		go get(github)
-		go get(jsdelivr)
-
-		resp := <-rc
-		if resp.StatusCode == 404 {
-			resp.Close()
+		var result interface{}
+		result, err = executor.ExecuteConcurrentArg(
+			[]string{
+				"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
+				"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
+			},
+			func(url interface{}) (interface{}, error) {
+				return http.Get(fmt.Sprintf(url.(string), strings.ReplaceAll(date, "-", "/")))
+			},
+		)
+		if err != nil {
 			return
 		}
 
+		resp, ok := result.(*http.Response)
+		if !ok || resp == nil {
+			return
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode == 404 {
+			return
+		}
+
+		decoder := json.NewDecoder(resp.Body)
 		var tl []sector.TimeLine
-		if err = resp.JSON(&tl); err != nil {
-			return nil, err
+		if err = decoder.Decode(&tl); err != nil {
+			return
 		}
 
 		for _, i := range tl {
@@ -154,7 +129,7 @@ func getFlows(date string) (flows []sector.Chart, err error) {
 	t := time.Now().In(time.FixedZone("CST", 8*60*60))
 	date = fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
 
-	flows, err = sector.GetChart(date, collFlows)
+	flows, err = sector.GetChart(date, &flowsClient)
 
 	return
 }

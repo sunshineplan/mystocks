@@ -1,43 +1,29 @@
 package main
 
 import (
-	"github.com/sunshineplan/database/mongodb"
+	"github.com/sunshineplan/database/mongodb/api"
 	"github.com/sunshineplan/utils"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var dbConfig mongodb.Config
-var collAccount *mongo.Collection
-var collStock *mongo.Collection
-var collFlows *mongo.Collection
+var accountClient, stockClient, flowsClient api.Client
 
 func initDB() (err error) {
+	var mongo api.Client
 	if err = utils.Retry(func() error {
-		return meta.Get("mystocks_mongo", &dbConfig)
+		return meta.Get("mystocks_mongo", &mongo)
 	}, 3, 20); err != nil {
 		return
 	}
 
-	var client *mongo.Client
-	client, err = dbConfig.Open()
-	if err != nil {
-		return
-	}
-
-	database := client.Database(dbConfig.Database)
-
-	collAccount = database.Collection("account")
-	collStock = database.Collection("stock")
-	collFlows = database.Collection("capitalflows")
+	accountClient, stockClient, flowsClient = mongo, mongo, mongo
+	accountClient.Collection = "account"
+	stockClient.Collection = "stock"
+	flowsClient.Collection = "capitalflows"
 
 	return
 }
 
 func test() error {
-	if err := meta.Get("mystocks_mongo", &dbConfig); err != nil {
-		return err
-	}
-
-	_, err := dbConfig.Open()
-	return err
+	var mongo api.Client
+	return meta.Get("mystocks_mongo", &mongo)
 }

@@ -1,16 +1,12 @@
 package main
 
 import (
-	"context"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sunshineplan/database/mongodb/api"
 	"github.com/sunshineplan/stock"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func myStocks(c *gin.Context) {
@@ -100,14 +96,10 @@ func star(c *gin.Context) {
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := collStock.FindOne(
-		ctx, bson.M{"index": index, "code": code, "user": userID}).Err(); err == nil {
+	if n, err := stockClient.CountDocuments(api.M{"index": index, "code": code, "user": userID}, nil); n > 0 {
 		c.String(200, "1")
 		return
-	} else if err != mongo.ErrNoDocuments {
+	} else if err != nil {
 		log.Print(err)
 	}
 	c.String(200, "0")
@@ -135,45 +127,29 @@ func doStar(c *gin.Context) {
 	}
 
 	if r.Action == "unstar" {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
 		var s struct{ Seq int }
-		if err := collStock.FindOneAndDelete(ctx,
-			bson.M{"index": index, "code": code, "user": userID}).Decode(&s); err != nil {
-			log.Println("Failed to delete stock:", err)
+		if err := stockClient.FindOneAndDelete(api.M{"index": index, "code": code, "user": userID}, nil, &s); err != nil {
+			log.Println("Failed to unstar stock:", err)
 			c.String(500, "")
 			return
 		}
 
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if _, err := collStock.UpdateMany(ctx,
-			bson.M{"user": userID, "seq": bson.M{"$gt": s.Seq}},
-			bson.M{"$inc": bson.M{"seq": -1}},
+		if _, err := stockClient.UpdateMany(
+			api.M{"user": userID, "seq": api.M{"$gt": s.Seq}},
+			api.M{"$inc": api.M{"seq": -1}},
+			nil,
 		); err != nil {
-			log.Println("Failed to reorder after delete stock:", err)
+			log.Println("Failed to reorder after unstar stock:", err)
 			c.String(500, "")
 			return
 		}
 	} else {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		cursor, err := collStock.Find(
-			ctx, bson.M{"user": userID}, options.Find().SetSort(bson.M{"seq": -1}).SetLimit(1))
-		if err != nil {
-			log.Println("Failed to query stocks:", err)
-			c.String(500, "")
-			return
-		}
-
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
 		var s []struct{ Seq int }
-		if err := cursor.All(ctx, &s); err != nil {
+		if err := stockClient.Find(
+			api.M{"user": userID},
+			&api.FindOpt{Sort: api.M{"seq": -1}, Limit: 1},
+			&s,
+		); err != nil {
 			log.Println("Failed to get stocks:", err)
 			c.String(500, "")
 			return
@@ -186,21 +162,17 @@ func doStar(c *gin.Context) {
 			seq = s[0].Seq + 1
 		}
 
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		res, err := collStock.UpdateOne(
-			ctx,
-			bson.D{
-				{Key: "index", Value: index},
-				{Key: "code", Value: code},
-				{Key: "user", Value: userID},
-			},
-			bson.M{"$setOnInsert": bson.M{"seq": seq}},
-			options.Update().SetUpsert(true),
+		res, err := stockClient.UpdateOne(
+			struct {
+				Index string `json:"index"`
+				Code  string `json:"code"`
+				User  string `json:"user"`
+			}{index, code, userID},
+			api.M{"$setOnInsert": api.M{"seq": seq}},
+			&api.UpdateOpt{Upsert: true},
 		)
 		if err != nil {
-			log.Println("Failed to add stock:", err)
+			log.Println("Failed to star stock:", err)
 			c.String(500, "")
 			return
 		}
