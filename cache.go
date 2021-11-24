@@ -1,14 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/sunshineplan/database/mongodb/api"
+	"github.com/sunshineplan/gohttp"
 	"github.com/sunshineplan/stock"
 	"github.com/sunshineplan/stock/capitalflows/sector"
 	"github.com/sunshineplan/utils/cache"
@@ -90,35 +89,37 @@ func loadFlows(date string) ([]sector.Chart, error) {
 
 func getFlows(date string) (flows []sector.Chart, err error) {
 	if date != "" {
-		var result interface{}
-		result, err = executor.ExecuteConcurrentArg(
+		var res interface{}
+		res, err = executor.ExecuteConcurrentArg(
 			[]string{
 				"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
 				"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 			},
 			func(url interface{}) (interface{}, error) {
-				return http.Get(fmt.Sprintf(url.(string), strings.ReplaceAll(date, "-", "/")))
+				resp := gohttp.Get(fmt.Sprintf(url.(string), strings.ReplaceAll(date, "-", "/")), nil)
+				if resp.Error != nil {
+					return nil, resp.Error
+				}
+				return resp, nil
 			},
 		)
 		if err != nil {
 			return
 		}
 
-		resp, ok := result.(*http.Response)
+		resp, ok := res.(*gohttp.Response)
 		if !ok || resp == nil {
 			return
 		}
-		defer resp.Body.Close()
 		if resp.StatusCode == 404 {
+			resp.Close()
 			return
 		}
 
-		decoder := json.NewDecoder(resp.Body)
 		var tl []sector.TimeLine
-		if err = decoder.Decode(&tl); err != nil {
+		if err = resp.JSON(&tl); err != nil {
 			return
 		}
-
 		for _, i := range tl {
 			flows = append(flows, sector.TimeLine2Chart(i))
 		}

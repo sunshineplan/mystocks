@@ -93,7 +93,7 @@ func reorderStock(userID interface{}, orig, dest []string) error {
 		return err
 	}
 
-	if _, err := stockClient.UpdateOne(api.M{"_id": origStock.ID}, api.M{"$set": api.M{"seq": destStock.Seq}}, nil); err != nil {
+	if _, err := stockClient.UpdateOne(api.M{"_id": api.ObjectID(origStock.ID)}, api.M{"$set": api.M{"seq": destStock.Seq}}, nil); err != nil {
 		log.Println("Failed to reorder stock:", err)
 		return err
 	}

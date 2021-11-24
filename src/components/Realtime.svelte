@@ -25,6 +25,8 @@
       window.open(`https://quote.eastmoney.com/sh${stock.code}.html`);
     else if (stock.index == "SZSE")
       window.open(`https://quote.eastmoney.com/sz${stock.code}.html`);
+    else if (stock.index == "BSE")
+      window.open(`https://quote.eastmoney.com/bj/${stock.code}.html`);
   };
 </script>
 

@@ -6,6 +6,7 @@ require (
 	github.com/gin-contrib/sessions v0.0.4
 	github.com/gin-gonic/gin v1.7.6
 	github.com/sunshineplan/database/mongodb/api v1.0.11
+	github.com/sunshineplan/gohttp v1.0.0
 	github.com/sunshineplan/password v1.0.4
 	github.com/sunshineplan/service v1.0.3
 	github.com/sunshineplan/stock v1.0.4
@@ -29,12 +30,11 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/sunshineplan/gohttp v1.0.0 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9 // indirect
 	golang.org/x/sys v0.0.0-20211123173158-ef496fb156ab // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
