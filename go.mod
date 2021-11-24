@@ -12,5 +12,5 @@ require (
 	github.com/sunshineplan/stock v1.0.3
 	github.com/sunshineplan/utils v0.0.20
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
-	go.mongodb.org/mongo-driver v1.7.4
+	go.mongodb.org/mongo-driver v1.8.0
 )
