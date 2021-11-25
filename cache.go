@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sunshineplan/database/mongodb/api"
+	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/gohttp"
 	"github.com/sunshineplan/stock"
 	"github.com/sunshineplan/stock/capitalflows/sector"
@@ -50,8 +50,8 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 func getStocks(id interface{}) (ss []stock.Stock, err error) {
 	var res []struct{ Index, Code string }
 	if err = stockClient.Find(
-		api.M{"user": id},
-		&api.FindOpt{Sort: api.M{"seq": 1}},
+		mongodb.M{"user": id},
+		&mongodb.FindOpt{Sort: mongodb.M{"seq": 1}},
 		&res,
 	); err != nil {
 		log.Println("Failed to get stocks:", err)
@@ -130,7 +130,7 @@ func getFlows(date string) (flows []sector.Chart, err error) {
 	t := time.Now().In(time.FixedZone("CST", 8*60*60))
 	date = fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
 
-	flows, err = sector.GetChart(date, &flowsClient)
+	flows, err = sector.GetChart(date, flowsClient)
 
 	return
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/database/mongodb/api"
+	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/stock"
 )
 
@@ -96,7 +96,7 @@ func star(c *gin.Context) {
 	index := refer[len(refer)-2]
 	code := refer[len(refer)-1]
 
-	if n, err := stockClient.CountDocuments(api.M{"index": index, "code": code, "user": userID}, nil); n > 0 {
+	if n, err := stockClient.CountDocuments(mongodb.M{"index": index, "code": code, "user": userID}, nil); n > 0 {
 		c.String(200, "1")
 		return
 	} else if err != nil {
@@ -128,15 +128,15 @@ func doStar(c *gin.Context) {
 
 	if r.Action == "unstar" {
 		var s struct{ Seq int }
-		if err := stockClient.FindOneAndDelete(api.M{"index": index, "code": code, "user": userID}, nil, &s); err != nil {
+		if err := stockClient.FindOneAndDelete(mongodb.M{"index": index, "code": code, "user": userID}, nil, &s); err != nil {
 			log.Println("Failed to unstar stock:", err)
 			c.String(500, "")
 			return
 		}
 
 		if _, err := stockClient.UpdateMany(
-			api.M{"user": userID, "seq": api.M{"$gt": s.Seq}},
-			api.M{"$inc": api.M{"seq": -1}},
+			mongodb.M{"user": userID, "seq": mongodb.M{"$gt": s.Seq}},
+			mongodb.M{"$inc": mongodb.M{"seq": -1}},
 			nil,
 		); err != nil {
 			log.Println("Failed to reorder after unstar stock:", err)
@@ -146,8 +146,8 @@ func doStar(c *gin.Context) {
 	} else {
 		var s []struct{ Seq int }
 		if err := stockClient.Find(
-			api.M{"user": userID},
-			&api.FindOpt{Sort: api.M{"seq": -1}, Limit: 1},
+			mongodb.M{"user": userID},
+			&mongodb.FindOpt{Sort: mongodb.M{"seq": -1}, Limit: 1},
 			&s,
 		); err != nil {
 			log.Println("Failed to get stocks:", err)
@@ -168,8 +168,8 @@ func doStar(c *gin.Context) {
 				Code  string `json:"code"`
 				User  string `json:"user"`
 			}{index, code, userID},
-			api.M{"$setOnInsert": api.M{"seq": seq}},
-			&api.UpdateOpt{Upsert: true},
+			mongodb.M{"$setOnInsert": mongodb.M{"seq": seq}},
+			&mongodb.UpdateOpt{Upsert: true},
 		)
 		if err != nil {
 			log.Println("Failed to star stock:", err)

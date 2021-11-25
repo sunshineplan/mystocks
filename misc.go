@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/sunshineplan/database/mongodb/api"
+	"github.com/sunshineplan/database/mongodb"
 )
 
 func addUser(username string) {
@@ -26,18 +26,19 @@ func addUser(username string) {
 		log.Fatal(err)
 	}
 
+	type stock struct {
+		Index string `json:"index"`
+		Code  string `json:"code"`
+		User  string `json:"user"`
+		Seq   int    `json:"seq"`
+	}
 	if _, err := stockClient.InsertMany(
-		[]struct {
-			Index string `json:"index"`
-			Code  string `json:"code"`
-			User  string `json:"user"`
-			Seq   int    `json:"seq"`
-		}{
-			{"SSE", "000001", insertedID, 1},
-			{"SZSE", "399001", insertedID, 2},
-			{"SZSE", "399106", insertedID, 3},
-			{"SZSE", "399005", insertedID, 4},
-			{"SZSE", "399006", insertedID, 5},
+		[]interface{}{
+			stock{"SSE", "000001", insertedID.(mongodb.ObjectID).Hex(), 1},
+			stock{"SZSE", "399001", insertedID.(mongodb.ObjectID).Hex(), 2},
+			stock{"SZSE", "399106", insertedID.(mongodb.ObjectID).Hex(), 3},
+			stock{"SZSE", "399005", insertedID.(mongodb.ObjectID).Hex(), 4},
+			stock{"SZSE", "399006", insertedID.(mongodb.ObjectID).Hex(), 5},
 		},
 	); err != nil {
 		log.Fatal(err)
@@ -53,7 +54,7 @@ func deleteUser(username string) {
 
 	username = strings.TrimSpace(strings.ToLower(username))
 
-	deletedCount, err := accountClient.DeleteOne(api.M{"username": username})
+	deletedCount, err := accountClient.DeleteOne(mongodb.M{"username": username})
 	if err != nil {
 		log.Fatalln("Failed to delete user:", err)
 	} else if deletedCount == 0 {
@@ -70,22 +71,22 @@ func reorderStock(userID interface{}, orig, dest []string) error {
 
 	c := make(chan error, 1)
 	go func() {
-		c <- stockClient.FindOne(api.M{"index": orig[0], "code": orig[1], "user": userID}, nil, &origStock)
+		c <- stockClient.FindOne(mongodb.M{"index": orig[0], "code": orig[1], "user": userID}, nil, &origStock)
 	}()
-	if err := stockClient.FindOne(api.M{"index": dest[0], "code": dest[1], "user": userID}, nil, &destStock); err != nil {
+	if err := stockClient.FindOne(mongodb.M{"index": dest[0], "code": dest[1], "user": userID}, nil, &destStock); err != nil {
 		return err
 	}
 	if err := <-c; err != nil {
 		return err
 	}
 
-	var filter, update api.M
+	var filter, update mongodb.M
 	if origStock.Seq > destStock.Seq {
-		filter = api.M{"user": userID, "seq": api.M{"$gte": destStock.Seq, "$lt": origStock.Seq}}
-		update = api.M{"$inc": api.M{"seq": 1}}
+		filter = mongodb.M{"user": userID, "seq": mongodb.M{"$gte": destStock.Seq, "$lt": origStock.Seq}}
+		update = mongodb.M{"$inc": mongodb.M{"seq": 1}}
 	} else {
-		filter = api.M{"user": userID, "seq": api.M{"$gt": origStock.Seq, "$lte": destStock.Seq}}
-		update = api.M{"$inc": api.M{"seq": -1}}
+		filter = mongodb.M{"user": userID, "seq": mongodb.M{"$gt": origStock.Seq, "$lte": destStock.Seq}}
+		update = mongodb.M{"$inc": mongodb.M{"seq": -1}}
 	}
 
 	if _, err := stockClient.UpdateMany(filter, update, nil); err != nil {
@@ -93,7 +94,12 @@ func reorderStock(userID interface{}, orig, dest []string) error {
 		return err
 	}
 
-	if _, err := stockClient.UpdateOne(api.M{"_id": api.ObjectID(origStock.ID)}, api.M{"$set": api.M{"seq": destStock.Seq}}, nil); err != nil {
+	id, _ := stockClient.ObjectID(origStock.ID)
+	if _, err := stockClient.UpdateOne(
+		mongodb.M{"_id": id.Interface()},
+		mongodb.M{"$set": mongodb.M{"seq": destStock.Seq}},
+		nil,
+	); err != nil {
 		log.Println("Failed to reorder stock:", err)
 		return err
 	}
