@@ -13,7 +13,7 @@ func initDB() (err error) {
 	if err = utils.Retry(func() error {
 		return meta.Get("mystocks_mongo", &apiClient)
 	}, 3, 20); err != nil {
-		return
+		return err
 	}
 
 	account, stock, flows := apiClient, apiClient, apiClient
@@ -22,7 +22,13 @@ func initDB() (err error) {
 	flows.Collection = "capitalflows"
 	accountClient, stockClient, flowsClient = &account, &stock, &flows
 
-	return
+	if err = accountClient.Connect(); err != nil {
+		return
+	}
+	if err = stockClient.Connect(); err != nil {
+		return
+	}
+	return flowsClient.Connect()
 }
 
 func test() error {

@@ -17,9 +17,9 @@ func addUser(username string) {
 
 	insertedID, err := accountClient.InsertOne(
 		struct {
-			Username string `json:"username"`
-			Password string `json:"password"`
-			Uid      string `json:"uid"`
+			Username string `json:"username" bson:"username"`
+			Password string `json:"password" bson:"password"`
+			Uid      string `json:"uid" bson:"uid"`
 		}{username, "123456", username},
 	)
 	if err != nil {
@@ -27,10 +27,10 @@ func addUser(username string) {
 	}
 
 	type stock struct {
-		Index string `json:"index"`
-		Code  string `json:"code"`
-		User  string `json:"user"`
-		Seq   int    `json:"seq"`
+		Index string `json:"index" bson:"index"`
+		Code  string `json:"code" bson:"code"`
+		User  string `json:"user" bson:"user"`
+		Seq   int    `json:"seq" bson:"seq"`
 	}
 	if _, err := stockClient.InsertMany(
 		[]interface{}{
@@ -65,7 +65,7 @@ func deleteUser(username string) {
 
 func reorderStock(userID interface{}, orig, dest []string) error {
 	var origStock, destStock struct {
-		ID  string `json:"_id"`
+		ID  string `json:"_id" bson:"_id"`
 		Seq int
 	}
 

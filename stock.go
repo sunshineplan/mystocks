@@ -164,9 +164,9 @@ func doStar(c *gin.Context) {
 
 		res, err := stockClient.UpdateOne(
 			struct {
-				Index string `json:"index"`
-				Code  string `json:"code"`
-				User  string `json:"user"`
+				Index string `json:"index" bson:"index"`
+				Code  string `json:"code" bson:"code"`
+				User  string `json:"user" bson:"user"`
 			}{index, code, userID},
 			mongodb.M{"$setOnInsert": mongodb.M{"seq": seq}},
 			&mongodb.UpdateOpt{Upsert: true},
