@@ -18,6 +18,7 @@ import (
 
 func run() {
 	router := gin.New()
+	router.TrustedPlatform = "X-Real-IP"
 	server.Handler = router
 
 	router.Use(gin.Recovery())
