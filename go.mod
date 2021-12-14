@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/sessions v0.0.4
 	github.com/gin-gonic/gin v1.7.7
 	github.com/sunshineplan/database/mongodb v1.0.4
-	github.com/sunshineplan/gohttp v1.0.2
+	github.com/sunshineplan/gohttp v1.0.3
 	github.com/sunshineplan/password v1.0.4
 	github.com/sunshineplan/service v1.0.3
 	github.com/sunshineplan/stock v1.0.6
