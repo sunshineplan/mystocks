@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/database/mongodb/api"
-	"github.com/sunshineplan/utils"
+	"github.com/sunshineplan/utils/retry"
 )
 
 var accountClient, stockClient, flowsClient mongodb.Client
 
 func initDB() (err error) {
 	var apiClient api.Client
-	if err = utils.Retry(func() error {
+	if err = retry.Do(func() error {
 		return meta.Get("mystocks_mongo", &apiClient)
 	}, 3, 20); err != nil {
 		return err

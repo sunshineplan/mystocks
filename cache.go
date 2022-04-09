@@ -17,7 +17,7 @@ import (
 var stockCache = cache.New(false)
 var flowsCache = cache.New(true)
 
-func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
+func loadStocks(id any, init bool) ([]stock.Stock, error) {
 	if id == "" {
 		return []stock.Stock{
 			stock.Init("SSE", "000001"),
@@ -40,14 +40,14 @@ func loadStocks(id interface{}, init bool) ([]stock.Stock, error) {
 		return nil, err
 	}
 
-	stockCache.Set(id, ss, 1*time.Hour, func() (interface{}, error) {
+	stockCache.Set(id, ss, 1*time.Hour, func() (any, error) {
 		return getStocks(id)
 	})
 
 	return ss, nil
 }
 
-func getStocks(id interface{}) (ss []stock.Stock, err error) {
+func getStocks(id any) (ss []stock.Stock, err error) {
 	var res []struct{ Index, Code string }
 	if err = stockClient.Find(
 		mongodb.M{"user": id},
@@ -89,14 +89,14 @@ func loadFlows(date string) ([]sector.Chart, error) {
 
 func getFlows(date string) (flows []sector.Chart, err error) {
 	if date != "" {
-		var res interface{}
+		var res any
 		res, err = executor.ExecuteConcurrentArg(
 			[]string{
 				"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
 				"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 			},
-			func(url interface{}) (interface{}, error) {
-				resp := gohttp.Get(fmt.Sprintf(url.(string), strings.ReplaceAll(date, "-", "/")), nil)
+			func(url string) (any, error) {
+				resp := gohttp.Get(fmt.Sprintf(url, strings.ReplaceAll(date, "-", "/")), nil)
 				if resp.Error != nil {
 					return nil, resp.Error
 				}

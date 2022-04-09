@@ -33,7 +33,7 @@ func addUser(username string) {
 		Seq   int    `json:"seq" bson:"seq"`
 	}
 	if _, err := stockClient.InsertMany(
-		[]interface{}{
+		[]any{
 			stock{"SSE", "000001", insertedID.(mongodb.ObjectID).Hex(), 1},
 			stock{"SZSE", "399001", insertedID.(mongodb.ObjectID).Hex(), 2},
 			stock{"SZSE", "399106", insertedID.(mongodb.ObjectID).Hex(), 3},
@@ -63,7 +63,7 @@ func deleteUser(username string) {
 	log.Print("Done!")
 }
 
-func reorderStock(userID interface{}, orig, dest []string) error {
+func reorderStock(userID any, orig, dest []string) error {
 	var origStock, destStock struct {
 		ID  string `json:"_id" bson:"_id"`
 		Seq int
