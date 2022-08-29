@@ -8,7 +8,7 @@ require (
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/gohttp v1.0.5
 	github.com/sunshineplan/password v1.0.4
-	github.com/sunshineplan/service v1.0.4
+	github.com/sunshineplan/service v1.0.5
 	github.com/sunshineplan/stock v1.0.7
 	github.com/sunshineplan/utils v0.1.5
 	github.com/vharitonsky/iniflags v0.0.0-20180513140207-a33cd0b5f3de
@@ -34,7 +34,7 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220408190544-5352b0902921 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
-	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
+	golang.org/x/sys v0.0.0-20220825204002-c680a09ffe64 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
