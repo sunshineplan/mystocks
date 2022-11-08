@@ -40,6 +40,7 @@
 {#if Object.keys(indices).length !== 0}
   <div class="indices">
     {#each Object.entries(names) as [key, val] (key)}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div id={key} on:click={() => goto(indices[key])}>
         <span class="short">{key}</span>
         <span class="full">{val}</span>

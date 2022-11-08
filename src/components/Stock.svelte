@@ -93,7 +93,8 @@
     yAxes.suggestedMax = stock.last * 1.01;
     const annotations = chart.options.plugins?.annotation
       ?.annotations as Record<string, AnnotationOptions>;
-    annotations.last.value = stock.last;
+    annotations.last.yMax = stock.last;
+    annotations.last.yMin = stock.last;
     updateChart(true);
   };
 
@@ -152,6 +153,7 @@
 
 <header>
   <AutoComplete />
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
     class="home"
     on:click={() => {

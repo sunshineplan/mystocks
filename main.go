@@ -11,13 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/password"
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/stock"
 	_ "github.com/sunshineplan/stock/eastmoney"
 	"github.com/sunshineplan/utils"
 	"github.com/sunshineplan/utils/httpsvr"
-	"github.com/sunshineplan/utils/metadata"
 	"github.com/vharitonsky/iniflags"
 )
 

@@ -31,11 +31,14 @@
   };
   const today = getDate(0);
 
-  const legend = capitalflows.options?.plugins?.legend as LegendOptions;
+  const legend = capitalflows.options?.plugins?.legend as LegendOptions<"line">;
 
   legend.onClick = (event, legendItem) => {
-    display(legendItem.datasetIndex);
-    chart.update();
+    const index = legendItem.datasetIndex;
+    if (index) {
+      display(index);
+      chart.update();
+    }
   };
 
   const display = (index: number) => {
@@ -227,6 +230,7 @@
         </i>
       {/if}
     {:else}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <i class="material-icons text-danger" on:click={() => load(true, date)}>
         close
       </i>

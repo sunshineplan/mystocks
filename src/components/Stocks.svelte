@@ -84,6 +84,7 @@
 
 <header>
   <AutoComplete />
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <span style="padding-left:10px" on:click={() => post("/refresh")}>
     <i class="material-icons refresh">refresh</i>
   </span>

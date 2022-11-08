@@ -32,10 +32,12 @@
 
 <div>
   <div style="display: flex; font-size: 2rem">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <i class="material-icons star {stared ? 'stared' : ''}" on:click={star}>
       {stared ? "star" : "star_border"}
     </i>
     <span>{stock.name}</span>(<span>{stock.code}</span>)
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <i class="material-icons open" on:click={open}>open_in_new</i>
     &nbsp;&nbsp;&nbsp;
     <span style={addColor(stock, "now")}>{stock.now}</span>
