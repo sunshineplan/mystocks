@@ -11,7 +11,7 @@
     TooltipCallbacks,
     LinearScaleOptions,
   } from "chart.js";
-  import type { AnnotationOptions } from "chartjs-plugin-annotation";
+  import type { LineAnnotationOptions } from "chartjs-plugin-annotation";
   import type { Stock } from "../index";
 
   let autoUpdate: number[] = [];
@@ -92,9 +92,8 @@
     yAxes.suggestedMin = stock.last / 1.01;
     yAxes.suggestedMax = stock.last * 1.01;
     const annotations = chart.options.plugins?.annotation
-      ?.annotations as Record<string, AnnotationOptions>;
-    annotations.last.yMax = stock.last;
-    annotations.last.yMin = stock.last;
+      ?.annotations as Record<string, LineAnnotationOptions>;
+    annotations.last.value = stock.last;
     updateChart(true);
   };
 
