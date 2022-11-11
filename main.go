@@ -112,29 +112,14 @@ func main() {
 	case 0:
 		run()
 	case 1:
-		switch flag.Arg(0) {
-		case "run":
-			svc.Run(false)
-		case "debug":
-			svc.Run(true)
-		case "test":
-			err = svc.Test()
-		case "install":
-			err = svc.Install()
-		case "remove":
-			err = svc.Remove()
-		case "start":
-			err = svc.Start()
-		case "stop":
-			err = svc.Stop()
-		case "restart":
-			err = svc.Restart()
-		case "update":
-			err = svc.Update()
-		case "add", "delete":
-			log.Fatalf("%s need two arguments", flag.Arg(0))
-		default:
-			usage(fmt.Sprintf("Unknown argument: %s", flag.Arg(0)))
+		cmd := flag.Arg(0)
+		var ok bool
+		if ok, err = svc.Command(cmd); !ok {
+			if cmd == "add" || cmd == "delete" {
+				log.Fatalf("%s need two arguments", cmd)
+			} else {
+				log.Fatalln("Unknown argument:", cmd)
+			}
 		}
 	case 2:
 		switch flag.Arg(0) {
@@ -145,10 +130,10 @@ func main() {
 				deleteUser(flag.Arg(1))
 			}
 		default:
-			log.Fatalf("Unknown arguments: %s", strings.Join(flag.Args(), " "))
+			log.Fatalln("Unknown arguments:", strings.Join(flag.Args(), " "))
 		}
 	default:
-		usage(fmt.Sprintf("Unknown arguments: %s", strings.Join(flag.Args(), " ")))
+		usage(fmt.Sprintln("Unknown arguments:", strings.Join(flag.Args(), " ")))
 	}
 	if err != nil {
 		log.Fatalf("Failed to %s: %v", flag.Arg(0), err)
