@@ -69,8 +69,8 @@ jobs:
 
       - name: Pack
         run: |
-          tar cvzf release-linux.tar.gz public scripts mystocks config.ini.default
-          zip -9vr release-windows.zip public scripts mystocks.exe config.ini.default
+          tar cvzf release-linux.tar.gz dist scripts mystocks config.ini.default
+          zip -9vr release-windows.zip dist scripts mystocks.exe config.ini.default
 
       - name: Create Release
         uses: softprops/action-gh-release@v1

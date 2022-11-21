@@ -35,7 +35,7 @@ installMyStocks() {
         cd $TMPDIR/*
         go build -ldflags "-s -w" && npm i && npm run build || exit 1
         mkdir -p $INSTALL_PATH
-        cp -r public mystocks config.ini.default $INSTALL_PATH
+        cp -r dist mystocks config.ini.default $INSTALL_PATH
         rm -rf $TMPDIR
     fi
 }
