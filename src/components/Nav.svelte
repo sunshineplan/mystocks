@@ -5,7 +5,7 @@
   export let user: string;
 
   const logout = async () => {
-    const resp = await post("@universal@/logout", undefined, true);
+    const resp = await post(window.universal + "/logout", undefined, true);
     if (resp.ok) {
       $username = "";
       window.history.pushState({}, "", "/");
@@ -71,7 +71,7 @@
     width: 100%;
     height: 60px;
     background-color: #1a73e8;
-    padding: .5rem 1rem;
+    padding: 0.5rem 1rem;
   }
 
   .brand {

@@ -1,6 +1,9 @@
-import type { ScatterDataPoint } from 'chart.js'
+declare interface Window {
+  universal: string
+  pubkey: string
+}
 
-export interface Stock {
+declare interface Stock {
   index: string
   code: string
   name: string
@@ -14,9 +17,4 @@ export interface Stock {
   sell5: { Price: number, Volume: number }[]
   buy5: { Price: number, Volume: number }[]
   update?: string
-}
-
-export interface Flows {
-  sector: string
-  chart: ScatterDataPoint[]
 }

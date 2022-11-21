@@ -1,12 +1,20 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Chart } from "chart.js";
+  import {
+    Chart,
+    type ChartDataset,
+    type LegendOptions,
+    type ScatterDataPoint,
+  } from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import { checkTime, getColor, capitalflows } from "../misc";
-  import type { ChartDataset, LegendOptions } from "chart.js";
-  import type { Flows } from "../index";
 
-  let autoUpdate = 0;
+  interface Flows {
+    sector: string;
+    chart: ScatterDataPoint[];
+  }
+
+  let autoUpdate: NodeJS.Timeout;
   let chart: Chart<"line">;
   let datasets: ChartDataset<"line">[] = [];
   let show: number[] = [];

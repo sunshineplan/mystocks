@@ -43,7 +43,7 @@ func run() {
 		log.Fatalln("Failed to initialize database:", err)
 	}
 
-	js, err := os.ReadFile(joinPath(dir(self), "public/build/bundle.js"))
+	js, err := os.ReadFile(joinPath(dir(self), "dist/const.js"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,13 +94,12 @@ func run() {
 		js = bytes.ReplaceAll(js, []byte("@pubkey@"), nil)
 	}
 
-	if err := os.WriteFile(joinPath(dir(self), "public/build/script.js"), js, 0644); err != nil {
+	if err := os.WriteFile(joinPath(dir(self), "dist/env.js"), js, 0644); err != nil {
 		log.Fatal(err)
 	}
 
-	router.StaticFS("/build", http.Dir(joinPath(dir(self), "public/build")))
-	router.StaticFile("favicon.ico", joinPath(dir(self), "public/favicon.ico"))
-	router.LoadHTMLFiles(joinPath(dir(self), "public/index.html"))
+	router.StaticFS("/", http.Dir(joinPath(dir(self), "dist")))
+	router.LoadHTMLFiles(joinPath(dir(self), "dist/index.html"))
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)

@@ -12,9 +12,8 @@
     LinearScaleOptions,
   } from "chart.js";
   import type { LineAnnotationOptions } from "chartjs-plugin-annotation";
-  import type { Stock } from "../index";
 
-  let autoUpdate: number[] = [];
+  let autoUpdate: NodeJS.Timeout[] = [];
   let stock: Stock = {
     index: "n/a",
     code: "n/a",

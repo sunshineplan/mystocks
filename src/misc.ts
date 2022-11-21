@@ -2,7 +2,6 @@ import JSEncrypt from 'jsencrypt'
 import Swal from 'sweetalert2'
 import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
-import type { Stock } from './index'
 import type { ChartConfiguration } from 'chart.js'
 import type { AnnotationOptions } from 'chartjs-plugin-annotation'
 
