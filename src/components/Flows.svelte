@@ -184,30 +184,26 @@
   <AutoComplete />
   <div>
     <div class="input-group">
-      <div class="input-group-prepend">
-        <button
-          class="input-group-text"
-          disabled={loading ? true : false}
-          on:click={() => getDate(-1)}
-        >
-          -
-        </button>
-      </div>
+      <button
+        class="input-group-text"
+        disabled={loading ? true : false}
+        on:click={() => getDate(-1)}
+      >
+        -
+      </button>
       <input
         class="form-control"
         type="date"
         disabled={loading ? true : false}
         bind:value={date}
       />
-      <div class="input-group-append">
-        <button
-          class="input-group-text"
-          disabled={loading ? true : false}
-          on:click={() => getDate(1)}
-        >
-          +
-        </button>
-      </div>
+      <button
+        class="input-group-text"
+        disabled={loading ? true : false}
+        on:click={() => getDate(1)}
+      >
+        +
+      </button>
     </div>
     <button
       class="btn btn-danger"
@@ -267,6 +263,11 @@
     display: inline-flex;
     width: 240px;
     vertical-align: middle;
+  }
+
+  .input-group-text {
+    width: 35px;
+    justify-content: center;
   }
 
   .spinner-border {
