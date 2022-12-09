@@ -51,25 +51,22 @@ func indices(c *gin.Context) {
 	c.JSON(200, gin.H{"沪": indices[0], "深": indices[1], "创": indices[2], "中": indices[3]})
 }
 
-func getStock(c *gin.Context) {
-	var r struct{ Index, Code, Q string }
+func getRealtime(c *gin.Context) {
+	var r struct{ Index, Code string }
 	if err := c.BindJSON(&r); err != nil {
 		c.String(400, "")
 		return
 	}
+	c.JSON(200, stock.Init(r.Index, r.Code).GetRealtime())
+}
 
-	s := stock.Init(r.Index, r.Code)
-
-	if r.Q == "realtime" {
-		realtime := s.GetRealtime()
-		c.JSON(200, realtime)
-		return
-	} else if r.Q == "chart" {
-		chart := s.GetChart()
-		c.JSON(200, chart)
+func getChart(c *gin.Context) {
+	var r struct{ Index, Code string }
+	if err := c.BindJSON(&r); err != nil {
+		c.String(400, "")
 		return
 	}
-	c.String(400, "")
+	c.JSON(200, stock.Init(r.Index, r.Code).GetChart())
 }
 
 func getSuggest(c *gin.Context) {

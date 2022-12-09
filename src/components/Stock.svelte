@@ -98,10 +98,9 @@
 
   const loadRealtime = async (force?: boolean) => {
     if (checkTime() || (force && $current.code)) {
-      const resp = await post("/get", {
+      const resp = await post("/realtime", {
         index: $current.index,
         code: $current.code,
-        q: "realtime",
       });
       const json = await resp.json();
       if (json.name) {
@@ -115,10 +114,9 @@
 
   const loadChart = async (force?: boolean) => {
     if (checkTime() || (force && $current.code)) {
-      const resp = await post("/get", {
+      const resp = await post("/chart", {
         index: $current.index,
         code: $current.code,
-        q: "chart",
       });
       const json = await resp.json();
       if (json.chart) data = json.chart;
