@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gin-contrib/sessions v0.0.5
-	github.com/gin-gonic/gin v1.8.1
+	github.com/gin-gonic/gin v1.8.2
 	github.com/sunshineplan/database/mongodb v1.0.5
 	github.com/sunshineplan/gohttp v1.0.5
 	github.com/sunshineplan/metadata v1.1.0
