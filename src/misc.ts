@@ -74,7 +74,7 @@ export const checkTime = () => {
   const date = new Date()
   const hour = date.getUTCHours()
   const day = date.getDay()
-  if (hour >= 1 && hour <= 8 && day >= 1 && day <= 5)
+  if (hour >= 1 && hour <= 7 && day >= 1 && day <= 5)
     return true
   return false
 }

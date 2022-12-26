@@ -48,7 +48,7 @@ func run() {
 		log.Fatal(err)
 	}
 
-	if universal {
+	if *universal {
 		var redisStore struct{ Endpoint, Password, Secret, API string }
 		if err := meta.Get("account_redis", &redisStore); err != nil {
 			log.Fatal(err)
@@ -111,7 +111,7 @@ func run() {
 		c.JSON(200, gin.H{"username": username, "refresh": refresh})
 	})
 
-	if !universal {
+	if !*universal {
 		auth := router.Group("/")
 		auth.POST("/login", login)
 		auth.POST("/logout", authRequired, func(c *gin.Context) {

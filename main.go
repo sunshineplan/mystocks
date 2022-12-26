@@ -22,10 +22,7 @@ import (
 )
 
 var self string
-var universal bool
-var pemPath, logPath string
-var maxRetry int
-var refresh int
+var logPath string
 var meta metadata.Server
 var priv *rsa.PrivateKey
 
@@ -36,8 +33,10 @@ var svc = service.Service{
 	Exec:     run,
 	TestExec: test,
 	Options: service.Options{
-		Dependencies: []string{"After=network.target"},
-		Environment:  map[string]string{"GIN_MODE": "release"},
+		Dependencies:       []string{"After=network.target"},
+		Environment:        map[string]string{"GIN_MODE": "release"},
+		RemoveBeforeUpdate: []string{"dist/assets"},
+		ExcludeFiles:       []string{"scripts/mystocks.conf"},
 	},
 }
 
@@ -54,6 +53,13 @@ func init() {
 	}
 }
 
+var (
+	universal = flag.Bool("universal", false, "Use Universal account id or not")
+	maxRetry  = flag.Int("retry", 5, "Max number of retries on wrong password")
+	refresh   = flag.Int("refresh", 3, "Refresh Interval")
+	pemPath   = flag.String("pem", "", "PEM File Path")
+)
+
 func usage(errmsg string) {
 	fmt.Fprintf(os.Stderr,
 		`%s
@@ -65,28 +71,22 @@ usage: %s <command>
 }
 
 func main() {
-	flag.BoolVar(&universal, "universal", false, "Use Universal account id or not")
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
 	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
 	flag.StringVar(&meta.Value, "value", "", "Verify Header Value")
-	flag.IntVar(&maxRetry, "retry", 5, "Max number of retries on wrong password")
 	flag.StringVar(&server.Unix, "unix", "", "UNIX-domain Socket")
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
-	flag.IntVar(&refresh, "refresh", 3, "Refresh Interval")
-	flag.StringVar(&pemPath, "pem", "", "PEM File Path")
 	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
-	exclude := flag.String("exclude", "", "Exclude Files")
-	//flag.StringVar(&logPath, "log", joinPath(dir(self), "access.log"), "Log Path")
 	flag.StringVar(&logPath, "log", "", "Log Path")
 	iniflags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	iniflags.SetAllowMissingConfigFile(true)
 	iniflags.SetAllowUnknownFlags(true)
 	iniflags.Parse()
 
-	password.SetMaxAttempts(maxRetry)
-	if pemPath != "" {
-		b, err := os.ReadFile(pemPath)
+	password.SetMaxAttempts(*maxRetry)
+	if *pemPath != "" {
+		b, err := os.ReadFile(*pemPath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -99,8 +99,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	svc.Options.ExcludeFiles = strings.Split(*exclude, ",")
-	stock.SetTimeout(refresh)
+	stock.SetTimeout(*refresh)
 
 	if service.IsWindowsService() {
 		svc.Run(false)

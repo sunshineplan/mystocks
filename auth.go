@@ -32,7 +32,7 @@ func getUser(c *gin.Context) (id, username string, err error) {
 		return
 	}
 	username, _ = session.Get("username").(string)
-	if universal {
+	if *universal {
 		var user user
 		if err = accountClient.FindOne(mongodb.M{"uid": sid}, nil, &user); err != nil {
 			return
