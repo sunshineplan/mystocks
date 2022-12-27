@@ -17,8 +17,8 @@ import (
 	"github.com/sunshineplan/stock"
 	_ "github.com/sunshineplan/stock/eastmoney"
 	"github.com/sunshineplan/utils"
+	"github.com/sunshineplan/utils/flags"
 	"github.com/sunshineplan/utils/httpsvr"
-	"github.com/vharitonsky/iniflags"
 )
 
 var self string
@@ -79,10 +79,8 @@ func main() {
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
 	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
 	flag.StringVar(&logPath, "log", "", "Log Path")
-	iniflags.SetConfigFile(joinPath(dir(self), "config.ini"))
-	iniflags.SetAllowMissingConfigFile(true)
-	iniflags.SetAllowUnknownFlags(true)
-	iniflags.Parse()
+	flags.SetConfigFile(joinPath(dir(self), "config.ini"))
+	flags.Parse()
 
 	password.SetMaxAttempts(*maxRetry)
 	if *pemPath != "" {
