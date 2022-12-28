@@ -64,7 +64,6 @@ configMyStocks() {
     [ -z $log ] && log=$LOG
     [ $log = none ] && log=
     read -p 'Please enter update URL: ' update
-    read -p 'Please enter exclude files: ' exclude
     [ $log ] && mkdir -p $(dirname $log)
     sed "s,\$server,$server," $INSTALL_PATH/config.ini.default > $INSTALL_PATH/config.ini
     sed -i"" -e "s/\$header/$header/" $INSTALL_PATH/config.ini
@@ -76,7 +75,6 @@ configMyStocks() {
     sed -i"" -e "s/\$refresh/$refresh/" $INSTALL_PATH/config.ini
     sed -i"" -e "s,\$log,$log," $INSTALL_PATH/config.ini
     sed -i"" -e "s,\$update,$update," $INSTALL_PATH/config.ini
-    sed -i"" -e "s|\$exclude|$exclude|" $INSTALL_PATH/config.ini
     $INSTALL_PATH/mystocks install || exit 1
 }
 
