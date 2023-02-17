@@ -34,6 +34,7 @@ jobs:
           npm install
           npm run build
           go build -ldflags "-s -w"
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o mystocks-darwin-arm64
           #sudo apt install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
           #GOOS=windows CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ go build -ldflags "-s -w"
           GOOS=windows go build -ldflags "-s -w"
@@ -70,6 +71,8 @@ jobs:
       - name: Pack
         run: |
           tar cvzf release-linux.tar.gz dist scripts mystocks config.ini.default
+          mv -f mystocks-darwin-arm64 mystocks
+          tar cvzf release-darwin-arm64.tar.gz dist scripts mystocks config.ini.default
           zip -9vr release-windows.zip dist scripts mystocks.exe config.ini.default
 
       - name: Create Release
