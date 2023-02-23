@@ -11,7 +11,7 @@ require (
 	github.com/sunshineplan/password v1.0.4
 	github.com/sunshineplan/service v1.0.6
 	github.com/sunshineplan/stock v1.0.8
-	github.com/sunshineplan/utils v0.1.23
+	github.com/sunshineplan/utils v0.1.24
 )
 
 require (
