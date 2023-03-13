@@ -1,7 +1,6 @@
 <script lang="ts">
   import { post, color, addColor } from "../misc";
   import { current } from "../stores";
-  import type { Stock } from "../index";
 
   export let stock: Stock;
 

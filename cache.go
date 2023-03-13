@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -54,7 +53,7 @@ func getStocks(id any) (ss []stock.Stock, err error) {
 		&mongodb.FindOpt{Sort: mongodb.M{"seq": 1}},
 		&res,
 	); err != nil {
-		log.Println("Failed to get stocks:", err)
+		svc.Println("Failed to get stocks:", err)
 		return
 	}
 	for _, i := range res {

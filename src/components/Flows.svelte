@@ -19,25 +19,38 @@
   let datasets: ChartDataset<"line">[] = [];
   let show: number[] = [];
   let date = "";
+  let today = "";
   let last = "";
   let loading = 0;
   let status = 0;
   let hover = false;
+  let dayChange = false;
 
   $: date && goto();
 
-  const getDate = (n: -1 | 0 | 1) => {
+  const getDate = (n: -1 | 0 | 1, setDate?: boolean) => {
     let day: Date;
     if (n == 0) day = new Date();
-    else day = new Date(date);
-    day.setDate(day.getDate() + n);
+    else {
+      day = new Date(date);
+      day.setDate(day.getDate() + n);
+    }
     const dd = String(day.getDate()).padStart(2, "0");
     const mm = String(day.getMonth() + 1).padStart(2, "0");
     const yyyy = day.getFullYear();
-    date = `${yyyy}-${mm}-${dd}`;
-    return date;
+    const ymd = `${yyyy}-${mm}-${dd}`;
+    if (setDate) date = ymd;
+    return ymd;
   };
-  const today = getDate(0);
+
+  const updateDate = () => {
+    if (date == today && date != getDate(0)) {
+      dayChange = true;
+      today = getDate(0, true);
+    } else {
+      today = getDate(0);
+    }
+  };
 
   const legend = capitalflows.options?.plugins?.legend as LegendOptions<"line">;
 
@@ -86,6 +99,7 @@
     }
     if (force) updateChart(true);
     if (checkTime() || force) {
+      updateDate();
       loading++;
       let array: any;
       try {
@@ -130,6 +144,10 @@
   };
 
   const goto = () => {
+    if (dayChange) {
+      dayChange = false;
+      return;
+    }
     if (!chart) return;
     show.length = 0;
     updateChart(true);
@@ -166,6 +184,7 @@
       capitalflows
     );
 
+    today = getDate(0, true);
     load(true);
     autoUpdate = setInterval(load, 60000);
 
@@ -187,7 +206,7 @@
       <button
         class="input-group-text"
         disabled={loading ? true : false}
-        on:click={() => getDate(-1)}
+        on:click={() => getDate(-1, true)}
       >
         -
       </button>
@@ -200,7 +219,7 @@
       <button
         class="input-group-text"
         disabled={loading ? true : false}
-        on:click={() => getDate(1)}
+        on:click={() => getDate(1, true)}
       >
         +
       </button>
@@ -216,7 +235,7 @@
         else chart.data.datasets = [];
         show.length = 0;
         chart.update();
-        getDate(0);
+        getDate(0, true);
       }}
     >
       Reset

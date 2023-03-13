@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -12,14 +11,14 @@ import (
 func myStocks(c *gin.Context) {
 	userID, _, err := getUser(c)
 	if err != nil {
-		log.Println("Failed to get user:", err)
+		svc.Println("Failed to get user:", err)
 		c.String(500, "")
 		return
 	}
 
 	stocks, err := loadStocks(userID, false)
 	if err != nil {
-		log.Println("Failed to get all stocks:", err)
+		svc.Println("Failed to get all stocks:", err)
 		c.String(500, "")
 		return
 	}
@@ -32,7 +31,7 @@ func capitalFlows(c *gin.Context) {
 
 	flows, err := loadFlows(date)
 	if err != nil {
-		log.Println("Failed to get flows chart:", err)
+		svc.Println("Failed to get flows chart:", err)
 		c.String(500, "")
 		return
 	}
@@ -81,7 +80,7 @@ func getSuggest(c *gin.Context) {
 func star(c *gin.Context) {
 	userID, _, err := getUser(c)
 	if err != nil {
-		log.Println("Failed to get user:", err)
+		svc.Println("Failed to get user:", err)
 		c.String(500, "")
 		return
 	} else if userID == "" {
@@ -97,7 +96,7 @@ func star(c *gin.Context) {
 		c.String(200, "1")
 		return
 	} else if err != nil {
-		log.Print(err)
+		svc.Print(err)
 	}
 	c.String(200, "0")
 }
@@ -105,7 +104,7 @@ func star(c *gin.Context) {
 func doStar(c *gin.Context) {
 	userID, _, err := getUser(c)
 	if err != nil {
-		log.Println("Failed to get user:", err)
+		svc.Println("Failed to get user:", err)
 		c.String(500, "")
 		return
 	} else if userID == "" {
@@ -126,7 +125,7 @@ func doStar(c *gin.Context) {
 	if r.Action == "unstar" {
 		var s struct{ Seq int }
 		if err := stockClient.FindOneAndDelete(mongodb.M{"index": index, "code": code, "user": userID}, nil, &s); err != nil {
-			log.Println("Failed to unstar stock:", err)
+			svc.Println("Failed to unstar stock:", err)
 			c.String(500, "")
 			return
 		}
@@ -136,7 +135,7 @@ func doStar(c *gin.Context) {
 			mongodb.M{"$inc": mongodb.M{"seq": -1}},
 			nil,
 		); err != nil {
-			log.Println("Failed to reorder after unstar stock:", err)
+			svc.Println("Failed to reorder after unstar stock:", err)
 			c.String(500, "")
 			return
 		}
@@ -147,7 +146,7 @@ func doStar(c *gin.Context) {
 			&mongodb.FindOpt{Sort: mongodb.M{"seq": -1}, Limit: 1},
 			&s,
 		); err != nil {
-			log.Println("Failed to get stocks:", err)
+			svc.Println("Failed to get stocks:", err)
 			c.String(500, "")
 			return
 		}
@@ -169,13 +168,13 @@ func doStar(c *gin.Context) {
 			&mongodb.UpdateOpt{Upsert: true},
 		)
 		if err != nil {
-			log.Println("Failed to star stock:", err)
+			svc.Println("Failed to star stock:", err)
 			c.String(500, "")
 			return
 		}
 
 		if res.MatchedCount == 1 {
-			log.Print("Stock already exists")
+			svc.Print("Stock already exists")
 		}
 	}
 
@@ -187,7 +186,7 @@ func doStar(c *gin.Context) {
 func reorder(c *gin.Context) {
 	userID, _, err := getUser(c)
 	if err != nil {
-		log.Println("Failed to get user:", err)
+		svc.Println("Failed to get user:", err)
 		c.String(500, "")
 		return
 	} else if userID == "" {
@@ -206,7 +205,7 @@ func reorder(c *gin.Context) {
 
 	code := 200
 	if err := reorderStock(userID, orig, dest); err != nil {
-		log.Println("Failed to reorder stock:", err)
+		svc.Println("Failed to reorder stock:", err)
 		code = 500
 	}
 

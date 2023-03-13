@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
   import { checkTime, addColor } from "../misc";
   import { current, component } from "../stores";
-  import type { Stock } from "../index";
 
   const names = {
     沪: "上证指数",

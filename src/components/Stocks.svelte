@@ -4,7 +4,6 @@
   import AutoComplete from "./AutoComplete.svelte";
   import { checkTime, post, addColor } from "../misc";
   import { current, component, refresh } from "../stores";
-  import type { Stock } from "../index";
 
   const columns = {
     指数: "index",
@@ -20,7 +19,7 @@
   } as { [key: string]: keyof Stock };
 
   let stocks: Stock[] = [];
-  let autoUpdate: number;
+  let autoUpdate: NodeJS.Timeout;
   let fetching: AbortController;
 
   const start = async () => {

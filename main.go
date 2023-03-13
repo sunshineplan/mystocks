@@ -6,7 +6,6 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,26 +20,14 @@ import (
 	"github.com/sunshineplan/utils/httpsvr"
 )
 
-var self string
-var logPath string
-var meta metadata.Server
-var priv *rsa.PrivateKey
-
-var server = httpsvr.New()
-var svc = service.Service{
-	Name:     "MyStocks",
-	Desc:     "Instance to serve My Stocks",
-	Exec:     run,
-	TestExec: test,
-	Options: service.Options{
-		Dependencies:       []string{"After=network.target"},
-		Environment:        map[string]string{"GIN_MODE": "release"},
-		RemoveBeforeUpdate: []string{"dist/assets"},
-		ExcludeFiles:       []string{"scripts/mystocks.conf"},
-	},
-}
-
 var (
+	self string
+	priv *rsa.PrivateKey
+
+	server = httpsvr.New()
+	svc    = service.New()
+	meta   metadata.Server
+
 	joinPath = filepath.Join
 	dir      = filepath.Dir
 )
@@ -49,7 +36,17 @@ func init() {
 	var err error
 	self, err = os.Executable()
 	if err != nil {
-		log.Fatalln("Failed to get self path:", err)
+		svc.Fatalln("Failed to get self path:", err)
+	}
+	svc.Name = "MyStocks"
+	svc.Desc = "Instance to serve My Stocks"
+	svc.Exec = run
+	svc.TestExec = test
+	svc.Options = service.Options{
+		Dependencies:       []string{"After=network.target"},
+		Environment:        map[string]string{"GIN_MODE": "release"},
+		RemoveBeforeUpdate: []string{"dist/assets"},
+		ExcludeFiles:       []string{"scripts/mystocks.conf"},
 	}
 }
 
@@ -57,7 +54,8 @@ var (
 	universal = flag.Bool("universal", false, "Use Universal account id or not")
 	maxRetry  = flag.Int("retry", 5, "Max number of retries on wrong password")
 	refresh   = flag.Int("refresh", 3, "Refresh Interval")
-	pemPath   = flag.String("pem", "", "PEM File Path")
+	pemPath   = flag.String("pem", "", "PEM file Path")
+	logPath   = flag.String("log", "", "Log file path")
 )
 
 func usage(errmsg string) {
@@ -78,7 +76,7 @@ func main() {
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")
 	flag.StringVar(&svc.Options.UpdateURL, "update", "", "Update URL")
-	flag.StringVar(&logPath, "log", "", "Log Path")
+	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/mystocks.pid", "PID file path")
 	flags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	flags.Parse()
 
@@ -86,36 +84,36 @@ func main() {
 	if *pemPath != "" {
 		b, err := os.ReadFile(*pemPath)
 		if err != nil {
-			log.Fatal(err)
+			svc.Fatal(err)
 		}
 		block, _ := pem.Decode(b)
 		if block == nil {
-			log.Fatal("no PEM data is found")
+			svc.Fatal("no PEM data is found")
 		}
 		priv, err = x509.ParsePKCS1PrivateKey(block.Bytes)
 		if err != nil {
-			log.Fatal(err)
+			svc.Fatal(err)
 		}
 	}
 	stock.SetTimeout(*refresh)
 
 	if service.IsWindowsService() {
-		svc.Run(false)
+		svc.Run()
 		return
 	}
 
 	var err error
 	switch flag.NArg() {
 	case 0:
-		run()
+		err = svc.Run()
 	case 1:
 		cmd := flag.Arg(0)
 		var ok bool
 		if ok, err = svc.Command(cmd); !ok {
 			if cmd == "add" || cmd == "delete" {
-				log.Fatalf("%s need two arguments", cmd)
+				svc.Fatalf("%s need two arguments", cmd)
 			} else {
-				log.Fatalln("Unknown argument:", cmd)
+				svc.Fatalln("Unknown argument:", cmd)
 			}
 		}
 	case 2:
@@ -127,12 +125,12 @@ func main() {
 				deleteUser(flag.Arg(1))
 			}
 		default:
-			log.Fatalln("Unknown arguments:", strings.Join(flag.Args(), " "))
+			svc.Fatalln("Unknown arguments:", strings.Join(flag.Args(), " "))
 		}
 	default:
 		usage(fmt.Sprintln("Unknown arguments:", strings.Join(flag.Args(), " ")))
 	}
 	if err != nil {
-		log.Fatalf("Failed to %s: %v", flag.Arg(0), err)
+		svc.Printf("Failed to %s: %v", flag.Arg(0), err)
 	}
 }
