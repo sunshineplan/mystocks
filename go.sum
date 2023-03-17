@@ -88,8 +88,8 @@ github.com/sunshineplan/metadata v1.1.1 h1:nlufF4CnAgwenW/Esi4iK6uGVxval/PdtV6Wr
 github.com/sunshineplan/metadata v1.1.1/go.mod h1:ENxneH9PDpQuw3IVJMu38rkfS1p+KVG4pddySkEEDSU=
 github.com/sunshineplan/password v1.0.4 h1:hldJyui1ANTS/eOi4IR/LdL7udRhIlv3SNhLJoc7/G0=
 github.com/sunshineplan/password v1.0.4/go.mod h1:3N6CqKdFbYdmc1aoR+56USaQCuErLmNZyknp2Clvy54=
-github.com/sunshineplan/service v1.0.8 h1:+Ak4KUH95JnanZf08jZ68AkhSnomxzLXKE5zpajYQls=
-github.com/sunshineplan/service v1.0.8/go.mod h1:otwMcajX/wwqbtIs+R8l9R3RcLKhuMtOaAHscd0HM2g=
+github.com/sunshineplan/service v1.0.9 h1:ZkiW3MJECJ/HmfeERNHGQBg6z4Zdff+18e9ufUIg6zo=
+github.com/sunshineplan/service v1.0.9/go.mod h1:XmiLeC4HnlHgwgcn6LhfUctBXGNh9cBkJk5auYKH+Wc=
 github.com/sunshineplan/stock v1.0.9 h1:XB1VmJmgnGSSLMJYhH4w6osTXlMpRAL+oxXc+iqS9wI=
 github.com/sunshineplan/stock v1.0.9/go.mod h1:rSceQ8rIzxk724Y0YLU2ZNlKQIfoVlu7Zb0RpY5qDHM=
 github.com/sunshineplan/utils v0.0.7/go.mod h1:qMSfTzU5OKJ+CjP/JMP/s+XBb5AduLU820yQbarZzW0=
