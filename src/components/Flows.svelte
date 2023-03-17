@@ -23,6 +23,7 @@
   let last = "";
   let loading = 0;
   let status = 0;
+  let controller: AbortController;
   let hover = false;
   let dayChange = false;
 
@@ -103,7 +104,7 @@
       loading++;
       let array: any;
       try {
-        const controller = new AbortController();
+        controller = new AbortController();
         setTimeout(() => controller.abort(), 50000);
         const resp = await fetch(url, { signal: controller.signal });
         if (!resp.ok) {
@@ -118,7 +119,7 @@
         loading--;
         return;
       }
-      if (array && array.length) {
+      if (array || array === null) {
         status = 1;
         datasets.length = 0;
         array.forEach((e: Flows, i: number) => {
@@ -149,6 +150,7 @@
       return;
     }
     if (!chart) return;
+    if (controller) controller.abort();
     show.length = 0;
     updateChart(true);
     if (date != today) {
