@@ -127,5 +127,9 @@ func getFlows(date string) (flows []sector.Chart, err error) {
 	}
 
 	t := time.Now().In(time.FixedZone("CST", 8*60*60))
-	return sector.GetChart(fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day()), flowsClient)
+	sectors, err := sector.GetSectors(fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day()), flowsClient)
+	if err != nil {
+		return
+	}
+	return sectors.Charts(), nil
 }
