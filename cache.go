@@ -111,26 +111,21 @@ func getFlows(date string) (flows []sector.Chart, err error) {
 		if !ok || resp == nil {
 			return
 		}
+		defer resp.Close()
 		if resp.StatusCode == 404 {
-			resp.Close()
 			return
 		}
 
-		var tl []sector.TimeLine
-		if err = resp.JSON(&tl); err != nil {
+		var timeline []sector.TimeLine
+		if err = resp.JSON(&timeline); err != nil {
 			return
 		}
-		for _, i := range tl {
+		for _, i := range timeline {
 			flows = append(flows, sector.TimeLine2Chart(i))
 		}
-
 		return
 	}
 
 	t := time.Now().In(time.FixedZone("CST", 8*60*60))
-	date = fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
-
-	flows, err = sector.GetChart(date, flowsClient)
-
-	return
+	return sector.GetChart(fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day()), flowsClient)
 }

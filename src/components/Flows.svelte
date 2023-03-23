@@ -102,7 +102,7 @@
     if (checkTime() || force) {
       updateDate();
       loading++;
-      let array: any;
+      let array: Flows[];
       try {
         controller = new AbortController();
         setTimeout(() => controller.abort(), 50000);
@@ -119,7 +119,7 @@
         loading--;
         return;
       }
-      if (array || array === null) {
+      if (array) {
         status = 1;
         datasets.length = 0;
         array.forEach((e: Flows, i: number) => {

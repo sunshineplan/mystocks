@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/stock"
+	"github.com/sunshineplan/stock/capitalflows/sector"
 )
 
 func myStocks(c *gin.Context) {
@@ -34,6 +35,9 @@ func capitalFlows(c *gin.Context) {
 		svc.Println("Failed to get flows chart:", err)
 		c.String(500, "")
 		return
+	}
+	if flows == nil {
+		flows = []sector.Chart{}
 	}
 
 	c.JSON(200, flows)
