@@ -185,11 +185,7 @@
       document.querySelector("#flowsChart") as HTMLCanvasElement,
       capitalflows
     );
-
     today = getDate(0, true);
-    load(true);
-    autoUpdate = setInterval(load, 60000);
-
     return () => {
       if (autoUpdate) clearInterval(autoUpdate);
       chart.destroy();
