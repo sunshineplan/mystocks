@@ -19,7 +19,7 @@
   } as { [key: string]: keyof Stock };
 
   let stocks: Stock[] = [];
-  let autoUpdate: NodeJS.Timeout;
+  let autoUpdate: number;
   let fetching: AbortController;
 
   const start = async () => {

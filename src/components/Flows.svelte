@@ -14,7 +14,7 @@
     chart: ScatterDataPoint[];
   }
 
-  let autoUpdate: NodeJS.Timeout;
+  let autoUpdate: number;
   let chart: Chart<"line">;
   let datasets: ChartDataset<"line">[] = [];
   let show: number[] = [];

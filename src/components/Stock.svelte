@@ -13,7 +13,7 @@
   } from "chart.js";
   import type { LineAnnotationOptions } from "chartjs-plugin-annotation";
 
-  let autoUpdate: NodeJS.Timeout[] = [];
+  let autoUpdate: number[] = [];
   let stock: Stock = {
     index: "n/a",
     code: "n/a",
