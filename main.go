@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/password"
@@ -48,6 +47,21 @@ func init() {
 		RemoveBeforeUpdate: []string{"dist/assets"},
 		ExcludeFiles:       []string{"scripts/mystocks.conf"},
 	}
+	svc.RegisterCommand("add", "add user", func(arg ...string) error {
+		return addUser(arg[0])
+	}, 1)
+	svc.RegisterCommand("delete", "delete user", func(arg ...string) error {
+		if utils.Confirm("Do you want to delete this user?", 3) {
+			return deleteUser(arg[0])
+		}
+		return nil
+	}, 1)
+
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprint(flag.CommandLine.Output(), svc.Usage())
+	}
 }
 
 var (
@@ -57,16 +71,6 @@ var (
 	pemPath   = flag.String("pem", "", "PEM file Path")
 	logPath   = flag.String("log", "", "Log file path")
 )
-
-func usage(errmsg string) {
-	fmt.Fprintf(os.Stderr,
-		`%s
-
-usage: %s <command>
-       where <command> is one of install, remove, start, stop.
-`, errmsg, os.Args[0])
-	os.Exit(2)
-}
 
 func main() {
 	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
@@ -102,35 +106,7 @@ func main() {
 		return
 	}
 
-	var err error
-	switch flag.NArg() {
-	case 0:
-		err = svc.Run()
-	case 1:
-		cmd := flag.Arg(0)
-		var ok bool
-		if ok, err = svc.Command(cmd); !ok {
-			if cmd == "add" || cmd == "delete" {
-				svc.Fatalf("%s need two arguments", cmd)
-			} else {
-				svc.Fatalln("Unknown argument:", cmd)
-			}
-		}
-	case 2:
-		switch flag.Arg(0) {
-		case "add":
-			addUser(flag.Arg(1))
-		case "delete":
-			if utils.Confirm(fmt.Sprintf("Do you want to delete user %s?", flag.Arg(1)), 3) {
-				deleteUser(flag.Arg(1))
-			}
-		default:
-			svc.Fatalln("Unknown arguments:", strings.Join(flag.Args(), " "))
-		}
-	default:
-		usage(fmt.Sprintln("Unknown arguments:", strings.Join(flag.Args(), " ")))
-	}
-	if err != nil {
-		svc.Printf("Failed to %s: %v", flag.Arg(0), err)
+	if err := svc.ParseAndRun(flag.Args()); err != nil {
+		svc.Fatal(err)
 	}
 }

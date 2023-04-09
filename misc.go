@@ -1,15 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/sunshineplan/database/mongodb"
 )
 
-func addUser(username string) {
+func addUser(username string) error {
 	svc.Print("Start!")
 	if err := initDB(); err != nil {
-		svc.Fatalln("Failed to initialize database:", err)
+		return err
 	}
 
 	username = strings.TrimSpace(strings.ToLower(username))
@@ -22,7 +23,7 @@ func addUser(username string) {
 		}{username, "123456", username},
 	)
 	if err != nil {
-		svc.Fatal(err)
+		return err
 	}
 
 	type stock struct {
@@ -40,26 +41,28 @@ func addUser(username string) {
 			stock{"SZSE", "399006", insertedID.(mongodb.ObjectID).Hex(), 5},
 		},
 	); err != nil {
-		svc.Fatal(err)
+		return err
 	}
 	svc.Print("Done!")
+	return nil
 }
 
-func deleteUser(username string) {
+func deleteUser(username string) error {
 	svc.Print("Start!")
 	if err := initDB(); err != nil {
-		svc.Fatalln("Failed to initialize database:", err)
+		return err
 	}
 
 	username = strings.TrimSpace(strings.ToLower(username))
 
 	deletedCount, err := accountClient.DeleteOne(mongodb.M{"username": username})
 	if err != nil {
-		svc.Fatalln("Failed to delete user:", err)
+		return err
 	} else if deletedCount == 0 {
-		svc.Fatalf("User %s does not exist.", username)
+		return fmt.Errorf("user %s does not exist", username)
 	}
 	svc.Print("Done!")
+	return nil
 }
 
 func reorderStock(userID any, orig, dest []string) error {
