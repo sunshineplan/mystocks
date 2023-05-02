@@ -101,11 +101,6 @@ func main() {
 	}
 	stock.SetTimeout(*refresh)
 
-	if service.IsWindowsService() {
-		svc.Run()
-		return
-	}
-
 	if err := svc.ParseAndRun(flag.Args()); err != nil {
 		svc.Fatal(err)
 	}
