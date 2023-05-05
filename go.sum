@@ -78,8 +78,8 @@ github.com/sunshineplan/cipher v1.0.5 h1:opCKCTVjkdcoIJSCi2yoI0ndmwiyDbcm+5Mpyav
 github.com/sunshineplan/cipher v1.0.5/go.mod h1:JMP+4CCZT1D7qjZyuiyTe8ZPYaaBMxU9MWrCBKC/QhQ=
 github.com/sunshineplan/database/mongodb v1.0.5 h1:+Mtcs8LjHaP00OOx0r0rf6/UinwMMWf1rnxcKNo0cc0=
 github.com/sunshineplan/database/mongodb v1.0.5/go.mod h1:WlNbFgkQFkgkGORHk2/RsgT6ZJGwe0lLo65JYhWKPME=
-github.com/sunshineplan/gohttp v1.0.6 h1:8Q4nPexZcBlES3Ee7z4kACV2RvS+SqN74L+FJAH8vPg=
-github.com/sunshineplan/gohttp v1.0.6/go.mod h1:aTmCdd7sOiBHDyFVDW9pTvX5ecRUOFym4zGN9DhwM18=
+github.com/sunshineplan/gohttp v1.0.7 h1:JTT9wqfKKKjUvN1Kc3duolTaqT4cWpZGf/896Yxlji4=
+github.com/sunshineplan/gohttp v1.0.7/go.mod h1:aTmCdd7sOiBHDyFVDW9pTvX5ecRUOFym4zGN9DhwM18=
 github.com/sunshineplan/metadata v1.1.1 h1:nlufF4CnAgwenW/Esi4iK6uGVxval/PdtV6Wrza/Wic=
 github.com/sunshineplan/metadata v1.1.1/go.mod h1:ENxneH9PDpQuw3IVJMu38rkfS1p+KVG4pddySkEEDSU=
 github.com/sunshineplan/password v1.0.4 h1:hldJyui1ANTS/eOi4IR/LdL7udRhIlv3SNhLJoc7/G0=
