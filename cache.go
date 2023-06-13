@@ -96,11 +96,7 @@ func getFlows(date string) (flows []sector.Chart, err error) {
 				"https://fastly.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 			},
 			func(url string) (any, error) {
-				resp := gohttp.Get(fmt.Sprintf(url, strings.ReplaceAll(date, "-", "/")), nil)
-				if resp.Error != nil {
-					return nil, resp.Error
-				}
-				return resp, nil
+				return gohttp.Get(fmt.Sprintf(url, strings.ReplaceAll(date, "-", "/")), nil)
 			},
 		)
 		if err != nil {
