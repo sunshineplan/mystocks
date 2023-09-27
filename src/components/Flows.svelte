@@ -55,9 +55,9 @@
 
   const legend = capitalflows.options?.plugins?.legend as LegendOptions<"line">;
 
-  legend.onClick = (event, legendItem) => {
+  legend.onClick = (_, legendItem) => {
     const index = legendItem.datasetIndex;
-    if (index) {
+    if (typeof index === "number") {
       display(index);
       chart.update();
     }
@@ -66,13 +66,13 @@
   const display = (index: number) => {
     const datasets = chart.data.datasets;
     if (!show.length) {
-      datasets.forEach((e, i) => {
+      datasets.forEach((_, i) => {
         const meta = chart.getDatasetMeta(i);
         if (i !== index) meta.hidden = true;
       });
       show.push(index);
     } else if (show.includes(index) && show.length == 1) {
-      datasets.forEach((e, i) => {
+      datasets.forEach((_, i) => {
         const meta = chart.getDatasetMeta(i);
         meta.hidden = false;
       });
@@ -81,7 +81,7 @@
       chart.getDatasetMeta(index).hidden = true;
       show.splice(show.indexOf(index), 1);
     } else {
-      datasets.forEach((e, i) => {
+      datasets.forEach((_, i) => {
         const meta = chart.getDatasetMeta(i);
         if (i == index) meta.hidden = false;
       });
@@ -171,7 +171,7 @@
       return;
     }
     if (show.length)
-      datasets.forEach((e, i) => {
+      datasets.forEach((_, i) => {
         const meta = chart.getDatasetMeta(i);
         if (show.includes(i)) meta.hidden = false;
         else meta.hidden = true;
@@ -226,7 +226,7 @@
       class="btn btn-danger"
       on:click={() => {
         if (chart.data.datasets && date == today)
-          chart.data.datasets.forEach((e, i) => {
+          chart.data.datasets.forEach((_, i) => {
             const meta = chart.getDatasetMeta(i);
             meta.hidden = false;
           });
