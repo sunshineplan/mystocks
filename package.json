@@ -10,7 +10,7 @@
     "@sveltejs/vite-plugin-svelte": "^2.5.3",
     "@tarekraafat/autocomplete.js": "^10.2.7",
     "@tsconfig/svelte": "^5.0.2",
-    "@types/sortablejs": "^1.15.7",
+    "@types/sortablejs": "^1.15.8",
     "chart.js": "^4.4.1",
     "chartjs-plugin-annotation": "^3.0.1",
     "jsencrypt": "^3.3.2",
