@@ -49,13 +49,13 @@ func init() {
 	}
 	svc.RegisterCommand("add", "add user", func(arg ...string) error {
 		return addUser(arg[0])
-	}, 1)
+	}, 1, true)
 	svc.RegisterCommand("delete", "delete user", func(arg ...string) error {
 		if utils.Confirm("Do you want to delete this user?", 3) {
 			return deleteUser(arg[0])
 		}
 		return nil
-	}, 1)
+	}, 1, true)
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
