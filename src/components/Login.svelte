@@ -5,21 +5,15 @@
 
   const dispatch = createEventDispatcher();
 
-  let username = localStorage.getItem("username") as string;
+  let username = localStorage.getItem("username");
   let password = "";
   let rememberme = localStorage.getItem("rememberme") == "true" ? true : false;
 
   const login = async () => {
-    if (
-      !(
-        document.querySelector("#username") as HTMLSelectElement
-      ).checkValidity()
-    )
+    if (!document.querySelector<HTMLInputElement>("#username").checkValidity())
       await fire("Error", "Username cannot be empty.", "error");
     else if (
-      !(
-        document.querySelector("#password") as HTMLSelectElement
-      ).checkValidity()
+      !document.querySelector<HTMLInputElement>("#password").checkValidity()
     )
       await fire("Error", "Password cannot be empty.", "error");
     else {
@@ -34,7 +28,7 @@
           password: pwd,
           rememberme,
         },
-        true
+        true,
       );
       if (resp.ok) {
         const json = await resp.json();
@@ -67,6 +61,7 @@
     Log In
   </h3>
 </header>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="login" on:keyup={handleEnter}>
   <div class="mb-3">
     <label for="username" class="form-label">Username</label>

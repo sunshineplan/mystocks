@@ -1,11 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import {
-    Chart,
-    type ChartDataset,
-    type LegendOptions,
-    type ScatterDataPoint,
-  } from "chart.js";
+  import { Chart, type ChartDataset, type ScatterDataPoint } from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import { checkTime, getColor, capitalflows } from "../misc";
 
@@ -53,7 +48,7 @@
     }
   };
 
-  const legend = capitalflows.options?.plugins?.legend as LegendOptions<"line">;
+  const legend = capitalflows.options?.plugins?.legend;
 
   legend.onClick = (_, legendItem) => {
     const index = legendItem.datasetIndex;
@@ -132,7 +127,7 @@
             backgroundColor: getColor(i),
             pointRadius: 0,
             pointHoverRadius: 3,
-            data: e.chart.map((i) => (i.y as number) / 100000000),
+            data: e.chart.map((i) => i.y / 100000000),
           });
         });
         if (force || !hover) {
@@ -182,8 +177,8 @@
 
   onMount(() => {
     chart = new Chart(
-      document.querySelector("#flowsChart") as HTMLCanvasElement,
-      capitalflows
+      document.querySelector<HTMLCanvasElement>("#flowsChart"),
+      capitalflows,
     );
     today = getDate(0, true);
     return () => {
@@ -252,6 +247,7 @@
       {/if}
     {:else}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <i class="material-icons text-danger" on:click={() => load(true, date)}>
         close
       </i>
@@ -261,6 +257,7 @@
     <small>Last update: {last}</small>
   {/if}
 </header>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
   class="chart"
   on:mouseenter={() => (hover = true)}

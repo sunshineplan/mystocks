@@ -21,8 +21,8 @@ const timeLabels = (start: number, end: number) => {
 const labels = timeLabels(9 * 60 + 30, 11 * 60 + 30).concat(timeLabels(13 * 60 + 1, 15 * 60))
 
 const callback = (value: string | number) => {
-  value = labels[value as number]
-  if (value.includes(':00') || value.includes(':30')) return value
+  const label = labels[Number(value)]
+  if (label.includes(':00') || label.includes(':30')) return label
   return null
 }
 

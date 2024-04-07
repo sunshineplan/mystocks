@@ -5,7 +5,7 @@
   import { checkTime, post, addColor } from "../misc";
   import { current, component, refresh } from "../stores";
 
-  const columns = {
+  const columns: { [key: string]: keyof Stock } = {
     指数: "index",
     代码: "code",
     名称: "name",
@@ -16,7 +16,7 @@
     最低: "low",
     开盘: "open",
     昨收: "last",
-  } as { [key: string]: keyof Stock };
+  };
 
   let stocks: Stock[] = [];
   let autoUpdate: number;
@@ -48,19 +48,15 @@
 
   const onUpdate = async (evt: Sortable.SortableEvent) => {
     await post("/reorder", {
-      old: `${stocks[evt.oldIndex as number].index} ${
-        stocks[evt.oldIndex as number].code
-      }`,
-      new: `${stocks[evt.newIndex as number].index} ${
-        stocks[evt.newIndex as number].code
-      }`,
+      old: `${stocks[evt.oldIndex].index} ${stocks[evt.oldIndex].code}`,
+      new: `${stocks[evt.newIndex].index} ${stocks[evt.newIndex].code}`,
     });
   };
 
   onMount(() => {
     start();
     const sortable = new Sortable(
-      document.querySelector("#sortable") as HTMLElement,
+      document.querySelector<HTMLElement>("#sortable"),
       {
         animation: 150,
         delay: 400,
@@ -68,7 +64,7 @@
         onStart: stop,
         onEnd: start,
         onUpdate,
-      }
+      },
     );
     return () => {
       stop();
@@ -84,6 +80,7 @@
 <header>
   <AutoComplete />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <span style="padding-left:10px" on:click={() => post("/refresh")}>
     <i class="material-icons refresh">refresh</i>
   </span>
@@ -92,7 +89,7 @@
   <table class="table table-hover table-sm">
     <thead>
       <tr>
-        {#each Object.entries(columns) as [key, val] (key)}
+        {#each Object.keys(columns) as key (key)}
           <th>{key}</th>
         {/each}
       </tr>

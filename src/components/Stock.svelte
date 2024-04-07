@@ -36,9 +36,8 @@
 
   $: $current, load();
 
-  const y2 = intraday.options?.scales?.y2 as LinearScaleOptions;
-  const callbacks = intraday.options?.plugins?.tooltip
-    ?.callbacks as TooltipCallbacks<"line">;
+  const y2 = intraday.options?.scales?.y2;
+  const callbacks = intraday.options?.plugins?.tooltip?.callbacks;
 
   y2.afterBuildTicks = (axis) => {
     if (chart) {
@@ -53,8 +52,7 @@
   y2.ticks.callback = (value) => {
     if (stock.last)
       return `${
-        Math.round((((value as number) - stock.last) / stock.last) * 10000) /
-        100
+        Math.round(((Number(value) - stock.last) / stock.last) * 10000) / 100
       }%`;
     return null;
   };
@@ -74,8 +72,8 @@
 
   const start = () => {
     chart = new Chart(
-      document.querySelector("#stockChart") as ChartItem,
-      intraday
+      document.querySelector<HTMLCanvasElement>("#stockChart"),
+      intraday,
     );
     if ($current.code != "n/a") {
       autoUpdate.push(setInterval(loadRealtime, $refresh * 1000));
@@ -87,7 +85,7 @@
     update = "";
     await loadRealtime(true);
     await loadChart(true);
-    const yAxes = chart.options?.scales?.y as LinearScaleOptions;
+    const yAxes = chart.options?.scales?.y;
     yAxes.suggestedMin = stock.last / 1.01;
     yAxes.suggestedMax = stock.last * 1.01;
     const annotations = chart.options.plugins?.annotation
@@ -150,6 +148,7 @@
 <header>
   <AutoComplete />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="home"
     on:click={() => {
@@ -162,6 +161,7 @@
   </div>
   <Realtime bind:stock />
 </header>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
   class="chart"
   on:mouseenter={() => (hover = true)}

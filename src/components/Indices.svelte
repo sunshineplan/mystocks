@@ -9,7 +9,7 @@
     创: "创业板指",
     中: "中小板指",
   };
-  const fields = ["now", "change", "percent"] as Array<keyof Stock>;
+  const fields: Array<keyof Stock> = ["now", "change", "percent"];
 
   let indices: { [key: string]: Stock } = {};
 
@@ -37,6 +37,7 @@
 </script>
 
 {#if Object.keys(indices).length !== 0}
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="indices">
     {#each Object.entries(names) as [key, val] (key)}
       <!-- svelte-ignore a11y-click-events-have-key-events -->

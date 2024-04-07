@@ -16,6 +16,7 @@
 
 <nav class="navbar navbar-light topbar">
   <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <span
     class="brand"
     on:click={() => {
@@ -26,6 +27,7 @@
     My Stocks
   </span>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <span style="color:white" on:click={flows.toggle}>
     Switch to {$flows ? "Stocks" : "Flows"}
   </span>
@@ -34,6 +36,7 @@
       <div class="navbar-nav flex-row">
         <span class="nav-link">{user}</span>
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <span
           class="nav-link link"
           on:click={() => {
@@ -44,11 +47,13 @@
           Setting
         </span>
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <span class="nav-link link" on:click={logout}>Log out</span>
       </div>
     {:else}
       <div class="navbar-nav flex-row">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <span
           class="nav-link link"
           on:click={() => {

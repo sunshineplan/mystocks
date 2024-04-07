@@ -27,7 +27,7 @@
           password1: p1,
           password2: p2,
         },
-        true
+        true,
       );
       if (!resp.ok) await fire("Error", await resp.text(), "error");
       else {
@@ -36,7 +36,7 @@
           await fire(
             "Success",
             "Your password has changed. Please Re-login!",
-            "success"
+            "success",
           );
           $username = "";
           window.history.pushState({}, "", "/");
@@ -73,6 +73,7 @@
   <h3>Setting</h3>
   <hr />
 </header>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
   style="margin-left: 120px; width: 250px"
   class="was-validated: {validated}"
