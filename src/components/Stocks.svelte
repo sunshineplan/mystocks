@@ -2,7 +2,7 @@
   import Sortable from "sortablejs";
   import { onMount } from "svelte";
   import AutoComplete from "./AutoComplete.svelte";
-  import { checkTime, post, addColor } from "../misc";
+  import { checkTradingTime, post, addColor } from "../misc";
   import { current, component, refresh } from "../stores";
 
   const columns: { [key: string]: keyof Stock } = {
@@ -33,7 +33,7 @@
   };
 
   const load = async (force?: boolean) => {
-    if (checkTime() || force) {
+    if (force || (await checkTradingTime())) {
       fetching = new AbortController();
       const resp = await fetch("/mystocks", { signal: fetching.signal });
       stocks = await resp.json();

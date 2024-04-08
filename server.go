@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -95,7 +96,16 @@ func run() error {
 	})
 	router.GET("/info", func(c *gin.Context) {
 		_, username, _ := getUser(c)
-		c.JSON(200, gin.H{"username": username, "refresh": refresh})
+		obj := gin.H{"username": username, "refresh": refresh}
+		now := time.Now().In(time.FixedZone("CST", 8*60*60))
+		isTradingDate, err := loadTradingDate(now)
+		if err != nil {
+			svc.Print(err)
+		} else {
+			obj["date"] = now.Format("2006-01-02")
+			obj["trading"] = isTradingDate
+		}
+		c.JSON(200, obj)
 	})
 
 	if !*universal {

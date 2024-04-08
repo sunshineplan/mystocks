@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/sunshineplan/database/mongodb"
@@ -11,10 +12,16 @@ import (
 	"github.com/sunshineplan/stock/capitalflows/sector"
 	"github.com/sunshineplan/utils/cache"
 	"github.com/sunshineplan/utils/executor"
+	"github.com/sunshineplan/workday"
+	"github.com/sunshineplan/workday/apihubs"
+	"github.com/sunshineplan/workday/timor"
 )
 
-var stockCache = cache.New(false)
-var flowsCache = cache.New(true)
+var (
+	stockCache    = cache.New(false)
+	flowsCache    = cache.New(true)
+	isTradingDate atomic.Value
+)
 
 func loadStocks(id any, init bool) ([]stock.Stock, error) {
 	if id == "" {
@@ -128,4 +135,31 @@ func getFlows(date string) (flows []sector.Chart, err error) {
 		return
 	}
 	return sectors.Charts(), nil
+}
+
+type tradingDate struct {
+	date string
+	is   bool
+}
+
+func loadTradingDate(t time.Time) (bool, error) {
+	if res, ok := isTradingDate.Load().(tradingDate); ok && res.date == t.Format("2006-01-02") {
+		return res.is, nil
+	}
+	is, err := getTradingDate(t)
+	if err != nil {
+		return false, err
+	}
+	isTradingDate.Store(tradingDate{t.Format("2006-01-02"), is})
+	return is, nil
+}
+
+func getTradingDate(t time.Time) (bool, error) {
+	if *workdayAPI != "" {
+		is, err := workday.NewWorkdayAPI(*workdayAPI).IsWorkday(t)
+		if err == nil {
+			return is, nil
+		}
+	}
+	return workday.IsWorkday(t, apihubs.API, timor.API)
 }

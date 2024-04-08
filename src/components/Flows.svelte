@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { Chart, type ChartDataset, type ScatterDataPoint } from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
-  import { checkTime, getColor, capitalflows } from "../misc";
+  import { dateStr, checkTradingTime, getColor, capitalflows } from "../misc";
 
   interface Flows {
     sector: string;
@@ -31,10 +31,7 @@
       day = new Date(date);
       day.setDate(day.getDate() + n);
     }
-    const dd = String(day.getDate()).padStart(2, "0");
-    const mm = String(day.getMonth() + 1).padStart(2, "0");
-    const yyyy = day.getFullYear();
-    const ymd = `${yyyy}-${mm}-${dd}`;
+    const ymd = dateStr(day);
     if (setDate) date = ymd;
     return ymd;
   };
@@ -94,7 +91,7 @@
       url = url + `?date=${date}`;
     }
     if (force) updateChart(true);
-    if (checkTime() || force) {
+    if (force || (await checkTradingTime())) {
       updateDate();
       loading++;
       let array: Flows[];

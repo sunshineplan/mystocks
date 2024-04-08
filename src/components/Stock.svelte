@@ -3,14 +3,9 @@
   import { Chart } from "chart.js";
   import AutoComplete from "./AutoComplete.svelte";
   import Realtime from "./Realtime.svelte";
-  import { checkTime, post, intraday } from "../misc";
+  import { checkTradingTime, post, intraday } from "../misc";
   import { component, current, refresh } from "../stores";
-  import type {
-    ChartItem,
-    ScatterDataPoint,
-    TooltipCallbacks,
-    LinearScaleOptions,
-  } from "chart.js";
+  import type { ScatterDataPoint } from "chart.js";
   import type { LineAnnotationOptions } from "chartjs-plugin-annotation";
 
   let autoUpdate: number[] = [];
@@ -95,7 +90,7 @@
   };
 
   const loadRealtime = async (force?: boolean) => {
-    if (checkTime() || (force && $current.code)) {
+    if ((force && $current.code) || (await checkTradingTime())) {
       const resp = await post("/realtime", {
         index: $current.index,
         code: $current.code,
@@ -111,7 +106,7 @@
   };
 
   const loadChart = async (force?: boolean) => {
-    if (checkTime() || (force && $current.code)) {
+    if ((force && $current.code) || (await checkTradingTime())) {
       const resp = await post("/chart", {
         index: $current.index,
         code: $current.code,

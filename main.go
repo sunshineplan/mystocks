@@ -65,11 +65,12 @@ func init() {
 }
 
 var (
-	universal = flag.Bool("universal", false, "Use Universal account id or not")
-	maxRetry  = flag.Int("retry", 5, "Max number of retries on wrong password")
-	refresh   = flag.Int("refresh", 3, "Refresh Interval")
-	pemPath   = flag.String("pem", "", "PEM file Path")
-	logPath   = flag.String("log", "", "Log file path")
+	universal  = flag.Bool("universal", false, "Use Universal account id or not")
+	maxRetry   = flag.Int("retry", 5, "Max number of retries on wrong password")
+	refresh    = flag.Int("refresh", 3, "Refresh Interval")
+	workdayAPI = flag.String("workday", "", "Workday API")
+	pemPath    = flag.String("pem", "", "PEM file Path")
+	logPath    = flag.String("log", "", "Log file path")
 )
 
 func main() {

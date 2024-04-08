@@ -6,13 +6,7 @@
   import Flows from "./components/Flows.svelte";
   import Stock from "./components/Stock.svelte";
   import Indices from "./components/Indices.svelte";
-  import {
-    username as user,
-    current,
-    component,
-    refresh,
-    flows,
-  } from "./stores";
+  import { username, current, component, info, flows } from "./stores";
 
   const components: {
     [component: string]: typeof Login | typeof Setting | typeof Stock;
@@ -22,13 +16,8 @@
     stock: Stock,
   };
 
-  const getInfo = async () => {
-    const resp = await fetch("/info");
-    const info = await resp.json();
-    if (Object.keys(info).length) {
-      $user = info.username;
-      $refresh = info.refresh;
-    }
+  const init = async () => {
+    await info();
     if (/^\/stock\/[A-Z]{3,4}\/\d{6}$/.test(window.location.pathname)) {
       const stock = window.location.pathname.split("/");
       $current = { index: stock[2], code: stock[3] };
@@ -36,19 +25,19 @@
       $component = "stock";
     }
   };
-  const promise = getInfo();
+  const promise = init();
 </script>
 
-<Nav bind:user={$user} />
+<Nav bind:user={$username} />
 {#await promise then _}
   <div class="content">
     <svelte:component
       this={$component != "stocks"
         ? components[$component]
         : $flows
-        ? Flows
-        : Stocks}
-      on:info={getInfo}
+          ? Flows
+          : Stocks}
+      on:info={info}
     />
   </div>
 {/await}

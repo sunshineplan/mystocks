@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { checkTime, addColor } from "../misc";
+  import { checkTradingTime, addColor } from "../misc";
   import { current, component } from "../stores";
 
   const names = {
@@ -19,7 +19,7 @@
   };
 
   const load = async (force?: boolean) => {
-    if (checkTime() || force) {
+    if (force || (await checkTradingTime())) {
       const resp = await fetch("/indices");
       indices = await resp.json();
     }

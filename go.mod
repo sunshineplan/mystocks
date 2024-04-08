@@ -12,6 +12,7 @@ require (
 	github.com/sunshineplan/service v1.0.19
 	github.com/sunshineplan/stock v1.0.13
 	github.com/sunshineplan/utils v0.1.64
+	github.com/sunshineplan/workday v1.0.0
 )
 
 require (
