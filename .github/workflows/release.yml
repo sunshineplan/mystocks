@@ -38,7 +38,7 @@ jobs:
           #sudo apt install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
           #GOOS=windows CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ go build -ldflags "-s -w"
           GOOS=windows go build -ldflags "-s -w"
-          echo "date=$(TZ=PRC date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+          echo "date=$(TZ=PRC date +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
 
       - name: Delete Old Release
         uses: actions/github-script@v7
