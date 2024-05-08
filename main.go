@@ -99,6 +99,7 @@ func main() {
 		if err != nil {
 			svc.Fatal(err)
 		}
+		password.SetKey(priv)
 	}
 	stock.SetTimeout(*refresh)
 
