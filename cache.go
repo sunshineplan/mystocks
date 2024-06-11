@@ -18,12 +18,12 @@ import (
 )
 
 var (
-	stockCache    = cache.New(false)
-	flowsCache    = cache.New(true)
+	stockCache    = cache.New[string, []stock.Stock](false)
+	flowsCache    = cache.New[string, []sector.Chart](true)
 	isTradingDate atomic.Value
 )
 
-func loadStocks(id any, init bool) ([]stock.Stock, error) {
+func loadStocks(id string, init bool) ([]stock.Stock, error) {
 	if id == "" {
 		return []stock.Stock{
 			stock.Init("SSE", "000001"),
@@ -37,7 +37,7 @@ func loadStocks(id any, init bool) ([]stock.Stock, error) {
 	if !init {
 		value, ok := stockCache.Get(id)
 		if ok {
-			return value.([]stock.Stock), nil
+			return value, nil
 		}
 	}
 
@@ -46,7 +46,7 @@ func loadStocks(id any, init bool) ([]stock.Stock, error) {
 		return nil, err
 	}
 
-	stockCache.Set(id, ss, 1*time.Hour, func() (any, error) {
+	stockCache.Set(id, ss, time.Hour, func() ([]stock.Stock, error) {
 		return getStocks(id)
 	})
 
@@ -73,7 +73,7 @@ func getStocks(id any) (ss []stock.Stock, err error) {
 func loadFlows(date string) ([]sector.Chart, error) {
 	value, ok := flowsCache.Get(date)
 	if ok {
-		return value.([]sector.Chart), nil
+		return value, nil
 	}
 
 	flows, err := getFlows(date)
