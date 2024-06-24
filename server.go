@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"time"
 
@@ -13,19 +14,28 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/utils/log"
 )
 
 func run() error {
-	if *logPath != "" {
-		svc.Logger = log.New(*logPath, "", log.LstdFlags)
-		gin.DefaultWriter = svc.Logger
-		gin.DefaultErrorWriter = svc.Logger
-	}
-
 	router := gin.Default()
 	router.TrustedPlatform = "X-Real-IP"
 	server.Handler = router
+
+	if *debug {
+		debug := router.Group("debug")
+		debug.GET("/", gin.WrapF(pprof.Index))
+		//debug.GET("/cmdline", gin.WrapF(pprof.Cmdline))
+		debug.GET("/profile", gin.WrapF(pprof.Profile))
+		debug.GET("/symbol", gin.WrapF(pprof.Symbol))
+		debug.POST("/symbol", gin.WrapF(pprof.Symbol))
+		debug.GET("/trace", gin.WrapF(pprof.Trace))
+		debug.GET("/allocs", gin.WrapH(pprof.Handler("allocs")))
+		debug.GET("/block", gin.WrapH(pprof.Handler("block")))
+		debug.GET("/goroutine", gin.WrapH(pprof.Handler("goroutine")))
+		debug.GET("/heap", gin.WrapH(pprof.Handler("heap")))
+		debug.GET("/mutex", gin.WrapH(pprof.Handler("mutex")))
+		debug.GET("/threadcreate", gin.WrapH(pprof.Handler("threadcreate")))
+	}
 
 	if err := initDB(); err != nil {
 		return err

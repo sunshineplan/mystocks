@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/password"
 	"github.com/sunshineplan/service"
@@ -17,6 +18,7 @@ import (
 	"github.com/sunshineplan/utils"
 	"github.com/sunshineplan/utils/flags"
 	"github.com/sunshineplan/utils/httpsvr"
+	"github.com/sunshineplan/utils/log"
 )
 
 var (
@@ -71,6 +73,7 @@ var (
 	workdayAPI = flag.String("workday", "", "Workday API")
 	pemPath    = flag.String("pem", "", "PEM file Path")
 	logPath    = flag.String("log", "", "Log file path")
+	debug      = flag.Bool("debug", false, "Debug pprof")
 )
 
 func main() {
@@ -84,6 +87,12 @@ func main() {
 	flag.StringVar(&svc.Options.PIDFile, "pid", "/var/run/mystocks.pid", "PID file path")
 	flags.SetConfigFile(joinPath(dir(self), "config.ini"))
 	flags.Parse()
+
+	if *logPath != "" {
+		svc.SetLogger(*logPath, "", log.LstdFlags)
+		gin.DefaultWriter = svc.Logger
+		gin.DefaultErrorWriter = svc.Logger
+	}
 
 	password.SetMaxAttempts(*maxRetry)
 	if *pemPath != "" {
