@@ -11,10 +11,10 @@ import (
 	"github.com/sunshineplan/stock"
 	"github.com/sunshineplan/stock/capitalflows/sector"
 	"github.com/sunshineplan/utils/cache"
-	"github.com/sunshineplan/utils/executor"
 	"github.com/sunshineplan/workday"
 	"github.com/sunshineplan/workday/apihubs"
 	"github.com/sunshineplan/workday/timor"
+	"github.com/sunshineplan/workers/executor"
 )
 
 var (
@@ -95,26 +95,22 @@ func loadFlows(date string) ([]sector.Chart, error) {
 
 func getFlows(date string) (flows []sector.Chart, err error) {
 	if date != "" {
-		var res any
-		res, err = executor.ExecuteConcurrentArg(
+		var resp *gohttp.Response
+		resp, err = executor.New[string, *gohttp.Response](0).ExecuteConcurrentArg(
 			[]string{
 				"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
 				"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 				"https://fastly.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 			},
-			func(url string) (any, error) {
+			func(url string) (*gohttp.Response, error) {
 				return gohttp.Get(fmt.Sprintf(url, strings.ReplaceAll(date, "-", "/")), nil)
 			},
 		)
 		if err != nil {
 			return
 		}
-
-		resp, ok := res.(*gohttp.Response)
-		if !ok || resp == nil {
-			return
-		}
 		defer resp.Close()
+
 		if resp.StatusCode == 404 {
 			return
 		}
