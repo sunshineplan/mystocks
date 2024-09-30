@@ -102,8 +102,8 @@ github.com/sunshineplan/service v1.0.21 h1:UXYaWwLVMeG5cZ40vlxVQLpymuSesCZK8ADn7
 github.com/sunshineplan/service v1.0.21/go.mod h1:dZtX1ktoLwftAH+p7Pve4xbaQyRuzFq1j8m1HStMsso=
 github.com/sunshineplan/stock v1.0.13 h1:mQ5itujzgwNE0Jiic6Nx3R/O3YbG12usY44JWJ+Zcl0=
 github.com/sunshineplan/stock v1.0.13/go.mod h1:eObUojaLba/mmwUazeo5ykUIeZpcMTKZjsIrt2DKk6c=
-github.com/sunshineplan/utils v0.1.72 h1:b3YA+/ak6hC+jpoK3bYkEU9/lT5qrcP66dV4ca/E+n4=
-github.com/sunshineplan/utils v0.1.72/go.mod h1:61jHA9jn2CVlZzt9LbPz+MpOEiR6Jy5SNHHEcc/KQNk=
+github.com/sunshineplan/utils v0.1.73 h1:Kvi45QYzdvNqQKON5Q67M7U/35+RrOnX7K8sbZtHsgI=
+github.com/sunshineplan/utils v0.1.73/go.mod h1:61jHA9jn2CVlZzt9LbPz+MpOEiR6Jy5SNHHEcc/KQNk=
 github.com/sunshineplan/workday v1.0.1 h1:gE2nddUn7FDJd23TjT0vw4hWkmlHcouTOZsTQMgwWYI=
 github.com/sunshineplan/workday v1.0.1/go.mod h1:ShoWQN23WGc4KSLbgbcTKcjjRjGP2lV3pKtsZMe4eEY=
 github.com/sunshineplan/workers v1.0.1 h1:vhDo4ZaerVu0QM1udRmWpvHY2U61/vTLRVwmKcYOxNw=
