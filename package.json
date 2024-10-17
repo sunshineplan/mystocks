@@ -12,7 +12,7 @@
     "@tsconfig/svelte": "^5.0.4",
     "@types/sortablejs": "^1.15.8",
     "chart.js": "^4.4.5",
-    "chartjs-plugin-annotation": "^3.0.1",
+    "chartjs-plugin-annotation": "^3.1.0",
     "jsencrypt": "^3.3.2",
     "sortablejs": "^1.15.3",
     "svelte": "^4.2.19",
