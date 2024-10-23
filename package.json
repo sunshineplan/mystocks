@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
-    "@tarekraafat/autocomplete.js": "^10.2.8",
+    "@tarekraafat/autocomplete.js": "^10.2.9",
     "@tsconfig/svelte": "^5.0.4",
     "@types/sortablejs": "^1.15.8",
     "chart.js": "^4.4.5",
