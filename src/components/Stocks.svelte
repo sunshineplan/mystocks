@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import AutoComplete from "./AutoComplete.svelte";
   import { checkTradingTime, post, addColor } from "../misc";
-  import { current, component, refresh } from "../stores";
+  import { mystocks } from "../stock.svelte";
 
   const columns: { [key: string]: keyof Stock } = {
     指数: "index",
@@ -18,13 +18,13 @@
     昨收: "last",
   };
 
-  let stocks: Stock[] = [];
+  let stocks: Stock[] = $state([]);
   let autoUpdate: number;
   let fetching: AbortController;
 
   const start = async () => {
     await load(true);
-    autoUpdate = setInterval(load, $refresh * 1000);
+    autoUpdate = setInterval(load, mystocks.refresh * 1000);
   };
 
   const stop = () => {
@@ -41,9 +41,9 @@
   };
 
   const goto = (stock: Stock) => {
-    $current = stock;
+    mystocks.current = stock;
     window.history.pushState({}, "", `/stock/${stock.index}/${stock.code}`);
-    $component = "stock";
+    mystocks.component = "stock";
   };
 
   const onUpdate = async (evt: Sortable.SortableEvent) => {
@@ -79,9 +79,9 @@
 
 <header>
   <AutoComplete />
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <span style="padding-left:10px" on:click={() => post("/refresh")}>
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <span style="padding-left:10px" onclick={() => post("/refresh")}>
     <i class="material-icons refresh">refresh</i>
   </span>
 </header>
@@ -96,7 +96,7 @@
     </thead>
     <tbody id="sortable">
       {#each stocks as stock (stock.index + stock.code)}
-        <tr on:click={() => goto(stock)}>
+        <tr onclick={() => goto(stock)}>
           {#each Object.entries(columns) as [key, val] (key)}
             <td style={addColor(stock, val)}>{stock[val]}</td>
           {/each}
@@ -129,9 +129,5 @@
     position: sticky;
     top: 0;
     background-color: white;
-  }
-
-  :global(.sortable-ghost) {
-    opacity: 0;
   }
 </style>

@@ -96,7 +96,7 @@ func loadFlows(date string) ([]sector.Chart, error) {
 func getFlows(date string) (flows []sector.Chart, err error) {
 	if date != "" {
 		var resp *gohttp.Response
-		resp, err = executor.New[string, *gohttp.Response](0).ExecuteConcurrentArg(
+		resp, err = executor.Executor[string, *gohttp.Response](0).ExecuteConcurrentArg(
 			[]string{
 				"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
 				"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",

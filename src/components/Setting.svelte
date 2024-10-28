@@ -1,11 +1,11 @@
 <script lang="ts">
   import { encrypt, fire, post, valid } from "../misc";
-  import { username, component } from "../stores";
+  import { mystocks } from "../stock.svelte";
 
-  let password = "";
-  let password1 = "";
-  let password2 = "";
-  let validated = false;
+  let password = $state("");
+  let password1 = $state("");
+  let password2 = $state("");
+  let validated = $state(false);
 
   const setting = async () => {
     if (valid()) {
@@ -38,9 +38,9 @@
             "Your password has changed. Please Re-login!",
             "success",
           );
-          $username = "";
+          mystocks.username = "";
           window.history.pushState({}, "", "/");
-          $component = "stocks";
+          mystocks.component = "stocks";
         } else {
           await fire("Error", json.message, "error");
           if (json.error == 1) password = "";
@@ -55,12 +55,12 @@
 
   const cancel = () => {
     window.history.pushState({}, "", "/");
-    $component = "stocks";
+    mystocks.component = "stocks";
   };
 </script>
 
 <svelte:window
-  on:keydown={(e) => {
+  onkeydown={(e) => {
     if (e.key === "Escape") cancel();
   }}
 />
@@ -73,11 +73,11 @@
   <h3>Setting</h3>
   <hr />
 </header>
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   style="margin-left: 120px; width: 250px"
   class="was-validated: {validated}"
-  on:keyup={async (e) => {
+  onkeyup={async (e) => {
     if (e.key == "Enter") await setting();
   }}
 >
@@ -120,8 +120,8 @@
       Max password length: 20 characters.
     </small>
   </div>
-  <button class="btn btn-primary" on:click={setting}>Change</button>
-  <button class="btn btn-primary" on:click={cancel}>Cancel</button>
+  <button class="btn btn-primary" onclick={setting}>Change</button>
+  <button class="btn btn-primary" onclick={cancel}>Cancel</button>
 </div>
 
 <style>

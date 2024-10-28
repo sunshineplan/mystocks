@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { checkTradingTime, addColor } from "../misc";
-  import { current, component } from "../stores";
+  import { mystocks } from "../stock.svelte";
 
   const names = {
     沪: "上证指数",
@@ -11,7 +11,7 @@
   };
   const fields: Array<keyof Stock> = ["now", "change", "percent"];
 
-  let indices: { [key: string]: Stock } = {};
+  let indices = $state<{ [key: string]: Stock }>({});
 
   const start = async () => {
     await load(true);
@@ -26,9 +26,9 @@
   };
 
   const goto = (stock: Stock) => {
-    $current = stock;
+    mystocks.current = stock;
     window.history.pushState({}, "", `/stock/${stock.index}/${stock.code}`);
-    $component = "stock";
+    mystocks.component = "stock";
   };
 
   onMount(async () => {
@@ -37,11 +37,11 @@
 </script>
 
 {#if Object.keys(indices).length !== 0}
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="indices">
     {#each Object.entries(names) as [key, val] (key)}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div id={key} on:click={() => goto(indices[key])}>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div id={key} onclick={() => goto(indices[key])}>
         <span class="short">{key}</span>
         <span class="full">{val}</span>
         {#each fields as field (field)}

@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { encrypt, fire, post } from "../misc";
-  import { component } from "../stores";
+  import { info, mystocks } from "../stock.svelte";
 
-  const dispatch = createEventDispatcher();
-
-  let username = localStorage.getItem("username");
-  let password = "";
-  let rememberme = localStorage.getItem("rememberme") == "true" ? true : false;
+  let username = $state(localStorage.getItem("username"));
+  let password = $state("");
+  let rememberme = $state(
+    localStorage.getItem("rememberme") == "true" ? true : false,
+  );
 
   const login = async () => {
     if (!document.querySelector<HTMLInputElement>("#username").checkValidity())
@@ -36,9 +35,9 @@
           localStorage.setItem("username", username);
           if (rememberme) localStorage.setItem("rememberme", "true");
           else localStorage.removeItem("rememberme");
-          dispatch("info");
+          await info();
           window.history.pushState({}, "", "/");
-          $component = "stocks";
+          mystocks.component = "stocks";
         } else await fire("Error", json.message, "error");
       } else await fire("Error", await resp.text(), "error");
     }
@@ -61,11 +60,11 @@
     Log In
   </h3>
 </header>
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="login" on:keyup={handleEnter}>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="login" onkeyup={handleEnter}>
   <div class="mb-3">
     <label for="username" class="form-label">Username</label>
-    <!-- svelte-ignore a11y-autofocus -->
+    <!-- svelte-ignore a11y_autofocus -->
     <input
       class="form-control"
       bind:value={username}
@@ -98,7 +97,7 @@
     <label class="form-check-label" for="rememberme">Remember Me</label>
   </div>
   <hr />
-  <button class="btn btn-primary login" on:click={login}>Log In</button>
+  <button class="btn btn-primary login" onclick={login}>Log In</button>
 </div>
 
 <style>

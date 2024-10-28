@@ -1,64 +1,62 @@
 <script lang="ts">
   import { fire, post } from "../misc";
-  import { username, component, flows } from "../stores";
-
-  export let user: string;
+  import { isFlows, mystocks } from "../stock.svelte";
 
   const logout = async () => {
     const resp = await post(window.universal + "/logout", undefined, true);
     if (resp.ok) {
-      $username = "";
+      mystocks.username = "";
       window.history.pushState({}, "", "/");
-      $component = "stocks";
+      mystocks.component = "stocks";
     } else await fire("Error", "Unknow error", "error");
   };
 </script>
 
 <nav class="navbar navbar-light topbar">
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <span
     class="brand"
-    on:click={() => {
+    onclick={() => {
       window.history.pushState({}, "", "/");
-      $component = "stocks";
+      mystocks.component = "stocks";
     }}
   >
     My Stocks
   </span>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <span style="color:white" on:click={flows.toggle}>
-    Switch to {$flows ? "Stocks" : "Flows"}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <span style="color:white" onclick={isFlows.toggle}>
+    Switch to {isFlows.status ? "Flows" : "Stocks"}
   </span>
   <div class="navbar-nav flex-row">
-    {#if user}
+    {#if mystocks.username}
       <div class="navbar-nav flex-row">
-        <span class="nav-link">{user}</span>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <span class="nav-link">{mystocks.username}</span>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <span
           class="nav-link link"
-          on:click={() => {
+          onclick={() => {
             window.history.pushState({}, "", "/setting");
-            $component = "setting";
+            mystocks.component = "setting";
           }}
         >
           Setting
         </span>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <span class="nav-link link" on:click={logout}>Log out</span>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <span class="nav-link link" onclick={logout}>Log out</span>
       </div>
     {:else}
       <div class="navbar-nav flex-row">
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <span
           class="nav-link link"
-          on:click={() => {
+          onclick={() => {
             window.history.pushState({}, "", "/login");
-            $component = "login";
+            mystocks.component = "login";
           }}
         >
           Log in
@@ -99,5 +97,6 @@
 
   span {
     cursor: pointer;
+    user-select: none;
   }
 </style>

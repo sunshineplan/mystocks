@@ -1,10 +1,10 @@
 <script>
   import autoComplete from "@tarekraafat/autocomplete.js";
   import { onMount } from "svelte";
-  import { current, component } from "../stores";
+  import { mystocks } from "../stock.svelte";
   import { post } from "../misc";
 
-  let suggest = "";
+  let suggest = $state("");
 
   onMount(() => {
     const autoCompleteJS = new autoComplete({
@@ -41,9 +41,9 @@
           selection(event) {
             const feedback = event.detail;
             const stock = feedback.selection.value.split(" ")[0].split(":");
-            $current = { index: stock[0], code: stock[1] };
+            mystocks.current = { index: stock[0], code: stock[1] };
             window.history.pushState({}, "", `/stock/${stock[0]}/${stock[1]}`);
-            $component = "stock";
+            mystocks.component = "stock";
             suggest = "";
           },
         },
@@ -94,34 +94,5 @@
     .search {
       margin-right: 0;
     }
-  }
-
-  :global(.autoComplete_wrapper > ul) {
-    position: absolute;
-    left: 0;
-    background-color: white;
-    box-shadow: 0px 5px 4px rgba(101, 119, 134, 0.2),
-      5px 2px 4px rgba(101, 119, 134, 0.2),
-      -5px 2px 4px rgba(101, 119, 134, 0.2);
-    border-radius: 5px;
-    list-style-type: none;
-    padding: 0;
-    width: 250px;
-    cursor: default;
-    text-indent: 20px;
-    top: 100%;
-    z-index: 99;
-  }
-
-  :global(.autoComplete_wrapper > ul > li:hover) {
-    color: white;
-    background-color: #008eff;
-    border-radius: 5px;
-  }
-
-  :global(.autoComplete_wrapper > ul > li[aria-selected="true"]) {
-    color: white;
-    background-color: #008eff;
-    border-radius: 5px;
   }
 </style>

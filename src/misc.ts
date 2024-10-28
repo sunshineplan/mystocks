@@ -4,8 +4,7 @@ import Chart from 'chart.js/auto'
 import annotation from 'chartjs-plugin-annotation'
 import type { ChartConfiguration } from 'chart.js'
 import type { AnnotationOptions } from 'chartjs-plugin-annotation'
-import { date, trading, info } from './stores'
-import { get } from 'svelte/store'
+import { mystocks, info } from './stock.svelte'
 
 Chart.register(annotation)
 
@@ -84,7 +83,7 @@ export const checkTradingTime = async (reload?: boolean): Promise<boolean> => {
   const weekday = d.getDay()
   const hour = d.getUTCHours()
   if (weekday < 1 || weekday > 5 || hour < 1 || hour > 7) return false
-  if (dateStr(d) === get(date)) return get(trading)
+  if (dateStr(d) === mystocks.date) return mystocks.trading
   if (reload) {
     await info()
     return await checkTradingTime(true)

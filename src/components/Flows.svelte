@@ -10,19 +10,21 @@
   }
 
   let autoUpdate: number;
-  let chart: Chart<"line">;
-  let datasets: ChartDataset<"line">[] = [];
-  let show: number[] = [];
-  let date = "";
-  let today = "";
-  let last = "";
-  let loading = 0;
-  let status = 0;
+  let chart = $state<Chart<"line">>();
+  let datasets = $state<ChartDataset<"line">[]>([]);
+  let show = $state<number[]>([]);
+  let date = $state("");
+  let today = $state("");
+  let last = $state("");
+  let loading = $state(0);
+  let status = $state(0);
   let controller: AbortController;
-  let hover = false;
+  let hover = $state(false);
   let dayChange = false;
 
-  $: date && goto();
+  $effect(() => {
+    goto(date);
+  });
 
   const getDate = (n: -1 | 0 | 1, setDate?: boolean) => {
     let day: Date;
@@ -136,7 +138,7 @@
     }
   };
 
-  const goto = () => {
+  const goto = (date: string) => {
     if (dayChange) {
       dayChange = false;
       return;
@@ -196,7 +198,7 @@
       <button
         class="input-group-text"
         disabled={loading ? true : false}
-        on:click={() => getDate(-1, true)}
+        onclick={() => getDate(-1, true)}
       >
         -
       </button>
@@ -209,14 +211,14 @@
       <button
         class="input-group-text"
         disabled={loading ? true : false}
-        on:click={() => getDate(1, true)}
+        onclick={() => getDate(1, true)}
       >
         +
       </button>
     </div>
     <button
       class="btn btn-danger"
-      on:click={() => {
+      onclick={() => {
         if (chart.data.datasets && date == today)
           chart.data.datasets.forEach((_, i) => {
             const meta = chart.getDatasetMeta(i);
@@ -243,9 +245,9 @@
         </i>
       {/if}
     {:else}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <i class="material-icons text-danger" on:click={() => load(true, date)}>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <i class="material-icons text-danger" onclick={() => load(true, date)}>
         close
       </i>
     {/if}
@@ -254,11 +256,11 @@
     <small>Last update: {last}</small>
   {/if}
 </header>
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   class="chart"
-  on:mouseenter={() => (hover = true)}
-  on:mouseleave={() => {
+  onmouseenter={() => (hover = true)}
+  onmouseleave={() => {
     hover = false;
     if (date == today) {
       chart.data.datasets = [...datasets];
@@ -266,7 +268,7 @@
     }
   }}
 >
-  <canvas id="flowsChart" />
+  <canvas id="flowsChart"></canvas>
 </div>
 
 <style>

@@ -1,14 +1,24 @@
 <script lang="ts">
   import { post, color, addColor } from "../misc";
-  import { current } from "../stores";
+  import { mystocks } from "../stock.svelte";
 
-  export let stock: Stock;
+  let {
+    stock = $bindable(),
+  }: {
+    stock: Stock;
+  } = $props();
 
-  let stared = false;
-  $: width = !stock.sell5.length && !stock.buy5.length ? "480px" : "360px";
-  $: $current && info();
+  let stared = $state(false);
 
-  const info = async () => {
+  let width = $derived(
+    !stock.sell5.length && !stock.buy5.length ? "480px" : "360px",
+  );
+
+  $effect(() => {
+    info(mystocks.current);
+  });
+
+  const info = async (stock: any) => {
     const resp = await fetch("/star");
     if ((await resp.text()) == "1") stared = true;
     else stared = false;
@@ -31,15 +41,15 @@
 
 <div>
   <div style="display: flex; font-size: 2rem">
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <i class="material-icons star {stared ? 'stared' : ''}" on:click={star}>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <i class="material-icons star {stared ? 'stared' : ''}" onclick={star}>
       {stared ? "star" : "star_border"}
     </i>
     <span>{stock.name}</span>(<span>{stock.code}</span>)
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <i class="material-icons open" on:click={open}>open_in_new</i>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <i class="material-icons open" onclick={open}>open_in_new</i>
     &nbsp;&nbsp;&nbsp;
     <span style={addColor(stock, "now")}>{stock.now}</span>
     &nbsp;&nbsp;&nbsp;

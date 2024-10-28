@@ -4,12 +4,12 @@
   import AutoComplete from "./AutoComplete.svelte";
   import Realtime from "./Realtime.svelte";
   import { checkTradingTime, post, intraday } from "../misc";
-  import { component, current, refresh } from "../stores";
+  import { mystocks } from "../stock.svelte";
   import type { ScatterDataPoint } from "chart.js";
   import type { LineAnnotationOptions } from "chartjs-plugin-annotation";
 
   let autoUpdate: number[] = [];
-  let stock: Stock = {
+  let stock: Stock = $state({
     index: "n/a",
     code: "n/a",
     name: "n/a",
@@ -23,13 +23,15 @@
     sell5: [],
     buy5: [],
     update: "",
-  };
+  });
   let data: ScatterDataPoint[] = [];
   let chart: Chart<"line">;
   let update = "";
-  let hover = false;
+  let hover = $state(false);
 
-  $: $current, load();
+  $effect(() => {
+    load(mystocks.current);
+  });
 
   const y2 = intraday.options?.scales?.y2;
   const callbacks = intraday.options?.plugins?.tooltip?.callbacks;
@@ -70,13 +72,13 @@
       document.querySelector<HTMLCanvasElement>("#stockChart"),
       intraday,
     );
-    if ($current.code != "n/a") {
-      autoUpdate.push(setInterval(loadRealtime, $refresh * 1000));
+    if (mystocks.current.code != "n/a") {
+      autoUpdate.push(setInterval(loadRealtime, mystocks.refresh * 1000));
       autoUpdate.push(setInterval(loadChart, 60000));
     }
   };
 
-  const load = async () => {
+  const load = async (stock: any) => {
     update = "";
     await loadRealtime(true);
     await loadChart(true);
@@ -90,10 +92,10 @@
   };
 
   const loadRealtime = async (force?: boolean) => {
-    if ((force && $current.code) || (await checkTradingTime())) {
+    if ((force && mystocks.current.code) || (await checkTradingTime())) {
       const resp = await post("/realtime", {
-        index: $current.index,
-        code: $current.code,
+        index: mystocks.current.index,
+        code: mystocks.current.code,
       });
       const json = await resp.json();
       if (json.name) {
@@ -106,10 +108,10 @@
   };
 
   const loadChart = async (force?: boolean) => {
-    if ((force && $current.code) || (await checkTradingTime())) {
+    if ((force && mystocks.current.code) || (await checkTradingTime())) {
       const resp = await post("/chart", {
-        index: $current.index,
-        code: $current.code,
+        index: mystocks.current.index,
+        code: mystocks.current.code,
       });
       const json = await resp.json();
       if (json.chart) data = json.chart;
@@ -142,13 +144,13 @@
 
 <header>
   <AutoComplete />
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="home"
-    on:click={() => {
+    onclick={() => {
       window.history.pushState({}, "", "/");
-      $component = "stocks";
+      mystocks.component = "stocks";
     }}
   >
     <div class="icon"><i class="material-icons">home</i></div>
@@ -156,16 +158,16 @@
   </div>
   <Realtime bind:stock />
 </header>
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   class="chart"
-  on:mouseenter={() => (hover = true)}
-  on:mouseleave={() => {
+  onmouseenter={() => (hover = true)}
+  onmouseleave={() => {
     hover = false;
     updateChart(true);
   }}
 >
-  <canvas id="stockChart" />
+  <canvas id="stockChart"></canvas>
 </div>
 
 <style>
