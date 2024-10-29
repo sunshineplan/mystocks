@@ -10,11 +10,11 @@
   }
 
   let autoUpdate: number;
-  let chart = $state<Chart<"line">>();
-  let datasets = $state<ChartDataset<"line">[]>([]);
+  let chart: Chart<"line">;
+  let datasets: ChartDataset<"line">[] = [];
   let show = $state<number[]>([]);
-  let date = $state("");
-  let today = $state("");
+  let date = $state(getDate(0));
+  let today = $state(getDate(0));
   let last = $state("");
   let loading = $state(0);
   let status = $state(0);
@@ -22,11 +22,7 @@
   let hover = $state(false);
   let dayChange = false;
 
-  $effect(() => {
-    goto(date);
-  });
-
-  const getDate = (n: -1 | 0 | 1, setDate?: boolean) => {
+  function getDate(n: -1 | 0 | 1, setDate?: boolean) {
     let day: Date;
     if (n == 0) day = new Date();
     else {
@@ -34,9 +30,12 @@
       day.setDate(day.getDate() + n);
     }
     const ymd = dateStr(day);
-    if (setDate) date = ymd;
+    if (setDate) {
+      date = ymd;
+      goto(date);
+    }
     return ymd;
-  };
+  }
 
   const updateDate = () => {
     if (date == today && date != getDate(0)) {
@@ -85,7 +84,7 @@
 
   const load = async (force?: boolean, date?: string) => {
     let url = "/flows";
-    if (date) {
+    if (date && date != today) {
       if (new Date(date) > new Date()) {
         status = -1;
         return;
@@ -99,10 +98,12 @@
       let array: Flows[];
       try {
         controller = new AbortController();
-        setTimeout(() => controller.abort(), 50000);
+        setTimeout(() => controller.abort("fetch flows timeout"), 50000);
         const resp = await fetch(url, { signal: controller.signal });
         if (!resp.ok) {
           status = 0;
+          datasets.length = 0;
+          chart.data.datasets.length = 0;
           loading--;
           return;
         }
@@ -110,10 +111,12 @@
       } catch (e) {
         console.log(e);
         status = 0;
+        datasets.length = 0;
+        chart.data.datasets.length = 0;
         loading--;
         return;
       }
-      if (array) {
+      if (array && array.length) {
         status = 1;
         datasets.length = 0;
         array.forEach((e: Flows, i: number) => {
@@ -179,7 +182,7 @@
       document.querySelector<HTMLCanvasElement>("#flowsChart"),
       capitalflows,
     );
-    today = getDate(0, true);
+    goto(date);
     return () => {
       if (autoUpdate) clearInterval(autoUpdate);
       chart.destroy();
@@ -207,6 +210,7 @@
         type="date"
         disabled={loading ? true : false}
         bind:value={date}
+        onchange={() => goto(date)}
       />
       <button
         class="input-group-text"

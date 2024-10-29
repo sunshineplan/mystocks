@@ -17,14 +17,13 @@
     stock: Stock,
   };
 
-  const Show = $derived.by(() => {
-    console.log(mystocks.component, isFlows.status);
-    return mystocks.component != "stocks"
+  const Show = $derived(
+    mystocks.component != "stocks"
       ? components[mystocks.component]
       : isFlows.status
         ? Flows
-        : Stocks;
-  });
+        : Stocks,
+  );
 
   const init = async () => {
     await info();

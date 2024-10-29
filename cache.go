@@ -95,30 +95,31 @@ func loadFlows(date string) ([]sector.Chart, error) {
 
 func getFlows(date string) (flows []sector.Chart, err error) {
 	if date != "" {
-		var resp *gohttp.Response
-		resp, err = executor.Executor[string, *gohttp.Response](0).ExecuteConcurrentArg(
+		var timeline []sector.TimeLine
+		if timeline, err = executor.Executor[string, []sector.TimeLine](0).ExecuteConcurrentArg(
 			[]string{
 				"https://raw.githubusercontent.com/sunshineplan/capital-flows-data/main/data/%s.json",
 				"https://cdn.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 				"https://fastly.jsdelivr.net/gh/sunshineplan/capital-flows-data/data/%s.json",
 			},
-			func(url string) (*gohttp.Response, error) {
-				return gohttp.Get(fmt.Sprintf(url, strings.ReplaceAll(date, "-", "/")), nil)
+			func(url string) (timeline []sector.TimeLine, err error) {
+				resp, err := gohttp.Get(fmt.Sprintf(url, strings.ReplaceAll(date, "-", "/")), nil)
+				if err != nil {
+					return
+				}
+				defer resp.Close()
+				if resp.StatusCode == 404 {
+					return
+				} else if resp.StatusCode != 200 {
+					return nil, fmt.Errorf(" bad status code: %d", resp.StatusCode)
+				}
+				err = resp.JSON(&timeline)
+				return
 			},
-		)
-		if err != nil {
-			return
-		}
-		defer resp.Close()
-
-		if resp.StatusCode == 404 {
+		); err != nil {
 			return
 		}
 
-		var timeline []sector.TimeLine
-		if err = resp.JSON(&timeline); err != nil {
-			return
-		}
 		for _, i := range timeline {
 			flows = append(flows, sector.TimeLine2Chart(i))
 		}

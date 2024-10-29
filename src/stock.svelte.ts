@@ -23,9 +23,6 @@ export const info = async () => {
 
 class Toggler {
   status = $state(false)
-  toggle() {
-    console.log(this.status) //test
-    this.status = !this.status
-  }
+  toggle() { this.status = !this.status }
 }
 export const isFlows = new Toggler
