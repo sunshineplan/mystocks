@@ -33,12 +33,12 @@ func addUser(username string) error {
 		Seq   int    `json:"seq" bson:"seq"`
 	}
 	if _, err := stockClient.InsertMany(
-		[]any{
-			stock{"SSE", "000001", insertedID.(mongodb.ObjectID).Hex(), 1},
-			stock{"SZSE", "399001", insertedID.(mongodb.ObjectID).Hex(), 2},
-			stock{"SZSE", "399106", insertedID.(mongodb.ObjectID).Hex(), 3},
-			stock{"SZSE", "399005", insertedID.(mongodb.ObjectID).Hex(), 4},
-			stock{"SZSE", "399006", insertedID.(mongodb.ObjectID).Hex(), 5},
+		[]stock{
+			{"SSE", "000001", insertedID.(mongodb.ObjectID).Hex(), 1},
+			{"SZSE", "399001", insertedID.(mongodb.ObjectID).Hex(), 2},
+			{"SZSE", "399106", insertedID.(mongodb.ObjectID).Hex(), 3},
+			{"SZSE", "399005", insertedID.(mongodb.ObjectID).Hex(), 4},
+			{"SZSE", "399006", insertedID.(mongodb.ObjectID).Hex(), 5},
 		},
 	); err != nil {
 		return err
@@ -65,9 +65,9 @@ func deleteUser(username string) error {
 	return nil
 }
 
-func reorderStock(userID any, orig, dest []string) error {
+func reorderStock(userID string, orig, dest []string) error {
 	var origStock, destStock struct {
-		ID  string `json:"_id" bson:"_id"`
+		ID  mongodb.OID `json:"_id" bson:"_id"`
 		Seq int
 	}
 
@@ -96,9 +96,9 @@ func reorderStock(userID any, orig, dest []string) error {
 		return err
 	}
 
-	id, _ := stockClient.ObjectID(origStock.ID)
+	id, _ := stockClient.ObjectID(origStock.ID.Hex())
 	if _, err := stockClient.UpdateOne(
-		mongodb.M{"_id": id.Interface()},
+		mongodb.M{"_id": id},
 		mongodb.M{"$set": mongodb.M{"seq": destStock.Seq}},
 		nil,
 	); err != nil {

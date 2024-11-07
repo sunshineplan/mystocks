@@ -53,10 +53,10 @@ func loadStocks(id string, init bool) ([]stock.Stock, error) {
 	return ss, nil
 }
 
-func getStocks(id any) (ss []stock.Stock, err error) {
+func getStocks(userID string) (ss []stock.Stock, err error) {
 	var res []struct{ Index, Code string }
 	if err = stockClient.Find(
-		mongodb.M{"user": id},
+		mongodb.M{"user": userID},
 		&mongodb.FindOpt{Sort: mongodb.M{"seq": 1}},
 		&res,
 	); err != nil {

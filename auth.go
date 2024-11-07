@@ -12,7 +12,7 @@ import (
 )
 
 type user struct {
-	ID       string `json:"_id" bson:"_id"`
+	ID       mongodb.OID `json:"_id" bson:"_id"`
 	Username string
 	Password string
 }
@@ -36,7 +36,7 @@ func getUser(c *gin.Context) (id, username string, err error) {
 		if err = accountClient.FindOne(mongodb.M{"uid": sid}, nil, &user); err != nil {
 			return
 		}
-		id = user.ID
+		id = user.ID.Hex()
 		return
 	}
 	id, _ = sid.(string)
@@ -44,7 +44,7 @@ func getUser(c *gin.Context) (id, username string, err error) {
 }
 
 type info struct {
-	username any
+	username string
 	ip       string
 }
 
@@ -88,7 +88,7 @@ func login(c *gin.Context) {
 		if message == "" {
 			session := sessions.Default(c)
 			session.Clear()
-			session.Set("id", user.ID)
+			session.Set("id", user.ID.Hex())
 			session.Set("username", user.Username)
 
 			if login.Rememberme {
@@ -119,7 +119,7 @@ func chgpwd(c *gin.Context) {
 		return
 	}
 
-	if password.IsMaxAttempts(info{username, c.ClientIP()}) {
+	if password.IsMaxAttempts(info{username.(string), c.ClientIP()}) {
 		c.JSON(200, gin.H{"status": 0, "message": fmt.Sprintf("Max retries exceeded (%d)", *maxRetry), "error": 1})
 		return
 	}
@@ -145,7 +145,7 @@ func chgpwd(c *gin.Context) {
 
 	id, _ := stockClient.ObjectID(userID.(string))
 	var user user
-	if err := accountClient.FindOne(mongodb.M{"_id": id.Interface()}, nil, &user); err != nil {
+	if err := accountClient.FindOne(mongodb.M{"_id": id}, nil, &user); err != nil {
 		svc.Print(err)
 		c.String(500, "")
 		return
@@ -153,7 +153,7 @@ func chgpwd(c *gin.Context) {
 
 	var message string
 	var errorCode int
-	if err = password.CompareHashAndPassword(info{username, c.ClientIP()}, user.Password, data.Password); err != nil {
+	if err = password.CompareHashAndPassword(info{username.(string), c.ClientIP()}, user.Password, data.Password); err != nil {
 		if errors.Is(err, password.ErrIncorrectPassword) {
 			message = err.Error()
 			errorCode = 1
@@ -186,7 +186,7 @@ func chgpwd(c *gin.Context) {
 			return
 		}
 		if _, err := accountClient.UpdateOne(
-			mongodb.M{"_id": id.Interface()},
+			mongodb.M{"_id": id},
 			mongodb.M{"$set": mongodb.M{"password": newPassword}},
 			nil,
 		); err != nil {

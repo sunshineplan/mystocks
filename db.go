@@ -2,14 +2,14 @@ package main
 
 import (
 	"github.com/sunshineplan/database/mongodb"
-	"github.com/sunshineplan/database/mongodb/api"
+	"github.com/sunshineplan/database/mongodb/driver"
 	"github.com/sunshineplan/utils/retry"
 )
 
 var accountClient, stockClient, flowsClient mongodb.Client
 
 func initDB() (err error) {
-	var apiClient api.Client
+	var apiClient driver.Client
 	if err = retry.Do(func() error {
 		return meta.Get("mystocks_mongo", &apiClient)
 	}, 3, 20); err != nil {
