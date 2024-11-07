@@ -12,9 +12,9 @@
       validated = false;
       var pwd: string, p1: string, p2: string;
       if (window.pubkey && window.pubkey.length) {
-        pwd = encrypt(window.pubkey, password) as string;
-        p1 = encrypt(window.pubkey, password1) as string;
-        p2 = encrypt(window.pubkey, password2) as string;
+        pwd = encrypt(window.pubkey, password);
+        p1 = encrypt(window.pubkey, password1);
+        p2 = encrypt(window.pubkey, password2);
       } else {
         pwd = password;
         p1 = password1;
@@ -22,11 +22,7 @@
       }
       const resp = await post(
         window.universal + "/chgpwd",
-        {
-          password: pwd,
-          password1: p1,
-          password2: p2,
-        },
+        { password: pwd, password1: p1, password2: p2 },
         true,
       );
       if (!resp.ok) await fire("Error", await resp.text(), "error");

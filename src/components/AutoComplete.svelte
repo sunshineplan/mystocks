@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import autoComplete from "@tarekraafat/autocomplete.js";
   import { onMount } from "svelte";
   import { mystocks } from "../stock.svelte";

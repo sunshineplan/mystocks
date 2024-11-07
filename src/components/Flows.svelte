@@ -21,6 +21,7 @@
   let controller: AbortController;
   let hover = $state(false);
   let dayChange = false;
+  let canvas: HTMLCanvasElement;
 
   function getDate(n: -1 | 0 | 1, setDate?: boolean) {
     let day: Date;
@@ -178,10 +179,7 @@
   };
 
   onMount(() => {
-    chart = new Chart(
-      document.querySelector<HTMLCanvasElement>("#flowsChart"),
-      capitalflows,
-    );
+    chart = new Chart(canvas, capitalflows);
     goto(date);
     return () => {
       if (autoUpdate) clearInterval(autoUpdate);
@@ -272,7 +270,7 @@
     }
   }}
 >
-  <canvas id="flowsChart"></canvas>
+  <canvas bind:this={canvas}></canvas>
 </div>
 
 <style>

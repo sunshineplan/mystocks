@@ -28,6 +28,7 @@
   let chart: Chart<"line">;
   let update = "";
   let hover = $state(false);
+  let canvas: HTMLCanvasElement;
 
   $effect(() => {
     load(mystocks.current);
@@ -68,10 +69,7 @@
   };
 
   const start = () => {
-    chart = new Chart(
-      document.querySelector<HTMLCanvasElement>("#stockChart"),
-      intraday,
-    );
+    chart = new Chart(canvas, intraday);
     if (mystocks.current.code != "n/a") {
       autoUpdate.push(setInterval(loadRealtime, mystocks.refresh * 1000));
       autoUpdate.push(setInterval(loadChart, 60000));
@@ -167,7 +165,7 @@
     updateChart(true);
   }}
 >
-  <canvas id="stockChart"></canvas>
+  <canvas bind:this={canvas}></canvas>
 </div>
 
 <style>

@@ -21,6 +21,7 @@
   let stocks: Stock[] = $state([]);
   let autoUpdate: number;
   let fetching: AbortController;
+  let table: HTMLElement;
 
   const start = async () => {
     await load(true);
@@ -55,17 +56,14 @@
 
   onMount(() => {
     start();
-    const sortable = new Sortable(
-      document.querySelector<HTMLElement>("#sortable"),
-      {
-        animation: 150,
-        delay: 400,
-        swapThreshold: 0.5,
-        onStart: stop,
-        onEnd: start,
-        onUpdate,
-      },
-    );
+    const sortable = new Sortable(table, {
+      animation: 150,
+      delay: 400,
+      swapThreshold: 0.5,
+      onStart: stop,
+      onEnd: start,
+      onUpdate,
+    });
     return () => {
       stop();
       sortable.destroy();
@@ -94,7 +92,7 @@
         {/each}
       </tr>
     </thead>
-    <tbody id="sortable">
+    <tbody bind:this={table}>
       {#each stocks as stock (stock.index + stock.code)}
         <tr onclick={() => goto(stock)}>
           {#each Object.entries(columns) as [key, val] (key)}
