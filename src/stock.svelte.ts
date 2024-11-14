@@ -4,17 +4,17 @@ class Toggler {
 }
 
 class stock {
-  index?: string
-  code?: string
+  index = $state('')
+  code = $state('')
   stared = $state(false)
   constructor(index?: string, code?: string) {
-    this.index = index
-    this.code = code
+    if (index) this.index = index
+    if (code) this.code = code
   }
   async goto() {
-    window.history.pushState({}, "", `/stock/${this.index}/${this.code}`);
-    const resp = await fetch("/star");
-    if ((await resp.text()) == "1") this.stared = true;
+    window.history.pushState({}, '', `/stock/${this.index}/${this.code}`);
+    const resp = await fetch('/star');
+    if ((await resp.text()) == '1') this.stared = true;
     else this.stared = false;
   }
 }
@@ -52,7 +52,7 @@ class MyStocks {
       this.current.index = a
       this.current.code = b
     } else this.current = new stock(a.index, a.code)
-    this.component = "stock";
+    this.component = 'stock';
     this.current.goto()
   };
 }
