@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { Chart, type ChartDataset, type ScatterDataPoint } from "chart.js";
+  import { onMount } from "svelte";
+  import { capitalflows, checkTradingTime, dateStr, getColor } from "../misc";
   import AutoComplete from "./AutoComplete.svelte";
-  import { dateStr, checkTradingTime, getColor, capitalflows } from "../misc";
 
   interface Flows {
     sector: string;

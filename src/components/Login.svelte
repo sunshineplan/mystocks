@@ -1,6 +1,6 @@
 <script lang="ts">
   import { encrypt, fire, post } from "../misc";
-  import { info, mystocks } from "../stock.svelte";
+  import { mystocks } from "../stock.svelte";
 
   let username = $state(localStorage.getItem("username"));
   let password = $state("");
@@ -31,7 +31,7 @@
           localStorage.setItem("username", username);
           if (rememberme) localStorage.setItem("rememberme", "true");
           else localStorage.removeItem("rememberme");
-          await info();
+          await mystocks.info();
           window.history.pushState({}, "", "/");
           mystocks.component = "stocks";
         } else await fire("Error", json.message, "error");

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fire, post } from "../misc";
-  import { isFlows, mystocks } from "../stock.svelte";
+  import { mystocks } from "../stock.svelte";
 
   const logout = async () => {
     const resp = await post(window.universal + "/logout", undefined, true);
@@ -26,8 +26,8 @@
   </span>
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <span style="color:white" onclick={() => isFlows.toggle()}>
-    Switch to {isFlows.status ? "Stocks" : "Flows"}
+  <span style="color:white" onclick={() => mystocks.toggle()}>
+    Switch to {mystocks.isFlows ? "Stocks" : "Flows"}
   </span>
   <div class="navbar-nav flex-row">
     {#if mystocks.username}

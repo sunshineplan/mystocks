@@ -1,9 +1,9 @@
 <script lang="ts">
   import Sortable from "sortablejs";
   import { onMount } from "svelte";
-  import AutoComplete from "./AutoComplete.svelte";
-  import { checkTradingTime, post, addColor } from "../misc";
+  import { addColor, checkTradingTime, post } from "../misc";
   import { mystocks } from "../stock.svelte";
+  import AutoComplete from "./AutoComplete.svelte";
 
   const columns: { [key: string]: keyof Stock } = {
     指数: "index",

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import type { ScatterDataPoint } from "chart.js";
   import { Chart } from "chart.js";
+  import type { LineAnnotationOptions } from "chartjs-plugin-annotation";
+  import { onMount } from "svelte";
+  import { checkTradingTime, intraday, post } from "../misc";
+  import { mystocks } from "../stock.svelte";
   import AutoComplete from "./AutoComplete.svelte";
   import Realtime from "./Realtime.svelte";
-  import { checkTradingTime, post, intraday } from "../misc";
-  import { mystocks } from "../stock.svelte";
-  import type { ScatterDataPoint } from "chart.js";
-  import type { LineAnnotationOptions } from "chartjs-plugin-annotation";
 
   let autoUpdate: number[] = [];
   let stock: Stock = $state({

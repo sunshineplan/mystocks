@@ -1,9 +1,9 @@
-declare interface Window {
+interface Window {
   universal: string
   pubkey: string
 }
 
-declare interface Stock {
+interface Stock {
   index: string
   code: string
   name: string

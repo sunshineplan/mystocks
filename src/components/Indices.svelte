@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { checkTradingTime, addColor } from "../misc";
+  import { addColor, checkTradingTime } from "../misc";
   import { mystocks } from "../stock.svelte";
 
   const names = {

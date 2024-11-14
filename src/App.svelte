@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { Component } from "svelte";
-  import Nav from "./components/Nav.svelte";
-  import Login from "./components/Login.svelte";
-  import Setting from "./components/Setting.svelte";
-  import Stocks from "./components/Stocks.svelte";
   import Flows from "./components/Flows.svelte";
-  import Stock from "./components/Stock.svelte";
   import Indices from "./components/Indices.svelte";
-  import { mystocks, info, isFlows } from "./stock.svelte";
+  import Login from "./components/Login.svelte";
+  import Nav from "./components/Nav.svelte";
+  import Setting from "./components/Setting.svelte";
+  import Stock from "./components/Stock.svelte";
+  import Stocks from "./components/Stocks.svelte";
+  import { mystocks } from "./stock.svelte";
 
   const components: {
     [component: string]: Component;
@@ -20,13 +20,13 @@
   const Show = $derived(
     mystocks.component != "stocks"
       ? components[mystocks.component]
-      : isFlows.status
+      : mystocks.isFlows
         ? Flows
         : Stocks,
   );
 
   const init = async () => {
-    await info();
+    await mystocks.info();
     if (/^\/stock\/[A-Z]{3,4}\/\d{6}$/.test(window.location.pathname)) {
       const stock = window.location.pathname.split("/");
       mystocks.current = { index: stock[2], code: stock[3] };
