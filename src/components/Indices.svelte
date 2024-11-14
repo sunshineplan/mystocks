@@ -25,12 +25,6 @@
     }
   };
 
-  const goto = (stock: Stock) => {
-    mystocks.current = stock;
-    window.history.pushState({}, "", `/stock/${stock.index}/${stock.code}`);
-    mystocks.component = "stock";
-  };
-
   onMount(async () => {
     await start();
   });
@@ -40,13 +34,14 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="indices">
     {#each Object.entries(names) as [key, val] (key)}
+      {@const stock = indices[key]}
       <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <div id={key} onclick={() => goto(indices[key])}>
+      <div id={key} onclick={() => mystocks.goto(stock)}>
         <span class="short">{key}</span>
         <span class="full">{val}</span>
         {#each fields as field (field)}
-          <span style={addColor(indices[key], field)}>
-            &nbsp;&nbsp;{indices[key][field]}
+          <span style={addColor(stock, field)}>
+            &nbsp;&nbsp;{stock[field]}
           </span>
         {/each}
       </div>

@@ -3,11 +3,27 @@ class Toggler {
   toggle() { this.status = !this.status }
 }
 
+class stock {
+  index?: string
+  code?: string
+  stared = $state(false)
+  constructor(index?: string, code?: string) {
+    this.index = index
+    this.code = code
+  }
+  async goto() {
+    window.history.pushState({}, "", `/stock/${this.index}/${this.code}`);
+    const resp = await fetch("/star");
+    if ((await resp.text()) == "1") this.stared = true;
+    else this.stared = false;
+  }
+}
+
 class MyStocks {
   username = $state('')
   component = $state('stocks')
   #toggler = new Toggler
-  current = $state({ index: 'n/a', code: 'n/a' })
+  current = $state(new stock())
   refresh = $state(3)
   date = $state('')
   trading = $state(false)
@@ -29,5 +45,15 @@ class MyStocks {
   toggle() {
     this.#toggler.toggle()
   }
+  goto(index: string, code: string): void
+  goto(stock: Stock): void
+  goto(a: string | Stock, b?: string) {
+    if (typeof a === 'string') {
+      this.current.index = a
+      this.current.code = b
+    } else this.current = new stock(a.index, a.code)
+    this.component = "stock";
+    this.current.goto()
+  };
 }
 export const mystocks = new MyStocks

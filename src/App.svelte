@@ -29,9 +29,7 @@
     await mystocks.info();
     if (/^\/stock\/[A-Z]{3,4}\/\d{6}$/.test(window.location.pathname)) {
       const stock = window.location.pathname.split("/");
-      mystocks.current = { index: stock[2], code: stock[3] };
-      window.history.pushState({}, "", `/stock/${stock[2]}/${stock[3]}`);
-      mystocks.component = "stock";
+      mystocks.goto(stock[2], stock[3]);
     }
   };
   const promise = init();

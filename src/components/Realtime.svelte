@@ -8,25 +8,15 @@
     stock: Stock;
   } = $props();
 
-  let stared = $state(false);
-
   let width = $derived(
     !stock.sell5.length && !stock.buy5.length ? "480px" : "360px",
   );
 
-  $effect(() => {
-    info(mystocks.current);
-  });
-
-  const info = async (stock: any) => {
-    const resp = await fetch("/star");
-    if ((await resp.text()) == "1") stared = true;
-    else stared = false;
-  };
-
   const star = async () => {
-    await post("/star", { action: stared ? "unstar" : "star" });
-    stared = !stared;
+    await post("/star", {
+      action: mystocks.current.stared ? "unstar" : "star",
+    });
+    mystocks.current.stared = !mystocks.current.stared;
   };
 
   const open = () => {
@@ -43,8 +33,12 @@
   <div style="display: flex; font-size: 2rem">
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <i class="material-icons star {stared ? 'stared' : ''}" onclick={star}>
-      {stared ? "star" : "star_border"}
+    <i
+      class="material-icons star"
+      class:stared={mystocks.current.stared}
+      onclick={star}
+    >
+      {mystocks.current.stared ? "star" : "star_border"}
     </i>
     <span>{stock.name}</span>(<span>{stock.code}</span>)
     <!-- svelte-ignore a11y_click_events_have_key_events -->

@@ -41,12 +41,6 @@
     }
   };
 
-  const goto = (stock: Stock) => {
-    mystocks.current = stock;
-    window.history.pushState({}, "", `/stock/${stock.index}/${stock.code}`);
-    mystocks.component = "stock";
-  };
-
   const onUpdate = async (evt: Sortable.SortableEvent) => {
     await post("/reorder", {
       old: `${stocks[evt.oldIndex].index} ${stocks[evt.oldIndex].code}`,
@@ -94,7 +88,7 @@
     </thead>
     <tbody bind:this={table}>
       {#each stocks as stock (stock.index + stock.code)}
-        <tr onclick={() => goto(stock)}>
+        <tr onclick={() => mystocks.goto(stock)}>
           {#each Object.entries(columns) as [key, val] (key)}
             <td style={addColor(stock, val)}>{stock[val]}</td>
           {/each}

@@ -39,11 +39,8 @@
             if (suggest) autoCompleteJS.start();
           },
           selection(event) {
-            const feedback = event.detail;
-            const stock = feedback.selection.value.split(" ")[0].split(":");
-            mystocks.current = { index: stock[0], code: stock[1] };
-            window.history.pushState({}, "", `/stock/${stock[0]}/${stock[1]}`);
-            mystocks.component = "stock";
+            const stock = event.detail.selection.value.split(" ")[0].split(":");
+            mystocks.goto(stock[0], stock[1]);
             suggest = "";
           },
         },
