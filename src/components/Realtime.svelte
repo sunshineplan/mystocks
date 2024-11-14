@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { addColor, color, post } from "../misc";
+  import { mystocks } from "../stock.svelte";
 
   let {
     stock = $bindable(),
@@ -14,11 +14,15 @@
     !stock.sell5.length && !stock.buy5.length ? "480px" : "360px",
   );
 
-  onMount(async () => {
+  $effect(() => {
+    info(mystocks.current);
+  });
+
+  const info = async (stock: any) => {
     const resp = await fetch("/star");
     if ((await resp.text()) == "1") stared = true;
     else stared = false;
-  });
+  };
 
   const star = async () => {
     await post("/star", { action: stared ? "unstar" : "star" });
