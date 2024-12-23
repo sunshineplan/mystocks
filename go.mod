@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sunshineplan/database/mongodb v1.0.13
-	github.com/sunshineplan/gohttp v1.0.10
+	github.com/sunshineplan/gohttp v1.0.11
 	github.com/sunshineplan/metadata v1.1.2
 	github.com/sunshineplan/password v1.0.6
 	github.com/sunshineplan/service v1.0.21
@@ -53,7 +53,7 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.0.0-beta2 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
