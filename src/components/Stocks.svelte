@@ -19,47 +19,52 @@
   };
 
   let stocks: Stock[] = $state([]);
-  let autoUpdate: number;
-  let fetching: AbortController;
+  let controller: AbortController;
   let table: HTMLElement;
 
-  const start = async () => {
-    await load(true);
-    autoUpdate = setInterval(load, mystocks.refresh * 1000);
-  };
-
-  const stop = () => {
-    fetching.abort();
-    clearInterval(autoUpdate);
-  };
-
-  const load = async (force?: boolean) => {
-    if (force || (await checkTradingTime())) {
-      fetching = new AbortController();
-      const resp = await fetch("/mystocks", { signal: fetching.signal });
-      stocks = await resp.json();
+  const subscribe = async (force?: boolean) => {
+    controller = new AbortController();
+    let resp: Response;
+    try {
+      if (force || (await checkTradingTime()))
+        resp = await fetch("/mystocks", { signal: controller.signal });
+      else resp = new Response(null, { status: 400 });
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+      console.error(e);
+      resp = new Response(null, { status: 500 });
     }
+    controller.abort();
+    if (resp.ok) {
+      stocks = await resp.json();
+      await new Promise((sleep) => setTimeout(sleep, mystocks.refresh * 1000));
+    } else if (resp.status == 400)
+      await new Promise((sleep) => setTimeout(sleep, mystocks.refresh * 1000));
+    else await new Promise((sleep) => setTimeout(sleep, 30000));
+    if (controller.signal.aborted) await subscribe();
   };
 
   const onUpdate = async (evt: Sortable.SortableEvent) => {
+    controller.abort();
     await post("/reorder", {
       old: `${stocks[evt.oldIndex].index} ${stocks[evt.oldIndex].code}`,
       new: `${stocks[evt.newIndex].index} ${stocks[evt.newIndex].code}`,
     });
+    subscribe(true);
   };
 
   onMount(() => {
-    start();
+    subscribe(true);
     const sortable = new Sortable(table, {
       animation: 150,
       delay: 400,
       swapThreshold: 0.5,
-      onStart: stop,
-      onEnd: start,
+      onStart: controller.abort,
+      onEnd: () => subscribe(true),
       onUpdate,
     });
     return () => {
-      stop();
+      controller.abort();
       sortable.destroy();
     };
   });
