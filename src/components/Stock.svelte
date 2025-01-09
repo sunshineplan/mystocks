@@ -70,7 +70,7 @@
 
   const start = () => {
     chart = new Chart(canvas, intraday);
-    if (mystocks.current.code != "n/a") {
+    if (mystocks.current.code) {
       autoUpdate.push(setInterval(loadRealtime, mystocks.refresh * 1000));
       autoUpdate.push(setInterval(loadChart, 60000));
     }
