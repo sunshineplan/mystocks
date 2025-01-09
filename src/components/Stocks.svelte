@@ -34,13 +34,14 @@
       console.error(e);
       resp = new Response(null, { status: 500 });
     }
-    controller.abort();
+    let timeout = 30000;
     if (resp.ok) {
       stocks = await resp.json();
-      await new Promise((sleep) => setTimeout(sleep, mystocks.refresh * 1000));
-    } else if (resp.status == 400)
-      await new Promise((sleep) => setTimeout(sleep, mystocks.refresh * 1000));
-    else await new Promise((sleep) => setTimeout(sleep, 30000));
+      controller.abort();
+      timeout = mystocks.refresh * 1000;
+    } else if (resp.status == 400) timeout = mystocks.refresh * 1000;
+    controller.abort();
+    await new Promise((sleep) => setTimeout(sleep, timeout));
     if (controller.signal.aborted) await subscribe();
   };
 
