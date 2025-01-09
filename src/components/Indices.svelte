@@ -11,22 +11,28 @@
   };
   const fields: Array<keyof Stock> = ["now", "change", "percent"];
 
-  let indices = $state<{ [key: string]: Stock }>({});
+  let indices = $state.raw<{ [key: string]: Stock }>({});
 
-  const start = async () => {
-    await load(true);
-    setInterval(load, 10000);
-  };
-
-  const load = async (force?: boolean) => {
-    if (force || (await checkTradingTime())) {
-      const resp = await fetch("/indices");
-      indices = await resp.json();
+  const subscribe = async (init?: boolean) => {
+    let resp: Response;
+    try {
+      if (init || (await checkTradingTime())) resp = await fetch("/indices");
+      else resp = new Response(null, { status: 400 });
+    } catch (e) {
+      console.error(e);
+      resp = new Response(null, { status: 500 });
     }
+    if (resp.ok) {
+      indices = await resp.json();
+      await new Promise((sleep) => setTimeout(sleep, 10000));
+    } else if (resp.status == 400)
+      await new Promise((sleep) => setTimeout(sleep, 1000));
+    else await new Promise((sleep) => setTimeout(sleep, 30000));
+    await subscribe();
   };
 
   onMount(async () => {
-    await start();
+    await subscribe(true);
   });
 </script>
 
