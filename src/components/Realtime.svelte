@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { addColor, color, post } from "../misc";
+  import { onMount } from "svelte";
+  import { addColor, checkTradingTime, color, post } from "../misc";
   import { mystocks } from "../stock.svelte";
 
-  let {
-    stock = $bindable(),
-  }: {
-    stock: Stock;
-  } = $props();
+  const controller = new AbortController();
 
   let width = $derived(
-    !stock.sell5.length && !stock.buy5.length ? "480px" : "360px",
+    !mystocks.current.stock.sell5.length && !mystocks.current.stock.buy5.length
+      ? "480px"
+      : "360px",
   );
 
   const star = async () => {
@@ -20,13 +19,53 @@
   };
 
   const open = () => {
-    if (stock.index == "SSE")
-      window.open(`https://quote.eastmoney.com/sh${stock.code}.html`);
-    else if (stock.index == "SZSE")
-      window.open(`https://quote.eastmoney.com/sz${stock.code}.html`);
-    else if (stock.index == "BSE")
-      window.open(`https://quote.eastmoney.com/bj/${stock.code}.html`);
+    if (mystocks.current.stock.index == "SSE")
+      window.open(
+        `https://quote.eastmoney.com/sh${mystocks.current.stock.code}.html`,
+      );
+    else if (mystocks.current.stock.index == "SZSE")
+      window.open(
+        `https://quote.eastmoney.com/sz${mystocks.current.stock.code}.html`,
+      );
+    else if (mystocks.current.stock.index == "BSE")
+      window.open(
+        `https://quote.eastmoney.com/bj/${mystocks.current.stock.code}.html`,
+      );
   };
+
+  const subscribe = async (init?: boolean) => {
+    if (controller.signal.aborted) return;
+    let resp: Response;
+    try {
+      if (init || (await checkTradingTime()))
+        post("/realtime", {
+          index: mystocks.current.stock.index,
+          code: mystocks.current.stock.code,
+        });
+      else resp = new Response(null, { status: 400 });
+    } catch (e) {
+      console.error(e);
+      resp = new Response(null, { status: 500 });
+    }
+    if (resp.ok) {
+      const res = await resp.json();
+      if (res.name) {
+        mystocks.current.stock = res;
+        //update = json.update;
+        //if (update && !force) updateChart();
+        document.title = `${res.name} ${res.now} ${res.percent}`;
+      }
+      await new Promise((sleep) => setTimeout(sleep, 10000));
+    } else if (resp.status == 400)
+      await new Promise((sleep) => setTimeout(sleep, 1000));
+    else await new Promise((sleep) => setTimeout(sleep, 30000));
+    await subscribe();
+  };
+
+  onMount(() => {
+    subscribe(true);
+    return () => controller.abort();
+  });
 </script>
 
 <div>
@@ -40,59 +79,77 @@
     >
       {mystocks.current.stared ? "star" : "star_border"}
     </i>
-    <span>{stock.name}</span>(<span>{stock.code}</span>)
+    <span>{mystocks.current.stock.name}({mystocks.current.stock.code})</span>
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <i class="material-icons open" onclick={open}>open_in_new</i>
     &nbsp;&nbsp;&nbsp;
-    <span style={addColor(stock, "now")}>{stock.now}</span>
+    <span style={addColor(mystocks.current.stock, "now")}>
+      {mystocks.current.stock.now}
+    </span>
     &nbsp;&nbsp;&nbsp;
-    <span style={addColor(stock, "percent")}>{stock.percent}</span>
+    <span style={addColor(mystocks.current.stock, "percent")}>
+      {mystocks.current.stock.percent}
+    </span>
   </div>
   <div style="min-height: 52px">
     <table style="float: left; table-layout: fixed; width: {width}">
       <tbody>
         <tr>
-          <td>昨收: <span>{stock.last}</span></td>
+          <td>昨收: <span>{mystocks.current.stock.last}</span></td>
           <td>
             涨跌:
-            <span style={addColor(stock, "change")}>{stock.change}</span>
+            <span style={addColor(mystocks.current.stock, "change")}>
+              {mystocks.current.stock.change}
+            </span>
           </td>
           <td>
             涨幅:
-            <span style={addColor(stock, "percent")}>{stock.percent}</span>
+            <span style={addColor(mystocks.current.stock, "percent")}>
+              {mystocks.current.stock.percent}
+            </span>
           </td>
         </tr>
         <tr>
           <td>
             最高:
-            <span style={addColor(stock, "high")}>{stock.high}</span>
+            <span style={addColor(mystocks.current.stock, "high")}>
+              {mystocks.current.stock.high}
+            </span>
           </td>
           <td>
             最低:
-            <span style={addColor(stock, "low")}>{stock.low}</span>
+            <span style={addColor(mystocks.current.stock, "low")}>
+              {mystocks.current.stock.low}
+            </span>
           </td>
           <td>
             开盘:
-            <span style={addColor(stock, "open")}>{stock.open}</span>
+            <span style={addColor(mystocks.current.stock, "open")}>
+              {mystocks.current.stock.open}
+            </span>
           </td>
         </tr>
       </tbody>
     </table>
-    {#if stock.sell5.length || stock.buy5.length}
+    {#if mystocks.current.stock.sell5.length || mystocks.current.stock.buy5.length}
       <table>
         <tbody>
           <tr>
             <td>
               <span style="display: inline-flex">
                 卖盘:&nbsp;
-                {#each stock.sell5 as sell, index (index)}
+                {#each mystocks.current.stock.sell5 as sell, index (index)}
                   <div class="sellbuy">
-                    <span style={color(stock.last, sell.Price)}>
+                    <span
+                      style={color(mystocks.current.stock.last, sell.Price)}
+                    >
                       {sell.Price}
                     </span>
                     -
-                    <span style={color(stock.last, sell.Price)}>
+                    <span
+                      style={color(mystocks.current.stock.last, sell.Price)}
+                    >
                       {sell.Volume}
                     </span>
                   </div>
@@ -104,13 +161,13 @@
             <td>
               <span style="display: inline-flex">
                 买盘:&nbsp;
-                {#each stock.buy5 as buy, index (index)}
+                {#each mystocks.current.stock.buy5 as buy, index (index)}
                   <div class="sellbuy">
-                    <span style={color(stock.last, buy.Price)}>
+                    <span style={color(mystocks.current.stock.last, buy.Price)}>
                       {buy.Price}
                     </span>
                     -
-                    <span style={color(stock.last, buy.Price)}>
+                    <span style={color(mystocks.current.stock.last, buy.Price)}>
                       {buy.Volume}
                     </span>
                   </div>
@@ -122,7 +179,9 @@
       </table>
     {/if}
   </div>
-  <small>更新时间: <span class="update">{stock.update}</span></small>
+  <small>
+    更新时间: <span class="update">{mystocks.current.stock.update}</span>
+  </small>
 </div>
 
 <style>

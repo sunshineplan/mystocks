@@ -70,15 +70,13 @@
 
   const start = () => {
     chart = new Chart(canvas, intraday);
-    if (mystocks.current.code) {
-      autoUpdate.push(setInterval(loadRealtime, mystocks.refresh * 1000));
+    if (mystocks.current.stock.code) {
       autoUpdate.push(setInterval(loadChart, 60000));
     }
   };
 
   const load = async (stock: any) => {
     update = "";
-    await loadRealtime(true);
     await loadChart(true);
     const yAxes = chart.options?.scales?.y;
     yAxes.suggestedMin = stock.last / 1.01;
@@ -89,27 +87,11 @@
     updateChart(true);
   };
 
-  const loadRealtime = async (force?: boolean) => {
-    if ((force && mystocks.current.code) || (await checkTradingTime())) {
-      const resp = await post("/realtime", {
-        index: mystocks.current.index,
-        code: mystocks.current.code,
-      });
-      const json = await resp.json();
-      if (json.name) {
-        stock = json;
-        update = json.update;
-        if (update && !force) updateChart();
-        document.title = `${json.name} ${json.now} ${json.percent}`;
-      }
-    }
-  };
-
   const loadChart = async (force?: boolean) => {
-    if ((force && mystocks.current.code) || (await checkTradingTime())) {
+    if ((force && mystocks.current.stock.code) || (await checkTradingTime())) {
       const resp = await post("/chart", {
-        index: mystocks.current.index,
-        code: mystocks.current.code,
+        index: mystocks.current.stock.index,
+        code: mystocks.current.stock.code,
       });
       const json = await resp.json();
       if (json.chart) data = json.chart;
@@ -154,7 +136,7 @@
     <div class="icon"><i class="material-icons">home</i></div>
     <span>Home</span>
   </div>
-  <Realtime bind:stock />
+  <Realtime />
 </header>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
