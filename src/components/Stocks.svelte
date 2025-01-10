@@ -37,21 +37,17 @@
     let timeout = 30000;
     if (resp.ok) {
       stocks = await resp.json();
-      controller.abort();
       timeout = mystocks.refresh * 1000;
     } else if (resp.status == 400) timeout = mystocks.refresh * 1000;
-    controller.abort();
+    controller.abort("sleep");
     await new Promise((sleep) => setTimeout(sleep, timeout));
-    if (controller.signal.aborted) await subscribe();
+    if (controller.signal.aborted && controller.signal.reason == "sleep")
+      await subscribe();
   };
 
-  const onUpdate = async (evt: Sortable.SortableEvent) => {
+  const abort = () => {
+    if (controller.signal.aborted) controller = new AbortController();
     controller.abort();
-    await post("/reorder", {
-      old: `${stocks[evt.oldIndex].index} ${stocks[evt.oldIndex].code}`,
-      new: `${stocks[evt.newIndex].index} ${stocks[evt.newIndex].code}`,
-    });
-    subscribe(true);
   };
 
   onMount(() => {
@@ -60,12 +56,17 @@
       animation: 150,
       delay: 400,
       swapThreshold: 0.5,
-      onStart: controller.abort,
+      onStart: abort,
       onEnd: () => subscribe(true),
-      onUpdate,
+      onUpdate: async (evt: Sortable.SortableEvent) => {
+        await post("/reorder", {
+          old: `${stocks[evt.oldIndex].index} ${stocks[evt.oldIndex].code}`,
+          new: `${stocks[evt.newIndex].index} ${stocks[evt.newIndex].code}`,
+        });
+      },
     });
     return () => {
-      controller.abort();
+      abort();
       sortable.destroy();
     };
   });
