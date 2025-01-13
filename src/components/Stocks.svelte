@@ -19,52 +19,53 @@
   };
 
   let stocks: Stock[] = $state([]);
-  let controller: AbortController;
   let table: HTMLElement;
+  let timer: number;
+  let controller: AbortController;
 
-  const subscribe = async (force?: boolean) => {
+  const subscribe = () => {
     controller = new AbortController();
-    let resp: Response;
-    try {
-      if (force || (await checkTradingTime()))
-        resp = await fetch("/mystocks", { signal: controller.signal });
-      else resp = new Response(null, { status: 400 });
-    } catch (e) {
-      if (e instanceof DOMException && e.name === "AbortError") return;
-      console.error(e);
-      resp = new Response(null, { status: 500 });
-    }
-    let timeout = 30000;
-    if (resp.ok) {
-      stocks = await resp.json();
-      timeout = mystocks.refresh * 1000;
-    } else if (resp.status == 400) timeout = mystocks.refresh * 1000;
-    controller.abort("sleep");
-    await new Promise((sleep) => setTimeout(sleep, timeout));
-    if (controller.signal.aborted && controller.signal.reason == "sleep")
-      await subscribe();
+    const fetchDate = async (force?: boolean) => {
+      let resp: Response;
+      try {
+        if (force || (await checkTradingTime()))
+          resp = await fetch("/mystocks", { signal: controller.signal });
+        else resp = new Response(null, { status: 400 });
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        console.error(e);
+        resp = new Response(null, { status: 500 });
+      }
+      let timeout = 30000;
+      if (resp.ok) {
+        stocks = await resp.json();
+        timeout = mystocks.refresh * 1000;
+      } else if (resp.status == 400) timeout = mystocks.refresh * 1000;
+      timer = setTimeout(fetchDate, timeout);
+    };
+    fetchDate(true);
   };
 
   const abort = () => {
-    if (controller.signal.aborted) controller = new AbortController();
-    controller.abort();
+    if (timer) clearTimeout(timer);
+    if (controller) controller.abort();
   };
 
   onMount(() => {
-    subscribe(true);
     const sortable = new Sortable(table, {
       animation: 150,
       delay: 400,
       swapThreshold: 0.5,
       onStart: abort,
-      onEnd: () => subscribe(true),
       onUpdate: async (evt: Sortable.SortableEvent) => {
         await post("/reorder", {
           old: `${stocks[evt.oldIndex].index} ${stocks[evt.oldIndex].code}`,
           new: `${stocks[evt.newIndex].index} ${stocks[evt.newIndex].code}`,
         });
+        subscribe();
       },
     });
+    subscribe();
     return () => {
       abort();
       sortable.destroy();

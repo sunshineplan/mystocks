@@ -48,6 +48,17 @@ type info struct {
 	ip       string
 }
 
+func auth(id info, got, want string) (message string, err error) {
+	if err = password.CompareHashAndPassword(id, got, want); err != nil {
+		if errors.Is(err, password.ErrIncorrectPassword) {
+			message = err.Error()
+		} else if e := password.Compare(id, got, want); e == nil {
+			return "", nil
+		}
+	}
+	return
+}
+
 func login(c *gin.Context) {
 	var login struct {
 		Username, Password string
@@ -75,14 +86,11 @@ func login(c *gin.Context) {
 			return
 		}
 	} else {
-		if err = password.CompareHashAndPassword(info{login.Username, c.ClientIP()}, user.Password, login.Password); err != nil {
-			if errors.Is(err, password.ErrIncorrectPassword) {
-				message = err.Error()
-			} else {
-				svc.Print(err)
-				c.String(500, "Internal Server Error")
-				return
-			}
+		message, err = auth(info{login.Username, c.ClientIP()}, user.Password, login.Password)
+		if err != nil {
+			svc.Print(err)
+			c.String(500, "Internal Server Error")
+			return
 		}
 
 		if message == "" {
@@ -153,15 +161,10 @@ func chgpwd(c *gin.Context) {
 
 	var message string
 	var errorCode int
-	if err = password.CompareHashAndPassword(info{username.(string), c.ClientIP()}, user.Password, data.Password); err != nil {
-		if errors.Is(err, password.ErrIncorrectPassword) {
-			message = err.Error()
-			errorCode = 1
-		} else {
-			svc.Print(err)
-			c.String(500, "Internal Server Error")
-			return
-		}
+	if message, err = auth(info{username.(string), c.ClientIP()}, user.Password, data.Password); err != nil {
+		svc.Print(err)
+		c.String(500, "Internal Server Error")
+		return
 	} else {
 		if priv != nil {
 			data.Password, _ = password.DecryptPKCS1v15(priv, data.Password)
@@ -205,6 +208,8 @@ func chgpwd(c *gin.Context) {
 
 		c.JSON(200, gin.H{"status": 1})
 		return
+	} else {
+		errorCode = 1
 	}
 
 	c.JSON(200, gin.H{"status": 0, "message": message, "error": errorCode})

@@ -1,12 +1,20 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { addColor, checkTradingTime, color, post } from "../misc";
   import { mystocks } from "../stock.svelte";
 
-  const controller = new AbortController();
+  let timer: number;
+  let controller: AbortController;
+
+  $effect(() => {
+    mystocks.current.index;
+    mystocks.current.code;
+    subscribe();
+    return abort;
+  });
 
   let width = $derived(
-    !mystocks.current.stock.sell5.length && !mystocks.current.stock.buy5.length
+    !mystocks.current.stock.sell5?.length &&
+      !mystocks.current.stock.buy5?.length
       ? "480px"
       : "360px",
   );
@@ -33,39 +41,41 @@
       );
   };
 
-  const subscribe = async (init?: boolean) => {
-    if (controller.signal.aborted) return;
-    let resp: Response;
-    try {
-      if (init || (await checkTradingTime()))
-        post("/realtime", {
-          index: mystocks.current.stock.index,
-          code: mystocks.current.stock.code,
-        });
-      else resp = new Response(null, { status: 400 });
-    } catch (e) {
-      console.error(e);
-      resp = new Response(null, { status: 500 });
-    }
-    if (resp.ok) {
-      const res = await resp.json();
-      if (res.name) {
-        mystocks.current.stock = res;
-        //update = json.update;
-        //if (update && !force) updateChart();
-        document.title = `${res.name} ${res.now} ${res.percent}`;
+  const subscribe = () => {
+    controller = new AbortController();
+    const fetchDate = async (force?: boolean) => {
+      let resp: Response;
+      try {
+        if (force || (await checkTradingTime()))
+          resp = await post("/realtime", {
+            index: mystocks.current.index,
+            code: mystocks.current.code,
+          });
+        else resp = new Response(null, { status: 400 });
+      } catch (e) {
+        console.error(e);
+        resp = new Response(null, { status: 500 });
       }
-      await new Promise((sleep) => setTimeout(sleep, 10000));
-    } else if (resp.status == 400)
-      await new Promise((sleep) => setTimeout(sleep, 1000));
-    else await new Promise((sleep) => setTimeout(sleep, 30000));
-    await subscribe();
+      let timeout = 30000;
+      if (resp.ok) {
+        const res = await resp.json();
+        if (res.name) {
+          mystocks.current.update = res.update;
+          delete res.update;
+          mystocks.current.stock = res;
+          document.title = `${res.name} ${res.now} ${res.percent}`;
+        }
+        timeout = 10000;
+      } else if (resp.status == 400) timeout = 1000;
+      timer = setTimeout(fetchDate, timeout);
+    };
+    fetchDate(true);
   };
 
-  onMount(() => {
-    subscribe(true);
-    return () => controller.abort();
-  });
+  const abort = () => {
+    if (timer) clearTimeout(timer);
+    if (controller) controller.abort();
+  };
 </script>
 
 <div>
@@ -132,7 +142,7 @@
         </tr>
       </tbody>
     </table>
-    {#if mystocks.current.stock.sell5.length || mystocks.current.stock.buy5.length}
+    {#if mystocks.current.stock.sell5?.length || mystocks.current.stock.buy5?.length}
       <table>
         <tbody>
           <tr>
@@ -180,7 +190,7 @@
     {/if}
   </div>
   <small>
-    更新时间: <span class="update">{mystocks.current.stock.update}</span>
+    更新时间: <span class="update">{mystocks.current.update}</span>
   </small>
 </div>
 

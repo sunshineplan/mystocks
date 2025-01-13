@@ -4,14 +4,17 @@ class Toggler {
 }
 
 class stock {
-  stock = $state<Stock>({} as Stock)
+  index = $state('')
+  code = $state('')
+  stock = $state<Stock>({})
   stared = $state(false)
+  update = $state('')
   constructor(index?: string, code?: string) {
-    if (index) this.stock.index = index
-    if (code) this.stock.code = code
+    if (index) this.index = index
+    if (code) this.code = code
   }
   async goto() {
-    window.history.pushState({}, '', `/stock/${this.stock.index}/${this.stock.code}`)
+    window.history.pushState({}, '', `/stock/${this.index}/${this.code}`)
     const resp = await fetch('/star')
     if ((await resp.text()) == '1') this.stared = true
     else this.stared = false
