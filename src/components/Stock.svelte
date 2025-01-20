@@ -122,7 +122,7 @@
 
   onMount(() => {
     chart = new Chart(canvas, intraday);
-    return chart.destroy;
+    return () => chart.destroy();
   });
 </script>
 

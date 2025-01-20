@@ -65,7 +65,7 @@
           mystocks.current.stock = res;
           document.title = `${res.name} ${res.now} ${res.percent}`;
         }
-        timeout = 10000;
+        timeout = mystocks.refresh * 1000;
       } else if (resp.status == 400) timeout = 1000;
       timer = setTimeout(fetchDate, timeout);
     };
