@@ -55,21 +55,21 @@ func indices(c *gin.Context) {
 }
 
 func getRealtime(c *gin.Context) {
-	var r struct{ Index, Code string }
-	if err := c.BindJSON(&r); err != nil {
+	index, code := c.Query("index"), c.Query("code")
+	if index == "" || code == "" {
 		c.String(400, "")
 		return
 	}
-	c.JSON(200, stock.Init(r.Index, r.Code).GetRealtime())
+	c.JSON(200, stock.Init(index, code).GetRealtime())
 }
 
 func getChart(c *gin.Context) {
-	var r struct{ Index, Code string }
-	if err := c.BindJSON(&r); err != nil {
+	index, code := c.Query("index"), c.Query("code")
+	if index == "" || code == "" {
 		c.String(400, "")
 		return
 	}
-	c.JSON(200, stock.Init(r.Index, r.Code).GetChart())
+	c.JSON(200, stock.Init(index, code).GetChart())
 }
 
 func getSuggest(c *gin.Context) {

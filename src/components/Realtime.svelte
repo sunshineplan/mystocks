@@ -47,12 +47,13 @@
       let resp: Response;
       try {
         if (force || (await checkTradingTime()))
-          resp = await post("/realtime", {
-            index: mystocks.current.index,
-            code: mystocks.current.code,
-          });
+          resp = await fetch(
+            `/realtime?index=${mystocks.current.index}&code=${mystocks.current.code}`,
+            { signal: controller.signal },
+          );
         else resp = new Response(null, { status: 400 });
       } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
         console.error(e);
         resp = new Response(null, { status: 500 });
       }

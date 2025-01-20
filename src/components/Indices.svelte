@@ -31,8 +31,8 @@
     await subscribe();
   };
 
-  onMount(async () => {
-    await subscribe(true);
+  onMount(() => {
+    subscribe(true);
   });
 </script>
 

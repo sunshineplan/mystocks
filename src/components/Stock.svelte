@@ -92,12 +92,13 @@
       let resp: Response;
       try {
         if (mystocks.current.code && (force || (await checkTradingTime())))
-          resp = await post("/chart", {
-            index: mystocks.current.index,
-            code: mystocks.current.code,
-          });
+          resp = await fetch(
+            `/chart?index=${mystocks.current.index}&code=${mystocks.current.code}`,
+            { signal: controller.signal },
+          );
         else resp = new Response(null, { status: 400 });
       } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
         console.error(e);
         resp = new Response(null, { status: 500 });
       }
