@@ -8,30 +8,23 @@
   import AutoComplete from "./AutoComplete.svelte";
   import Realtime from "./Realtime.svelte";
 
-  let autoUpdate: number[] = [];
-  let stock: Stock = $state({
-    index: "n/a",
-    code: "n/a",
-    name: "n/a",
-    now: 0,
-    change: 0,
-    percent: "-",
-    high: 0,
-    low: 0,
-    open: 0,
-    last: 0,
-    sell5: [],
-    buy5: [],
-    update: "",
-  });
   let data: ScatterDataPoint[] = [];
   let chart: Chart<"line">;
-  let update = "";
   let hover = $state(false);
   let canvas: HTMLCanvasElement;
+  let timer: number;
+  let controller: AbortController;
 
   $effect(() => {
-    load(mystocks.current);
+    mystocks.current.index;
+    mystocks.current.code;
+    subscribe();
+    return abort;
+  });
+
+  $effect(() => {
+    mystocks.current.update;
+    updateChart();
   });
 
   const y2 = intraday.options?.scales?.y2;
@@ -48,9 +41,13 @@
   };
 
   y2.ticks.callback = (value) => {
-    if (stock.last)
+    if (mystocks.current.stock.last)
       return `${
-        Math.round(((Number(value) - stock.last) / stock.last) * 10000) / 100
+        Math.round(
+          ((Number(value) - mystocks.current.stock.last) /
+            mystocks.current.stock.last) *
+            10000,
+        ) / 100
       }%`;
     return null;
   };
@@ -58,67 +55,29 @@
   callbacks.label = (tooltipItem) => {
     const value = tooltipItem.parsed.y;
     const percent =
-      Math.round(((value - stock.last) / stock.last) * 10000) / 100;
+      Math.round(
+        ((value - mystocks.current.stock.last) / mystocks.current.stock.last) *
+          10000,
+      ) / 100;
     return `${value}   ${percent}%`;
   };
   callbacks.labelTextColor = (tooltipItem) => {
-    const change = tooltipItem.parsed.y - stock.last;
+    const change = tooltipItem.parsed.y - mystocks.current.stock.last;
     if (change > 0) return "red";
     else if (change < 0) return "green";
     return "black";
   };
 
-  const start = () => {
-    chart = new Chart(canvas, intraday);
-    if (mystocks.current.code) {
-      autoUpdate.push(setInterval(loadRealtime, mystocks.refresh * 1000));
-      autoUpdate.push(setInterval(loadChart, 60000));
-    }
-  };
-
-  const load = async (stock: any) => {
-    update = "";
-    await loadRealtime(true);
-    await loadChart(true);
+  const updateChart = (force?: boolean) => {
+    if (!chart) return;
     const yAxes = chart.options?.scales?.y;
-    yAxes.suggestedMin = stock.last / 1.01;
-    yAxes.suggestedMax = stock.last * 1.01;
+    yAxes.suggestedMin = mystocks.current.stock.last / 1.01;
+    yAxes.suggestedMax = mystocks.current.stock.last * 1.01;
     const annotations = chart.options.plugins?.annotation
       ?.annotations as Record<string, LineAnnotationOptions>;
-    annotations.last.value = stock.last;
-    updateChart(true);
-  };
-
-  const loadRealtime = async (force?: boolean) => {
-    if ((force && mystocks.current.code) || (await checkTradingTime())) {
-      const resp = await post("/realtime", {
-        index: mystocks.current.index,
-        code: mystocks.current.code,
-      });
-      const json = await resp.json();
-      if (json.name) {
-        stock = json;
-        update = json.update;
-        if (update && !force) updateChart();
-        document.title = `${json.name} ${json.now} ${json.percent}`;
-      }
-    }
-  };
-
-  const loadChart = async (force?: boolean) => {
-    if ((force && mystocks.current.code) || (await checkTradingTime())) {
-      const resp = await post("/chart", {
-        index: mystocks.current.index,
-        code: mystocks.current.code,
-      });
-      const json = await resp.json();
-      if (json.chart) data = json.chart;
-    }
-  };
-
-  const updateChart = (force?: boolean) => {
-    if (data.length && stock.now && (force || !hover)) {
-      data[data.length - 1].y = stock.now;
+    annotations.last.value = mystocks.current.stock.last;
+    if (data.length && mystocks.current.stock.now && (force || !hover)) {
+      data[data.length - 1].y = mystocks.current.stock.now;
       chart.data.datasets[0].data = data;
       chart.update();
     } else if (!data.length) {
@@ -127,12 +86,43 @@
     }
   };
 
-  onMount(() => {
-    start();
-    return () => {
-      for (; autoUpdate.length > 0; ) clearInterval(autoUpdate.pop());
-      chart.destroy();
+  const subscribe = () => {
+    controller = new AbortController();
+    const fetchDate = async (force?: boolean) => {
+      let resp: Response;
+      try {
+        if (mystocks.current.code && (force || (await checkTradingTime())))
+          resp = await post("/chart", {
+            index: mystocks.current.index,
+            code: mystocks.current.code,
+          });
+        else resp = new Response(null, { status: 400 });
+      } catch (e) {
+        console.error(e);
+        resp = new Response(null, { status: 500 });
+      }
+      let timeout = 30000;
+      if (resp.ok) {
+        const res = await resp.json();
+        if (res.chart) {
+          data = res.chart;
+          updateChart(true);
+        }
+        timeout = 60000;
+      } else if (resp.status == 400) timeout = 1000;
+      timer = setTimeout(fetchDate, timeout);
     };
+    fetchDate(true);
+  };
+
+  const abort = () => {
+    if (timer) clearTimeout(timer);
+    if (controller) controller.abort();
+  };
+
+  onMount(() => {
+    chart = new Chart(canvas, intraday);
+    return () => chart.destroy();
   });
 </script>
 
@@ -154,7 +144,7 @@
     <div class="icon"><i class="material-icons">home</i></div>
     <span>Home</span>
   </div>
-  <Realtime bind:stock />
+  <Realtime />
 </header>
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div

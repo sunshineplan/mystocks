@@ -6,16 +6,18 @@ class Toggler {
 class stock {
   index = $state('')
   code = $state('')
+  stock = $state<Stock>({})
   stared = $state(false)
+  update = $state('')
   constructor(index?: string, code?: string) {
     if (index) this.index = index
     if (code) this.code = code
   }
   async goto() {
-    window.history.pushState({}, '', `/stock/${this.index}/${this.code}`);
-    const resp = await fetch('/star');
-    if ((await resp.text()) == '1') this.stared = true;
-    else this.stared = false;
+    window.history.pushState({}, '', `/stock/${this.index}/${this.code}`)
+    const resp = await fetch('/star')
+    if ((await resp.text()) == '1') this.stared = true
+    else this.stared = false
   }
 }
 
@@ -48,12 +50,10 @@ class MyStocks {
   goto(index: string, code: string): void
   goto(stock: Stock): void
   goto(a: string | Stock, b?: string) {
-    if (typeof a === 'string') {
-      this.current.index = a
-      this.current.code = b
-    } else this.current = new stock(a.index, a.code)
-    this.component = 'stock';
+    if (typeof a === 'string') this.current = new stock(a, b)
+    else this.current = new stock(a.index, a.code)
+    this.component = 'stock'
     this.current.goto()
-  };
+  }
 }
 export const mystocks = new MyStocks
