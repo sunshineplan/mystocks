@@ -88,7 +88,7 @@
 
   const subscribe = () => {
     controller = new AbortController();
-    const fetchDate = async (force?: boolean) => {
+    const fetchData = async (force?: boolean) => {
       let resp: Response;
       try {
         if (mystocks.current.code && (force || (await checkTradingTime())))
@@ -111,9 +111,9 @@
         }
         timeout = 60000;
       } else if (resp.status == 400) timeout = 1000;
-      timer = setTimeout(fetchDate, timeout);
+      timer = setTimeout(fetchData, timeout);
     };
-    fetchDate(true);
+    fetchData(true);
   };
 
   const abort = () => {

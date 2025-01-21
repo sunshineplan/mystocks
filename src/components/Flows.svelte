@@ -9,42 +9,38 @@
     chart: ScatterDataPoint[];
   }
 
-  let autoUpdate: number;
   let chart: Chart<"line">;
   let datasets: ChartDataset<"line">[] = [];
   let show = $state<number[]>([]);
-  let date = $state(getDate(0));
-  let today = $state(getDate(0));
+  let current = $state(dateStr(new Date()));
+  let today = $state(dateStr(new Date()));
   let last = $state("");
   let loading = $state(0);
   let status = $state(0);
-  let controller: AbortController;
   let hover = $state(false);
-  let dayChange = false;
   let canvas: HTMLCanvasElement;
+  let timer: number;
+  let controller: AbortController;
 
-  function getDate(n: -1 | 0 | 1, setDate?: boolean) {
-    let day: Date;
-    if (n == 0) day = new Date();
+  const gotoDate = (n: -1 | 0 | 1) => {
+    let date: Date;
+    if (!n) date = new Date();
     else {
-      day = new Date(date);
-      day.setDate(day.getDate() + n);
+      date = new Date(current);
+      date.setDate(date.getDate() + n);
     }
-    const ymd = dateStr(day);
-    if (setDate) {
-      date = ymd;
-      goto(date);
-    }
-    return ymd;
-  }
+    const newDate = dateStr(date);
+    if (current == newDate) return;
+    current = newDate;
+    reset();
+  };
 
-  const updateDate = () => {
-    if (date == today && date != getDate(0)) {
-      dayChange = true;
-      today = getDate(0, true);
-    } else {
-      today = getDate(0);
-    }
+  const reset = () => {
+    show.length = 0;
+    updateChart(true);
+    if (current != today) last = "";
+    abort();
+    subscribe();
   };
 
   const legend = capitalflows.options?.plugins?.legend;
@@ -83,106 +79,91 @@
     }
   };
 
-  const load = async (force?: boolean, date?: string) => {
-    let url = "/flows";
-    if (date && date != today) {
-      if (new Date(date) > new Date()) {
-        status = -1;
-        return;
-      }
-      url = url + `?date=${date}`;
-    }
-    if (force) updateChart(true);
-    if (force || (await checkTradingTime())) {
-      updateDate();
-      loading++;
-      let array: Flows[];
-      try {
-        controller = new AbortController();
-        setTimeout(() => controller.abort("fetch flows timeout"), 50000);
-        const resp = await fetch(url, { signal: controller.signal });
-        if (!resp.ok) {
-          status = 0;
-          datasets.length = 0;
-          chart.data.datasets.length = 0;
-          loading--;
-          return;
-        }
-        array = await resp.json();
-      } catch (e) {
-        console.log(e);
-        status = 0;
-        datasets.length = 0;
-        chart.data.datasets.length = 0;
-        loading--;
-        return;
-      }
-      if (array && array.length) {
-        status = 1;
-        datasets.length = 0;
-        array.forEach((e: Flows, i: number) => {
-          datasets.push({
-            label: e.sector,
-            fill: false,
-            tension: 0,
-            borderWidth: 1.5,
-            borderColor: getColor(i),
-            backgroundColor: getColor(i),
-            pointRadius: 0,
-            pointHoverRadius: 3,
-            data: e.chart.map((i) => i.y / 100000000),
-          });
-        });
-        if (force || !hover) {
-          chart.data.datasets = [...datasets];
-          updateChart();
-        }
-      } else status = -1;
-      loading--;
-    }
-  };
-
-  const goto = (date: string) => {
-    if (dayChange) {
-      dayChange = false;
-      return;
-    }
-    if (!chart) return;
-    if (controller) controller.abort();
-    show.length = 0;
-    updateChart(true);
-    if (date != today) {
-      if (autoUpdate) clearInterval(autoUpdate);
-      load(true, date);
-    } else {
-      last = "";
-      load(true);
-      autoUpdate = setInterval(load, 60000);
-    }
-  };
-
   const updateChart = (empty?: boolean) => {
-    const datasets = chart.data.datasets;
-    if (empty) {
-      datasets.length = 0;
-      chart.update();
-      return;
-    }
+    if (!chart) return;
+    if (empty) datasets.length = 0;
+    chart.data.datasets = [...datasets];
     if (show.length)
-      datasets.forEach((_, i) => {
+      chart.data.datasets.forEach((_, i) => {
         const meta = chart.getDatasetMeta(i);
         if (show.includes(i)) meta.hidden = false;
         else meta.hidden = true;
       });
-    chart.update();
-    if (!date || (date && date == today)) last = new Date().toLocaleString();
+    if (!hover) chart.update();
+    if (empty) return;
+    if (current == today) last = new Date().toLocaleString();
+  };
+
+  const subscribe = () => {
+    controller = new AbortController();
+    const fetchData = async (force?: boolean) => {
+      const now = dateStr(new Date());
+      if (today != now) today = now;
+      let url = "/flows";
+      if (current != today) {
+        if (!force) {
+          timer = setTimeout(fetchData, 1000);
+          return;
+        } else if (new Date(current) > new Date()) {
+          status = -1;
+          return;
+        }
+        url += `?date=${current}`;
+      }
+      if (force) updateChart(true);
+      let resp: Response;
+      let array: Flows[];
+      loading++;
+      try {
+        if (force || (await checkTradingTime()))
+          resp = await fetch(url, { signal: controller.signal });
+        else resp = new Response(null, { status: 400 });
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        console.error(e);
+        resp = new Response(null, { status: 500 });
+        status = 0;
+        datasets.length = 0;
+      }
+      let timeout = 30000;
+      if (resp.ok) {
+        array = await resp.json();
+        if (array && array.length) {
+          status = 1;
+          datasets.length = 0;
+          array.forEach((e: Flows, i: number) => {
+            datasets.push({
+              label: e.sector,
+              fill: false,
+              tension: 0,
+              borderWidth: 1.5,
+              borderColor: getColor(i),
+              backgroundColor: getColor(i),
+              pointRadius: 0,
+              pointHoverRadius: 3,
+              data: e.chart.map((i) => i.y / 100000000),
+            });
+          });
+        } else status = -1;
+        timeout = 60000;
+      } else if (resp.status == 400) timeout = 1000;
+      loading--;
+      updateChart();
+      timer = setTimeout(fetchData, timeout);
+    };
+    fetchData(true);
+  };
+
+  const abort = () => {
+    if (timer) clearTimeout(timer);
+    if (controller) controller.abort();
   };
 
   onMount(() => {
     chart = new Chart(canvas, capitalflows);
-    goto(date);
+    subscribe();
     return () => {
-      if (autoUpdate) clearInterval(autoUpdate);
+      abort();
       chart.destroy();
     };
   });
@@ -199,7 +180,7 @@
       <button
         class="input-group-text"
         disabled={loading ? true : false}
-        onclick={() => getDate(-1, true)}
+        onclick={() => gotoDate(-1)}
       >
         -
       </button>
@@ -207,13 +188,13 @@
         class="form-control"
         type="date"
         disabled={loading ? true : false}
-        bind:value={date}
-        onchange={() => goto(date)}
+        bind:value={current}
+        onchange={reset}
       />
       <button
         class="input-group-text"
         disabled={loading ? true : false}
-        onclick={() => getDate(1, true)}
+        onclick={() => gotoDate(1)}
       >
         +
       </button>
@@ -221,7 +202,7 @@
     <button
       class="btn btn-danger"
       onclick={() => {
-        if (chart.data.datasets && date == today)
+        if (chart.data.datasets && current == today)
           chart.data.datasets.forEach((_, i) => {
             const meta = chart.getDatasetMeta(i);
             meta.hidden = false;
@@ -229,7 +210,7 @@
         else chart.data.datasets = [];
         show.length = 0;
         chart.update();
-        getDate(0, true);
+        gotoDate(0);
       }}
     >
       Reset
@@ -249,12 +230,18 @@
     {:else}
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <i class="material-icons text-danger" onclick={() => load(true, date)}>
+      <i
+        class="material-icons text-danger"
+        onclick={() => {
+          abort();
+          subscribe();
+        }}
+      >
         close
       </i>
     {/if}
   </div>
-  {#if date == today && last}
+  {#if current == today && last}
     <small>Last update: {last}</small>
   {/if}
 </header>
@@ -264,7 +251,7 @@
   onmouseenter={() => (hover = true)}
   onmouseleave={() => {
     hover = false;
-    if (date == today) {
+    if (current == today) {
       chart.data.datasets = [...datasets];
       updateChart();
     }
