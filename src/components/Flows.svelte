@@ -102,6 +102,7 @@
       let url = "/flows";
       if (current != today) {
         if (!force) {
+          current = today;
           timer = setTimeout(fetchData, 1000);
           return;
         } else if (new Date(current) > new Date()) {
@@ -149,7 +150,7 @@
       } else if (resp.status == 400) timeout = 1000;
       loading--;
       updateChart();
-      timer = setTimeout(fetchData, timeout);
+      if (!force || current == today) timer = setTimeout(fetchData, timeout);
     };
     fetchData(true);
   };
