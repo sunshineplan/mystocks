@@ -3,7 +3,7 @@ module mystocks
 go 1.24
 
 require (
-	github.com/gin-contrib/sessions v1.0.3
+	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-gonic/gin v1.10.1
 	github.com/sunshineplan/database/mongodb v1.0.13
 	github.com/sunshineplan/gohttp v1.0.11
