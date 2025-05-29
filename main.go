@@ -15,7 +15,7 @@ import (
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/stock"
 	_ "github.com/sunshineplan/stock/eastmoney"
-	"github.com/sunshineplan/utils"
+	"github.com/sunshineplan/utils/confirm"
 	"github.com/sunshineplan/utils/flags"
 	"github.com/sunshineplan/utils/httpsvr"
 	"github.com/sunshineplan/utils/log"
@@ -53,7 +53,7 @@ func init() {
 		return addUser(arg[0])
 	}, 1, true)
 	svc.RegisterCommand("delete", "delete user", func(arg ...string) error {
-		if utils.Confirm("Do you want to delete this user?", 3) {
+		if confirm.Do("Do you want to delete this user?", 3) {
 			return deleteUser(arg[0])
 		}
 		return nil

@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	stockCache    = cache.New[string, []stock.Stock](false)
-	flowsCache    = cache.New[string, []sector.Chart](true)
+	stockCache    = cache.NewWithRenew[string, []stock.Stock](false)
+	flowsCache    = cache.NewWithRenew[string, []sector.Chart](true)
 	isTradingDate atomic.Value
 )
 
