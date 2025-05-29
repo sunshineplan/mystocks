@@ -107,8 +107,8 @@ github.com/sunshineplan/stock v1.0.14 h1:jVAgMwT4w6jNBfOTwU59X9wdB0jEPEeXfklRO2+
 github.com/sunshineplan/stock v1.0.14/go.mod h1:CxUmMF/ISGK4K4ZmHa5m9HpxOwXJzCuXXVLsTpEwNzg=
 github.com/sunshineplan/utils v0.1.74 h1:Zr5Si2lllOfDbxcSz4GpaSsF24CzlBFNrF/WGMc8lH8=
 github.com/sunshineplan/utils v0.1.74/go.mod h1:61jHA9jn2CVlZzt9LbPz+MpOEiR6Jy5SNHHEcc/KQNk=
-github.com/sunshineplan/workday v1.0.1 h1:gE2nddUn7FDJd23TjT0vw4hWkmlHcouTOZsTQMgwWYI=
-github.com/sunshineplan/workday v1.0.1/go.mod h1:ShoWQN23WGc4KSLbgbcTKcjjRjGP2lV3pKtsZMe4eEY=
+github.com/sunshineplan/workday v1.0.2 h1:8cs7qzfa9b8lQcQRy5maVTCQd3XvpZZi6NDAg3PsjOk=
+github.com/sunshineplan/workday v1.0.2/go.mod h1:CDh01oGZHxtGmKk71QsUv2jtIYeXW7xFuh8b6pWcXG8=
 github.com/sunshineplan/workers v1.0.4 h1:S44VfWA7WEIfqpe3fzTvw1ir1VJ6vAI7ZqxDHxFpREQ=
 github.com/sunshineplan/workers v1.0.4/go.mod h1:BOqgiv5aLr9gruFCQOJgyk/94LOWjbuFNI7L7Pvnr70=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
