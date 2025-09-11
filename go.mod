@@ -13,7 +13,7 @@ require (
 	github.com/sunshineplan/stock v1.0.15
 	github.com/sunshineplan/utils v0.1.79
 	github.com/sunshineplan/workday v1.0.2
-	github.com/sunshineplan/workers v1.0.5
+	github.com/sunshineplan/workers v1.0.6
 )
 
 require (
@@ -53,7 +53,7 @@ require (
 	golang.org/x/arch v0.16.0 // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
