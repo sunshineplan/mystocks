@@ -10,7 +10,7 @@ require (
 	github.com/sunshineplan/metadata v1.1.2
 	github.com/sunshineplan/password v1.0.9
 	github.com/sunshineplan/service v1.0.24
-	github.com/sunshineplan/stock v1.0.16
+	github.com/sunshineplan/stock v1.0.17
 	github.com/sunshineplan/utils v0.1.82
 	github.com/sunshineplan/workday v1.0.2
 	github.com/sunshineplan/workers v1.0.6

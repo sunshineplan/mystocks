@@ -102,8 +102,8 @@ github.com/sunshineplan/password v1.0.9 h1:k+6yCcn8F8huuO/q0nC2AJztcs37OTsz9QX53
 github.com/sunshineplan/password v1.0.9/go.mod h1:uZA31FGR0HK6VC5KUdhvHLfGidioX60grH0FqQVVDPM=
 github.com/sunshineplan/service v1.0.24 h1:Ma+75ZUUmMjucWg98aJIJFntLgo0TNsVPeWUuZYIOMo=
 github.com/sunshineplan/service v1.0.24/go.mod h1:XJwWAFNd4gEYHl47KgG2zhm2Y8e5RN/En0vIpqd7C4U=
-github.com/sunshineplan/stock v1.0.16 h1:Yqb/wyYwKPWxhAcUP2DFdrQ/VnjqwzlyKR2u/WHUVaA=
-github.com/sunshineplan/stock v1.0.16/go.mod h1:1JOJcoQtONcdO6XwP80hlZbLIlX5frWe//t1gsgBG6c=
+github.com/sunshineplan/stock v1.0.17 h1:N8FPhWxUPE8KCt3BGxW2NhjakcXa4U5ZCFM9OJ6Hdbs=
+github.com/sunshineplan/stock v1.0.17/go.mod h1:1JOJcoQtONcdO6XwP80hlZbLIlX5frWe//t1gsgBG6c=
 github.com/sunshineplan/utils v0.1.82 h1:GmRfNLxhsKfkroRHZHTdxNE9GcF77t5+A2rLOZnwtmM=
 github.com/sunshineplan/utils v0.1.82/go.mod h1:R7MInPRKnExzzNGJ9qY1W0+11P/3jc6IO5ICuGDPA1w=
 github.com/sunshineplan/workday v1.0.2 h1:8cs7qzfa9b8lQcQRy5maVTCQd3XvpZZi6NDAg3PsjOk=
