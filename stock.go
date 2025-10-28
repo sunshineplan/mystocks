@@ -7,6 +7,7 @@ import (
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/stock"
 	"github.com/sunshineplan/stock/capitalflows/sector"
+	"github.com/sunshineplan/stock/eastmoney"
 )
 
 func myStocks(c *gin.Context) {
@@ -43,14 +44,15 @@ func capitalFlows(c *gin.Context) {
 	c.JSON(200, flows)
 }
 
+var Indices = []stock.Stock{
+	stock.Init("SSE", "000001"),
+	stock.Init("SZSE", "399001"),
+	stock.Init("SZSE", "399006"),
+	stock.Init("SZSE", "399005"),
+}
+
 func indices(c *gin.Context) {
-	indices := stock.Realtimes(
-		[]stock.Stock{
-			stock.Init("SSE", "000001"),
-			stock.Init("SZSE", "399001"),
-			stock.Init("SZSE", "399006"),
-			stock.Init("SZSE", "399005"),
-		})
+	indices := stock.Realtimes(Indices)
 	c.JSON(200, gin.H{"沪": indices[0], "深": indices[1], "创": indices[2], "中": indices[3]})
 }
 
@@ -78,7 +80,7 @@ func getSuggest(c *gin.Context) {
 		c.String(400, "")
 		return
 	}
-	c.JSON(200, stock.Suggests(r.Keyword))
+	c.JSON(200, eastmoney.Suggests(r.Keyword))
 }
 
 func star(c *gin.Context) {
