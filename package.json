@@ -7,7 +7,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@tarekraafat/autocomplete.js": "^10.2.9",
     "@tsconfig/svelte": "^5.0.8",
     "@types/sortablejs": "^1.15.9",
@@ -15,7 +15,7 @@
     "chartjs-plugin-annotation": "^3.1.0",
     "jsencrypt": "^3.5.4",
     "sortablejs": "^1.15.7",
-    "svelte": "^5.53.2",
+    "svelte": "^5.53.3",
     "svelte-check": "^4.4.3",
     "sweetalert2": "^11.26.20",
     "tslib": "^2.8.1",
