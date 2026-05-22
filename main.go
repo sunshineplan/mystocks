@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sunshineplan/metadata"
 	"github.com/sunshineplan/password"
 	"github.com/sunshineplan/service"
 	"github.com/sunshineplan/stock"
@@ -29,7 +28,9 @@ var (
 
 	server = httpsvr.New()
 	svc    = service.New()
-	meta   metadata.Server
+
+	redisStore struct{ Endpoint, Username, Password, Secret string }
+	accountAPI string
 
 	joinPath = filepath.Join
 	dir      = filepath.Dir
@@ -79,9 +80,16 @@ var (
 )
 
 func main() {
-	flag.StringVar(&meta.Addr, "server", "", "Metadata Server Address")
-	flag.StringVar(&meta.Header, "header", "", "Verify Header Header Name")
-	flag.StringVar(&meta.Value, "value", "", "Verify Header Value")
+	flag.StringVar(&mongoClient.Server, "server", "", "MongoDB Server Address")
+	flag.BoolVar(&mongoClient.SRV, "srv", true, "MongoDB SRV")
+	flag.StringVar(&mongoClient.Database, "database", "stock", "MongoDB Database Name")
+	flag.StringVar(&mongoClient.Username, "username", "stock", "MongoDB Username")
+	flag.StringVar(&mongoClient.Password, "password", "", "MongoDB Password")
+	flag.StringVar(&redisStore.Endpoint, "redis-endpoint", "", "Redis Endpoint")
+	flag.StringVar(&redisStore.Username, "redis-username", "", "Redis Username")
+	flag.StringVar(&redisStore.Password, "redis-password", "", "Redis Password")
+	flag.StringVar(&redisStore.Secret, "redis-secret", "", "Redis Secret")
+	flag.StringVar(&accountAPI, "account-api", "", "Account API")
 	flag.StringVar(&server.Unix, "unix", "", "UNIX-domain Socket")
 	flag.StringVar(&server.Host, "host", "0.0.0.0", "Server Host")
 	flag.StringVar(&server.Port, "port", "12345", "Server Port")

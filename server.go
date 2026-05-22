@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -47,12 +48,14 @@ func run() error {
 	}
 
 	if *universal {
-		var redisStore struct{ Endpoint, Username, Password, Secret, API string }
-		if err := meta.Get("account_redis", &redisStore); err != nil {
-			return err
+		if redisStore.Endpoint == "" {
+			return errors.New("Redis Endpoint is required")
+		}
+		if accountAPI == "" {
+			return errors.New("Account API is required")
 		}
 
-		js = bytes.ReplaceAll(js, []byte("@universal@"), []byte(redisStore.API))
+		js = bytes.ReplaceAll(js, []byte("@universal@"), []byte(accountAPI))
 
 		store, err := redis.NewStore(
 			10,

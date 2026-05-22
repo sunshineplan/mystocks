@@ -1,24 +1,23 @@
 package main
 
 import (
-	"time"
+	"errors"
 
 	"github.com/sunshineplan/database/mongodb"
 	"github.com/sunshineplan/database/mongodb/driver"
-	"github.com/sunshineplan/utils/retry"
 )
 
-var accountClient, stockClient, flowsClient mongodb.Client
+var (
+	mongoClient                             driver.Client
+	accountClient, stockClient, flowsClient mongodb.Client
+)
 
 func initDB() (err error) {
-	var apiClient driver.Client
-	if err = retry.Do(func() error {
-		return meta.Get("mystocks_mongo", &apiClient)
-	}, 3, 20*time.Second); err != nil {
-		return err
+	if mongoClient.Server == "" {
+		return errors.New("MongoDB Server Address is required")
 	}
 
-	account, stock, flows := apiClient, apiClient, apiClient
+	account, stock, flows := mongoClient, mongoClient, mongoClient
 	account.Collection = "account"
 	stock.Collection = "stock"
 	flows.Collection = "capitalflows"
